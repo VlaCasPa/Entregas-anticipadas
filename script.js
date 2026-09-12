@@ -26,17 +26,15 @@ Papa.parse(urlCSV, {
         data.forEach(fila => {
             if (fila.Latitud && fila.Longitud) {
                 
-                // Determinar el color según la Línea o el Tipo
-                let colorMarcador = '#3388ff'; // Azul por defecto
-                if (fila.Linea === 'Ramal L4') colorMarcador = '#ff9900'; // Naranja para Ramal L4
-                if (fila.Linea === 'Línea 2') colorMarcador = '#d32f2f'; // Rojo para Línea 2
-
                 // Contadores para los KPIs
                 if (fila.Tipo === 'Estación') conteoEstaciones++;
                 else if (fila.Tipo === 'Pozo') conteoPozos++;
                 else conteoOtros++;
 
-                // Crear el popup con diseño
+                // Color morado pastel para todos los puntos
+                const colorPastel = '#B19CD9'; 
+
+                // Crear el popup con diseño (al hacer clic)
                 const popupContent = `
                     <div class="custom-popup">
                         <h3>${fila.ID} - ${fila.Nombre || 'Estructura'}</h3>
@@ -47,15 +45,23 @@ Papa.parse(urlCSV, {
                     </div>
                 `;
 
-                // Agregar marcadores circulares tipo "estación de metro"
+                // Agregar marcadores y la etiqueta de texto permanente
                 L.circleMarker([fila.Latitud, fila.Longitud], {
-                    radius: 8,
-                    fillColor: colorMarcador,
-                    color: "#ffffff", // Borde blanco
-                    weight: 2,
+                    radius: 7,
+                    fillColor: colorPastel,
+                    color: "#ffffff", // Borde blanco sutil
+                    weight: 1.5,
                     opacity: 1,
-                    fillOpacity: 0.9
-                }).addTo(map).bindPopup(popupContent);
+                    fillOpacity: 0.95
+                })
+                .addTo(map)
+                .bindPopup(popupContent)
+                .bindTooltip(fila.ID, {
+                    permanent: true,       // Mantiene el texto siempre visible
+                    direction: 'right',    // Lo coloca a la derecha del punto
+                    className: 'etiqueta-texto', // Clase CSS personalizada
+                    offset: [5, 0]         // Desplaza ligeramente el texto
+                });
             }
         });
 
