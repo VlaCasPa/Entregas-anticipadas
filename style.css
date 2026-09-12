@@ -133,3 +133,19 @@ body, html {
 .mapa-base-gris {
     filter: grayscale(100%) opacity(65%);
 }
+/* Estilo transparente para los IDs de las estructuras */
+.etiqueta-texto {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-weight: 700;
+    font-size: 11px;
+    color: #2c3e50;
+    /* Resplandor blanco alrededor de las letras para máxima legibilidad */
+    text-shadow: 1px 1px 2px #ffffff, -1px -1px 2px #ffffff, 1px -1px 2px #ffffff, -1px 1px 2px #ffffff;
+}
+
+/* Oculta la flechita por defecto de los tooltips de Leaflet */
+.leaflet-tooltip-right.etiqueta-texto::before {
+    display: none;
+}
