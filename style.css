@@ -1,199 +1,80 @@
 body, html {
     margin: 0;
     padding: 0;
+    width: 100%;
     height: 100%;
-    font-family: 'Inter', sans-serif;
-    background-color: #f3f4f6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #map {
-    height: 100dvh;
     width: 100%;
+    height: 100vh; /* Ocupa toda la pantalla */
+    z-index: 1;
 }
 
-/* Filtro base Google Maps tenue */
-.mapa-google-gris {
-    filter: grayscale(100%) brightness(1.05) contrast(0.9);
-}
-
-/* --- Título Flotante --- */
+/* Estilo del Título Flotante */
 #titulo-flotante {
     position: absolute;
-    top: 15px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: white;
     padding: 10px 25px;
     border-radius: 8px;
-    font-size: clamp(14px, 3.5vw, 18px);
-    font-weight: 700;
-    color: #111827;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    white-space: nowrap;
-    border-left: 5px solid #2563EB;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    z-index: 1000; /* Para que quede sobre el mapa */
+    border-left: 5px solid #d32f2f;
 }
 
-/* --- Panel de KPIs Superiores --- */
+/* Estilo del Panel de KPIs (Inferior) */
 #panel-kpis {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    z-index: 1000;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    gap: 8px;
+    gap: 15px;
+    z-index: 1000;
 }
 
-.kpi-card {
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 8px 14px;
+.kpi-box {
+    background-color: white;
+    padding: 15px 25px;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     text-align: center;
-    min-width: 80px;
-    border-top: 4px solid #94a3b8;
+    min-width: 120px;
 }
 
 .kpi-title {
     display: block;
-    font-size: 9px;
-    font-weight: 700;
-    color: #64748b;
+    font-size: 12px;
+    color: #666;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
 .kpi-value {
     display: block;
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: bold;
+    color: #d32f2f;
 }
 
-.kpi-inicial { border-top-color: #64748b; }
-.kpi-inicial .kpi-value { color: #475569; }
-
-.kpi-residual { border-top-color: #ec4899; }
-.kpi-residual .kpi-value { color: #db2777; }
-
-.kpi-liberado { border-top-color: #06b6d4; }
-.kpi-liberado .kpi-value { color: #0891b2; }
-
-/* --- Leyenda --- */
-#panel-leyenda {
-    position: absolute;
-    bottom: 25px;
-    left: 15px;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 12px 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    font-size: 11px;
-    line-height: 1.6;
+/* Estilos de los Popups del Mapa */
+.custom-popup h3 {
+    margin: 0 0 10px 0;
+    color: #0056b3;
+    font-size: 16px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
 }
-
-.leyenda-titulo {
-    display: block;
-    font-weight: 700;
-    font-size: 9px;
-    color: #64748b;
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-}
-
-.leyenda-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: #334155;
-}
-
-.leyenda-color {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    display: inline-block;
-}
-
-.color-inicial { background-color: rgba(100, 116, 139, 0.45); border: 1.5px solid #475569; }
-.color-residual { background-color: rgba(244, 114, 182, 0.45); border: 1.5px solid #ec4899; }
-.color-liberado { background-color: rgba(103, 232, 249, 0.45); border: 1.5px solid #06b6d4; }
-
-/* --- Tooltips y Ventanas Emergentes --- */
-.id-tooltip {
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-weight: 700;
-    color: #1e293b;
-    font-size: 11px;
-    text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
-}
-
-.leaflet-popup-content-wrapper {
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    padding: 6px;
-}
-
-.popup-container {
-    min-width: 250px;
-}
-
-.popup-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 2px 0;
-}
-
-.popup-subtitle {
-    font-size: 11px;
-    color: #64748b;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.popup-dato {
-    font-size: 11px;
-    color: #334155;
-    margin-bottom: 4px;
-    line-height: 1.35;
-}
-
-.popup-dato b {
-    color: #0f172a;
-}
-
-@media (max-width: 768px) {
-    #titulo-flotante {
-        position: static;
-        transform: none;
-        margin: 10px auto;
-        text-align: center;
-        width: fit-content;
-    }
-    #panel-kpis {
-        top: auto;
-        bottom: 95px;
-        right: 50%;
-        transform: translateX(50%);
-        gap: 6px;
-    }
-    .kpi-card {
-        padding: 6px 8px;
-        min-width: 60px;
-    }
-    .kpi-value {
-        font-size: 16px;
-    }
-    #panel-leyenda {
-        bottom: 15px;
-        left: 10px;
-        padding: 8px 10px;
-        font-size: 10px;
-    }
+.custom-popup p {
+    margin: 4px 0;
+    font-size: 13px;
+    color: #333;
 }
