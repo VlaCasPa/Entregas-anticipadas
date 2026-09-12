@@ -5,15 +5,13 @@ const map = L.map('map').setView([-12.046374, -77.082793], 12);
 L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
     maxZoom: 20,
     attribution: '© Google',
-    className: 'mapa-base-gris' // <-- Esta clase conectará con nuestro CSS
+    className: 'mapa-base-gris'
 }).addTo(map);
 
-// ... (El resto de tu código Papa.parse y urlCSV se queda exactamente igual) ...
-
-// 2. URL de Google Sheets en CSV
+// 3. URL de Google Sheets en CSV
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 
-// 3. Procesar datos
+// 4. Procesar datos
 Papa.parse(urlCSV, {
     download: true,
     header: true,
