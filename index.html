@@ -3,43 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo de Cerramientos y Restitución Urbana - L2</title>
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>Cerramientos de Obra y Áreas Liberadas - Línea 2</title>
+    <!-- CSS de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <!-- Tu archivo de estilos -->
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <!-- Título Principal -->
-    <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
+    <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2 y Ramal 4</div>
 
     <!-- Panel de Indicadores de Gestión (KPIs) -->
     <div id="panel-kpis">
-        <div class="kpi-card kpi-inicial">
-            <span class="kpi-title">Cerco Inicial</span>
-            <span class="kpi-value" id="kpi-inicial">0</span>
+        <div class="kpi-box">
+            <span class="kpi-title">ESTACIONES</span>
+            <span class="kpi-value" id="kpi-estaciones">0</span>
         </div>
-        <div class="kpi-card kpi-residual">
-            <span class="kpi-title">Cerco Residual</span>
-            <span class="kpi-value" id="kpi-residual">0</span>
+        <div class="kpi-box">
+            <span class="kpi-title">POZOS</span>
+            <span class="kpi-value" id="kpi-pozos">0</span>
         </div>
-        <div class="kpi-card kpi-liberado">
-            <span class="kpi-title">Con Liberación</span>
-            <span class="kpi-value" id="kpi-liberado">0</span>
-        </div>
-    </div>
-
-    <!-- Leyenda de Cerramientos -->
-    <div id="panel-leyenda">
-        <span class="leyenda-titulo">CONVENCIONES</span>
-        <div class="leyenda-item">
-            <span class="leyenda-color color-inicial"></span> Cerramiento Inicial (Gris)
-        </div>
-        <div class="leyenda-item">
-            <span class="leyenda-color color-residual"></span> Cerramiento Residual (Magenta)
-        </div>
-        <div class="leyenda-item">
-            <span class="leyenda-color color-liberado"></span> Área Liberada al Tránsito (Cyan)
+        <div class="kpi-box">
+            <span class="kpi-title">OTROS (Patios/Túnel)</span>
+            <span class="kpi-value" id="kpi-otros">0</span>
         </div>
     </div>
 
@@ -49,6 +36,7 @@
     <!-- Librerías JS y Script -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Tu archivo de lógica -->
     <script src="script.js"></script>
 </body>
 </html>
