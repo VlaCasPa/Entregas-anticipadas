@@ -1,11 +1,14 @@
 // 1. Inicializar el mapa centrado en el trayecto de la Línea 2
 const map = L.map('map').setView([-12.046374, -77.082793], 12);
 
-// Capa de mapa (puedes cambiar a un mapa oscuro o claro según prefieras)
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+// 2. Capa de Google Maps con clase CSS para volverlo gris tenue
+L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    maxZoom: 20,
+    attribution: '© Google',
+    className: 'mapa-base-gris' // <-- Esta clase conectará con nuestro CSS
 }).addTo(map);
+
+// ... (El resto de tu código Papa.parse y urlCSV se queda exactamente igual) ...
 
 // 2. URL de Google Sheets en CSV
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
