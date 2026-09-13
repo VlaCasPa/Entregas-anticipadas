@@ -1,5 +1,5 @@
-// 1. Inicializar el mapa centrado en el trayecto de la Línea 2
-const map = L.map('map').setView([-12.046374, -77.082793], 12);
+// 1. Inicializar el mapa centrado en Lima
+const map = L.map('map').setView([-12.059, -77.038], 14); // Centrado cerca a E13 para la prueba
 
 // 2. Capa de Google Maps con clase CSS para volverlo gris tenue
 L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -8,70 +8,118 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
     className: 'mapa-base-gris'
 }).addTo(map);
 
-// 3. URL de Google Sheets en CSV
+// Grupos de capas para controlar qué se oculta con el zoom
+const markerLayer = L.layerGroup().addTo(map); // Los pines siempre se ven
+const polygonLayer = L.layerGroup(); // Los polígonos inician ocultos y se ven con el zoom
+
+// 3. Enlace de tu Google Sheets (CSV)
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 
-// 4. Procesar datos
+// Diccionario para guardar los datos del CSV y cruzarlos con el GeoJSON
+let datosObras = {};
+
+// 4. Procesar el CSV
 Papa.parse(urlCSV, {
     download: true,
     header: true,
     dynamicTyping: true,
     complete: function(results) {
         const data = results.data;
-        
-        let conteoEstaciones = 0;
-        let conteoPozos = 0;
-        let conteoOtros = 0;
+
+        // Variables para los KPIs
+        let kpiInicial = 0;
+        let kpiLiberado = 0;
+        let kpiCulminado = 0;
 
         data.forEach(fila => {
-            if (fila.Latitud && fila.Longitud) {
+            if (fila.Latitud && fila.Longitud && fila.ID) {
+                // Guardamos la fila en el diccionario usando el ID como llave
+                datosObras[fila.ID] = fila;
+
+                // Definimos el estado
+                const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim() : 'No';
                 
-                // Contadores para los KPIs
-                if (fila.Tipo === 'Estación') conteoEstaciones++;
-                else if (fila.Tipo === 'Pozo') conteoPozos++;
-                else conteoOtros++;
+                // Color del marcador (Pin) según el estado
+                let colorPin = '#B19CD9'; // Morado pastel por defecto
+                if (estado.toLowerCase() === 'culminada') {
+                    colorPin = '#FFF275'; // Amarillo pastel tenue
+                    kpiCulminado++;
+                } else if (estado.toLowerCase() === 'no') {
+                    kpiInicial++;
+                } else {
+                    kpiLiberado++;
+                }
 
-                // Color morado pastel para todos los puntos
-                const colorPastel = '#B19CD9'; 
-
-                // Crear el popup con diseño (al hacer clic)
-                const popupContent = `
-                    <div class="custom-popup">
-                        <h3>${fila.ID} - ${fila.Nombre || 'Estructura'}</h3>
-                        <p><b>Tipo:</b> ${fila.Tipo}</p>
-                        <p><b>Línea:</b> ${fila.Linea}</p>
-                        <p><b>Municipalidad:</b> ${fila.Municipalidad || 'N/A'}</p>
-                        <p><b>Estado de Obra:</b> ${fila.Aut_Obra_Resolucion || 'Pendiente'}</p>
-                    </div>
-                `;
-
-                // Agregar marcadores y la etiqueta de texto permanente
-                L.circleMarker([fila.Latitud, fila.Longitud], {
+                // Dibujar el Marcador (Pin circular)
+                const pin = L.circleMarker([fila.Latitud, fila.Longitud], {
                     radius: 7,
-                    fillColor: colorPastel,
-                    color: "#ffffff", // Borde blanco sutil
+                    fillColor: colorPin,
+                    color: "#ffffff",
                     weight: 1.5,
                     opacity: 1,
                     fillOpacity: 0.95
-                })
-                .addTo(map)
-                .bindPopup(popupContent)
-                .bindTooltip(fila.ID, {
-                    permanent: true,       // Mantiene el texto siempre visible
-                    direction: 'right',    // Lo coloca a la derecha del punto
-                    className: 'etiqueta-texto', // Clase CSS personalizada
-                    offset: [5, 0]         // Desplaza ligeramente el texto
+                }).bindTooltip(fila.ID, {
+                    permanent: true,
+                    direction: 'right',
+                    className: 'etiqueta-texto',
+                    offset: [5, 0]
                 });
+                
+                markerLayer.addLayer(pin);
             }
         });
 
-        // Actualizar los textos de los KPIs en el HTML
-        document.getElementById('kpi-estaciones').innerText = conteoEstaciones;
-        document.getElementById('kpi-pozos').innerText = conteoPozos;
-        document.getElementById('kpi-otros').innerText = conteoOtros;
+        // Actualizar KPIs en el HTML (asegúrate de tener estos IDs en tu index.html luego)
+        if(document.getElementById('kpi-inicial')) document.getElementById('kpi-inicial').innerText = kpiInicial;
+        if(document.getElementById('kpi-liberado')) document.getElementById('kpi-liberado').innerText = kpiLiberado;
+        if(document.getElementById('kpi-culminado')) document.getElementById('kpi-culminado').innerText = kpiCulminado;
 
-    },
-    error: function(error) {
-        console.error("Error al procesar el CSV:", error);
+        // 5. UNA VEZ CARGADO EL CSV, CARGAMOS EL GEOJSON DE POLÍGONOS
+        cargarPoligonos();
+    }
+});
+
+function cargarPoligonos() {
+    fetch('cerramientos.geojson')
+        .then(response => response.json())
+        .then(geojsonData => {
+            L.geoJSON(geojsonData, {
+                style: function(feature) {
+                    const id = feature.properties.id;
+                    const tipoPoligono = feature.properties.tipo.toLowerCase(); // "inicial", "residual", "liberado"
+                    const datosCSV = datosObras[id];
+
+                    // Si la estructura no está en el Excel o está Culminada, ocultamos el polígono
+                    if (!datosCSV) return { opacity: 0, fillOpacity: 0 };
+                    
+                    const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+
+                    if (estadoLib === 'culminada') {
+                        return { opacity: 0, fillOpacity: 0 };
+                    }
+
+                    // Reglas de colores pastel transparentes
+                    if (estadoLib === 'no') {
+                        // Sin liberación: Solo se ve el poligono "inicial" en gris transparente
+                        if (tipoPoligono === 'inicial') return { color: '#808080', fillColor: '#808080', weight: 1, fillOpacity: 0.4 };
+                        return { opacity: 0, fillOpacity: 0 }; 
+                    } else {
+                        // Con liberación: Morado pastel (residual) y Celeste pastel (liberado)
+                        if (tipoPoligono === 'residual') return { color: '#B19CD9', fillColor: '#B19CD9', weight: 1, fillOpacity: 0.5 };
+                        if (tipoPoligono === 'liberado') return { color: '#AEC6CF', fillColor: '#AEC6CF', weight: 1, fillOpacity: 0.5 };
+                        return { opacity: 0, fillOpacity: 0 }; 
+                    }
+                }
+            }).addTo(polygonLayer);
+        });
+}
+
+// 6. Lógica de Zoom Dinámico (Solo muestra polígonos al acercarse)
+map.on('zoomend', function() {
+    const currentZoom = map.getZoom();
+    if (currentZoom >= 15) {
+        if (!map.hasLayer(polygonLayer)) map.addLayer(polygonLayer);
+    } else {
+        if (map.hasLayer(polygonLayer)) map.removeLayer(polygonLayer);
     }
 });
