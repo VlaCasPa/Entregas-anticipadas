@@ -2,11 +2,9 @@
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// Crear panel exclusivo para mantener pines sobre los polígonos
 map.createPane('panelPines');
 map.getPane('panelPines').style.zIndex = 650;
 
-// Capa de Google Maps gris tenue
 L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
     maxZoom: 20,
     attribution: '© Google',
@@ -16,11 +14,37 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 const markerLayer = L.layerGroup().addTo(map); 
 const polygonLayer = L.layerGroup(); 
 let circleMarkersArray = [];
-
 let listasReporte = { inicial: [], liberada: [], culminada: [] };
 let datosObras = {};
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
+
+// Función para diseñar la tarjeta emergente
+function generarPopupHTML(datos, idLimpio) {
+    const fechaConst = datos['Fecha de constatacion notarial'] || datos.Fecha_Constatacion || 'Sin registro';
+    const fechaLib = datos['Fecha de liberacion parcial'] || datos.Fecha_Liberacion || 'Sin registro';
+    const asiento = datos['Asiento de obra'] || datos.Asiento_Obra || 'Sin registro';
+    const plano = datos['Codigo de plano'] || datos.Codigo_Plano || 'Sin registro';
+
+    return `
+        <div class="popup-container">
+            <div class="popup-header">
+                <h3>${idLimpio}</h3>
+                <span class="popup-subtitle">📍 Línea 2 y Ramal 4</span>
+            </div>
+            <div class="popup-card residual-card">
+                <h4><span class="icon">🚧</span> Constatación y Liberación</h4>
+                <p><b>Constatación:</b> ${fechaConst}</p>
+                <p><b>Liberación:</b> ${fechaLib}</p>
+            </div>
+            <div class="popup-card doc-card">
+                <h4><span class="icon">📄</span> Documentación Técnica</h4>
+                <p><b>Asiento de Obra:</b> ${asiento}</p>
+                <p><b>Plano Asociado:</b> ${plano}</p>
+            </div>
+        </div>
+    `;
+}
 
 Papa.parse(urlCSV, {
     download: true,
@@ -29,9 +53,7 @@ Papa.parse(urlCSV, {
     complete: function(results) {
         try {
             const data = results.data;
-            let kpiInicial = 0;
-            let kpiLiberado = 0;
-            let kpiCulminado = 0;
+            let kpiInicial = 0; let kpiLiberado = 0; let kpiCulminado = 0;
 
             data.forEach(fila => {
                 if (fila && fila.ID) { 
@@ -39,8 +61,8 @@ Papa.parse(urlCSV, {
                     datosObras[idLimpio] = fila;
                     
                     const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                    
                     let colorPin = '#B19CD9'; 
+                    
                     if (estado === 'culminada') {
                         colorPin = '#FFF275'; 
                         kpiCulminado++;
@@ -53,7 +75,6 @@ Papa.parse(urlCSV, {
                         listasReporte.liberada.push(idLimpio);
                     }
 
-                    // VALIDACIÓN ESTRICTA: Evita que celdas vacías rompan el código
                     if (fila.Latitud !== undefined && fila.Latitud !== null && fila.Longitud !== undefined && fila.Longitud !== null) {
                         const latStr = fila.Latitud.toString().replace(/,/g, '.').trim();
                         const lngStr = fila.Longitud.toString().replace(/,/g, '.').trim();
@@ -61,6 +82,7 @@ Papa.parse(urlCSV, {
                         const lng = parseFloat(lngStr);
 
                         if (!isNaN(lat) && !isNaN(lng)) {
+                            // Dibuja el pin indiferentemente del estado[cite: 5, 6]
                             const pin = L.circleMarker([lat, lng], {
                                 pane: 'panelPines',
                                 radius: 7,
@@ -75,6 +97,11 @@ Papa.parse(urlCSV, {
                                 className: 'etiqueta-texto',
                                 offset: [8, 0]
                             });
+
+                            // SOLO agregar la ventana emergente (Popup) a las áreas liberadas activas
+                            if (estado !== 'no' && estado !== 'culminada') {
+                                pin.bindPopup(generarPopupHTML(fila, idLimpio), { className: 'custom-popup-wrapper' });
+                            }
                             
                             markerLayer.addLayer(pin);
                             circleMarkersArray.push(pin);
@@ -83,31 +110,25 @@ Papa.parse(urlCSV, {
                 }
             });
 
-            // Actualizar interfaz gráfica
-            const uiInicial = document.getElementById('kpi-inicial') || document.getElementById('kpi-estaciones');
-            const uiLiberado = document.getElementById('kpi-liberado') || document.getElementById('kpi-pozos');
-            const uiCulminado = document.getElementById('kpi-culminado') || document.getElementById('kpi-otros');
+            const uiInicial = document.getElementById('kpi-inicial');
+            const uiLiberado = document.getElementById('kpi-liberado');
+            const uiCulminado = document.getElementById('kpi-culminado');
 
             if(uiInicial) uiInicial.innerText = kpiInicial;
             if(uiLiberado) uiLiberado.innerText = kpiLiberado;
             if(uiCulminado) uiCulminado.innerText = kpiCulminado;
 
-            // Se respeta tu lógica de conexión con los polígonos
             cargarPoligonos();
 
-        } catch (error) {
-            console.error("Error interno procesando CSV:", error);
-        }
+        } catch (error) { console.error("Error interno procesando CSV:", error); }
     },
-    error: function(error) {
-        console.error("Fallo al descargar el archivo CSV:", error);
-    }
+    error: function(error) { console.error("Fallo al descargar CSV:", error); }
 });
 
 function cargarPoligonos() {
     fetch('cerramientos.geojson')
         .then(response => {
-            if (!response.ok) throw new Error("No se encontró el archivo GeoJSON.");
+            if (!response.ok) throw new Error("No se encontró el GeoJSON.");
             return response.json();
         })
         .then(geojsonData => {
@@ -117,10 +138,9 @@ function cargarPoligonos() {
                 style: function(feature) {
                     const id = feature.properties.ID || feature.properties.id;
                     const idLimpio = id ? id.toString().trim() : "";
-                    const tipoAtributo = feature.properties.tipo || feature.properties.TIPO || feature.properties.Tipo || "";
-                    const tipoPoligono = tipoAtributo.toString().trim().toLowerCase();
-                    
+                    const tipoPoligono = (feature.properties.tipo || "").toString().trim().toLowerCase();
                     const datosCSV = datosObras[idLimpio];
+                    
                     if (!datosCSV) return { opacity: 0, fillOpacity: 0 };
                     
                     const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
@@ -134,12 +154,22 @@ function cargarPoligonos() {
                         if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 2, fillOpacity: 0.4 };
                         return { opacity: 0, fillOpacity: 0 }; 
                     }
+                },
+                onEachFeature: function(feature, layer) {
+                    const id = feature.properties.ID || feature.properties.id;
+                    const idLimpio = id ? id.toString().trim() : "";
+                    const datosCSV = datosObras[idLimpio];
+                    if (datosCSV) {
+                        const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                        // Condicionar también el popup para el clic sobre la geometría del polígono
+                        if (estadoLib !== 'no' && estadoLib !== 'culminada') {
+                            layer.bindPopup(generarPopupHTML(datosCSV, idLimpio), { className: 'custom-popup-wrapper' });
+                        }
+                    }
                 }
             }).addTo(polygonLayer);
 
-            circleMarkersArray.forEach(pin => {
-                if(pin.bringToFront) pin.bringToFront();
-            });
+            circleMarkersArray.forEach(pin => { if(pin.bringToFront) pin.bringToFront(); });
         })
         .catch(err => console.error("Error en polígonos:", err));
 }
@@ -149,9 +179,7 @@ map.on('zoomend', function() {
     if (currentZoom >= 14) {
         if (!map.hasLayer(polygonLayer)) {
             map.addLayer(polygonLayer);
-            circleMarkersArray.forEach(pin => {
-                if(pin.bringToFront) pin.bringToFront();
-            });
+            circleMarkersArray.forEach(pin => { if(pin.bringToFront) pin.bringToFront(); });
         }
     } else {
         if (map.hasLayer(polygonLayer)) map.removeLayer(polygonLayer);
@@ -161,21 +189,10 @@ map.on('zoomend', function() {
 function generarReporteWhatsApp(e) {
     e.preventDefault();
     const fecha = new Date().toLocaleDateString('es-PE');
-    
-    let mensaje = `*Gestión de Cerramientos - Línea 2 Metro* 🚧\n`;
-    mensaje += `📊 *REPORTE DE ESTADO*\nFecha: ${fecha}\n\n`;
-    
-    mensaje += `🔘 *CERRAMIENTOS DE OBRA (${listasReporte.inicial.length}):*\n`;
-    mensaje += listasReporte.inicial.length > 0 ? `${listasReporte.inicial.join(', ')}\n\n` : `Ninguno\n\n`;
-    
-    mensaje += `🟣 *ÁREAS LIBERADAS (${listasReporte.liberada.length}):*\n`;
-    mensaje += listasReporte.liberada.length > 0 ? `${listasReporte.liberada.join(', ')}\n\n` : `Ninguno\n\n`;
-    
-    mensaje += `🟡 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n`;
-    mensaje += listasReporte.culminada.length > 0 ? `${listasReporte.culminada.join(', ')}\n\n` : `Ninguno\n\n`;
-    
-    mensaje += `🔗 *Ver mapa interactivo:* https://vlacaspa.github.io/Entregas-anticipadas/`;
-
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
+    let mensaje = `*Gestión de Cerramientos - Línea 2 Metro* 🚧\n📊 *REPORTE DE ESTADO*\nFecha: ${fecha}\n\n`;
+    mensaje += `🔘 *CERRAMIENTOS DE OBRA (${listasReporte.inicial.length}):*\n${listasReporte.inicial.length > 0 ? listasReporte.inicial.join(', ') : 'Ninguno'}\n\n`;
+    mensaje += `🟣 *ÁREAS LIBERADAS (${listasReporte.liberada.length}):*\n${listasReporte.liberada.length > 0 ? listasReporte.liberada.join(', ') : 'Ninguno'}\n\n`;
+    mensaje += `🟡 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n${listasReporte.culminada.length > 0 ? listasReporte.culminada.join(', ') : 'Ninguno'}\n\n`;
+    mensaje += `🔗 *Ver mapa:* https://vlacaspa.github.io/Entregas-anticipadas/`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
