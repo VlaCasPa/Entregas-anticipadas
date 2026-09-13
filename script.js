@@ -85,8 +85,10 @@ function cargarPoligonos() {
         .then(geojsonData => {
             L.geoJSON(geojsonData, {
                 style: function(feature) {
-                    const id = feature.properties.id;
-                    const tipoPoligono = feature.properties.tipo.toLowerCase(); // "inicial", "residual", "liberado"
+                    // Aceptará ID, id, Tipo o tipo, sin importar cómo salga del AutoCAD
+const id = feature.properties.ID || feature.properties.id;
+const tipoAtributo = feature.properties.tipo || feature.properties.TIPO || feature.properties.Tipo || "";
+const tipoPoligono = tipoAtributo.toLowerCase();
                     const datosCSV = datosObras[id];
 
                     // Si la estructura no está en el Excel o está Culminada, ocultamos el polígono
