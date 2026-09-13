@@ -39,31 +39,34 @@
             </div>
         </div>
     </div>
-<!-- Botón de Reporte WhatsApp -->
-    <a href="#" id="btn-reporte" onclick="generarReporteWhatsApp(event)">
-        📋 Reporte WhatsApp
-        <span>diseñado por Vladimir Casas</span>
-    </a>
-    <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="script.js"></script>
     <!-- Leyenda de Colores del Mapa -->
     <div id="map-legend">
         <h4>Leyenda de Cerramientos</h4>
         <div class="legend-item">
             <span class="legend-color inicial"></span>
-            <span>Mantiene Cerramiento</span>
+            <span>Mantiene Cerramiento (Inicial)</span>
         </div>
         <div class="legend-item">
             <span class="legend-color residual"></span>
-            <span>Área residual</span>
+            <span>Área Residual</span>
         </div>
         <div class="legend-item">
             <span class="legend-color liberada"></span>
-            <span>Área liberada</span>
+            <span>Área Liberada</span>
         </div>
     </div>
+
+    <div id="map"></div>
+
+    <!-- Botón de Reporte WhatsApp -->
+    <a href="#" id="btn-reporte" onclick="generarReporteWhatsApp(event)">
+        📋 Reporte WhatsApp
+        <span>diseñado por Vladimir Casas</span>
+    </a>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
