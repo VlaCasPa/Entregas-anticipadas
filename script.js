@@ -1,5 +1,8 @@
 // 1. Inicializar el mapa centrado en Lima
-const map = L.map('map').setView([-12.059, -77.038], 14); 
+const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
+
+// Mover el control de zoom abajo a la derecha para que no estorbe en celulares
+L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 // 2. Capa de Google Maps con clase CSS para volverlo gris tenue
 L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -8,14 +11,13 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
     className: 'mapa-base-gris'
 }).addTo(map);
 
-// Grupos de capas para controlar qué se oculta con el zoom
+// Grupos de capas
 const markerLayer = L.layerGroup().addTo(map); 
 const polygonLayer = L.layerGroup(); 
 
 // 3. Enlace de tu Google Sheets (CSV)
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 
-// Diccionario para guardar los datos del CSV y cruzarlos con el GeoJSON
 let datosObras = {};
 
 // 4. Procesar el CSV
@@ -31,11 +33,10 @@ Papa.parse(urlCSV, {
 
         data.forEach(fila => {
             if (fila.Latitud && fila.Longitud && fila.ID) {
-                // SOLUCIÓN 1: Limpiar espacios invisibles en el ID del Excel
                 const idLimpio = fila.ID.toString().trim();
                 datosObras[idLimpio] = fila;
 
-                // SOLUCIÓN 2: Arreglar el Excel en español (Convertir comas a puntos)
+                // Convertir comas a puntos (Excel en español)
                 const latStr = fila.Latitud.toString().replace(',', '.');
                 const lngStr = fila.Longitud.toString().replace(',', '.');
                 const lat = parseFloat(latStr);
@@ -44,7 +45,7 @@ Papa.parse(urlCSV, {
                 // Definimos el estado
                 const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim() : 'No';
                 
-                let colorPin = '#B19CD9'; // Morado pastel por defecto
+                let colorPin = '#B19CD9'; // Marcador en forma de circulo de color morado pastel por defecto
                 if (estado.toLowerCase() === 'culminada') {
                     colorPin = '#FFF275'; 
                     kpiCulminado++;
@@ -54,8 +55,8 @@ Papa.parse(urlCSV, {
                     kpiLiberado++;
                 }
 
-                // Solo si las coordenadas se convirtieron exitosamente, dibujamos el Pin
                 if (!isNaN(lat) && !isNaN(lng)) {
+                    // Marcador Circular Morado Pastel con etiqueta a la derecha
                     const pin = L.circleMarker([lat, lng], {
                         radius: 7,
                         fillColor: colorPin,
@@ -65,9 +66,9 @@ Papa.parse(urlCSV, {
                         fillOpacity: 0.95
                     }).bindTooltip(idLimpio, {
                         permanent: true,
-                        direction: 'right',
+                        direction: 'right', // Etiqueta a la derecha del círculo
                         className: 'etiqueta-texto',
-                        offset: [5, 0]
+                        offset: [8, 0] // Espacio entre el círculo y el texto
                     });
                     
                     markerLayer.addLayer(pin);
@@ -80,20 +81,15 @@ Papa.parse(urlCSV, {
         if(document.getElementById('kpi-liberado')) document.getElementById('kpi-liberado').innerText = kpiLiberado;
         if(document.getElementById('kpi-culminado')) document.getElementById('kpi-culminado').innerText = kpiCulminado;
 
-        // 5. CARGAMOS EL GEOJSON DE POLÍGONOS
+        // 5. Cargar polígonos después del CSV
         cargarPoligonos();
     }
 });
 
 function cargarPoligonos() {
-    // SOLUCIÓN 3: Buscar el archivo exactamente con el nombre que lo subiste
-    // IMPORTANTE: Si en tu GitHub se llama solo "cerramientos.geojson", borra el "_2" aquí abajo
-    fetch('cerramientos.geojson')
+    fetch('cerramientos_2.geojson')
         .then(response => {
-            if (!response.ok) {
-                console.error("No se encontró el GeoJSON. Verifica que el nombre del archivo en GitHub sea idéntico.");
-                return;
-            }
+            if (!response.ok) return;
             return response.json();
         })
         .then(geojsonData => {
@@ -107,28 +103,25 @@ function cargarPoligonos() {
                     const tipoPoligono = tipoAtributo.toString().trim().toLowerCase();
                     
                     const datosCSV = datosObras[idLimpio];
-
-                    // Ocultar si no está en el Excel
                     if (!datosCSV) return { opacity: 0, fillOpacity: 0 };
                     
                     const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-
-                    // Ocultar si está culminada
                     if (estadoLib === 'culminada') return { opacity: 0, fillOpacity: 0 };
 
-                    // Reglas de colores pastel transparentes
+                    // NUEVOS COLORES SOLICITADOS
                     if (estadoLib === 'no') {
                         if (tipoPoligono === 'inicial') return { color: '#808080', fillColor: '#808080', weight: 1, fillOpacity: 0.4 };
                         return { opacity: 0, fillOpacity: 0 }; 
                     } else {
-                        if (tipoPoligono === 'residual') return { color: '#B19CD9', fillColor: '#B19CD9', weight: 1, fillOpacity: 0.5 };
-                        if (tipoPoligono === 'liberado') return { color: '#AEC6CF', fillColor: '#AEC6CF', weight: 1, fillOpacity: 0.5 };
+                        // Residuales sea FF009D y para liberado 00DBFF en color transparente
+                        if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 2, fillOpacity: 0.4 };
+                        if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 2, fillOpacity: 0.4 };
                         return { opacity: 0, fillOpacity: 0 }; 
                     }
                 }
             }).addTo(polygonLayer);
         })
-        .catch(err => console.error("Error al cargar el mapa de polígonos:", err));
+        .catch(err => console.error(err));
 }
 
 // 6. Lógica de Zoom Dinámico
