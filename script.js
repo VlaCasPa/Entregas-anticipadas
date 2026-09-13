@@ -88,7 +88,7 @@ Papa.parse(urlCSV, {
 function cargarPoligonos() {
     // SOLUCIÓN 3: Buscar el archivo exactamente con el nombre que lo subiste
     // IMPORTANTE: Si en tu GitHub se llama solo "cerramientos.geojson", borra el "_2" aquí abajo
-    fetch('cerramientos_2.geojson')
+    fetch('cerramientos.geojson')
         .then(response => {
             if (!response.ok) {
                 console.error("No se encontró el GeoJSON. Verifica que el nombre del archivo en GitHub sea idéntico.");
