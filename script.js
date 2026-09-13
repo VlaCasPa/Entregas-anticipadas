@@ -2,9 +2,9 @@
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// NUEVO: Crear un panel exclusivo para forzar los pines al frente
+// Crear panel exclusivo para mantener pines sobre los polígonos
 map.createPane('panelPines');
-map.getPane('panelPines').style.zIndex = 650; // Asegura que se dibuje sobre los polígonos (z-index 400)
+map.getPane('panelPines').style.zIndex = 650;
 
 // Capa de Google Maps gris tenue
 L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -15,6 +15,10 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 
 const markerLayer = L.layerGroup().addTo(map); 
 const polygonLayer = L.layerGroup(); 
+let circleMarkersArray = [];
+
+// Arrays para recopilar los IDs para el reporte gerencial
+let listasReporte = { inicial: [], liberada: [], culminada: [] };
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 let datosObras = {};
@@ -33,16 +37,21 @@ Papa.parse(urlCSV, {
             if (fila.ID) { 
                 const idLimpio = fila.ID.toString().trim();
                 datosObras[idLimpio] = fila;
+                
                 const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
                 
                 let colorPin = '#B19CD9'; 
+                // Clasificación y conteo para KPIs y Reporte WhatsApp
                 if (estado === 'culminada') {
                     colorPin = '#FFF275'; 
                     kpiCulminado++;
+                    listasReporte.culminada.push(idLimpio);
                 } else if (estado === 'no') {
                     kpiInicial++;
+                    listasReporte.inicial.push(idLimpio);
                 } else {
                     kpiLiberado++;
+                    listasReporte.liberada.push(idLimpio);
                 }
 
                 if (fila.Latitud && fila.Longitud) {
@@ -53,7 +62,7 @@ Papa.parse(urlCSV, {
 
                     if (!isNaN(lat) && !isNaN(lng)) {
                         const pin = L.circleMarker([lat, lng], {
-                            pane: 'panelPines', // Se asigna al panel superior
+                            pane: 'panelPines',
                             radius: 7,
                             fillColor: colorPin,
                             color: "#ffffff",
@@ -66,15 +75,18 @@ Papa.parse(urlCSV, {
                             className: 'etiqueta-texto',
                             offset: [8, 0]
                         });
+                        
                         markerLayer.addLayer(pin);
+                        circleMarkersArray.push(pin);
                     }
                 }
             }
         });
 
-        const uiInicial = document.getElementById('kpi-inicial');
-        const uiLiberado = document.getElementById('kpi-liberado');
-        const uiCulminado = document.getElementById('kpi-culminado');
+        // Actualizar valores en el DOM (compatible con IDs antiguos y nuevos)
+        const uiInicial = document.getElementById('kpi-inicial') || document.getElementById('kpi-estaciones');
+        const uiLiberado = document.getElementById('kpi-liberado') || document.getElementById('kpi-pozos');
+        const uiCulminado = document.getElementById('kpi-culminado') || document.getElementById('kpi-otros');
 
         if(uiInicial) uiInicial.innerText = kpiInicial;
         if(uiLiberado) uiLiberado.innerText = kpiLiberado;
@@ -116,17 +128,49 @@ function cargarPoligonos() {
                     }
                 }
             }).addTo(polygonLayer);
+
+            // Forzar los pines al frente después de cargar polígonos
+            circleMarkersArray.forEach(pin => {
+                if(pin.bringToFront) pin.bringToFront();
+            });
         })
-        .catch(err => {
-            console.error("Error crítico leyendo el GeoJSON. Si usaste comas en las coordenadas, el archivo se rompió:", err);
-        });
+        .catch(err => console.error(err));
 }
 
+// Función de visualización dinámica por Zoom
 map.on('zoomend', function() {
     const currentZoom = map.getZoom();
     if (currentZoom >= 14) {
-        if (!map.hasLayer(polygonLayer)) map.addLayer(polygonLayer);
+        if (!map.hasLayer(polygonLayer)) {
+            map.addLayer(polygonLayer);
+            circleMarkersArray.forEach(pin => {
+                if(pin.bringToFront) pin.bringToFront();
+            });
+        }
     } else {
         if (map.hasLayer(polygonLayer)) map.removeLayer(polygonLayer);
     }
 });
+
+// Función para generar y enviar el Reporte Gerencial por WhatsApp
+function generarReporteWhatsApp(e) {
+    e.preventDefault();
+    const fecha = new Date().toLocaleDateString('es-PE');
+    
+    let mensaje = `*Gestión de Cerramientos - Línea 2 Metro* 🚧\n`;
+    mensaje += `📊 *REPORTE DE ESTADO*\nFecha: ${fecha}\n\n`;
+    
+    mensaje += `🔘 *CERRAMIENTOS DE OBRA (${listasReporte.inicial.length}):*\n`;
+    mensaje += listasReporte.inicial.length > 0 ? `${listasReporte.inicial.join(', ')}\n\n` : `Ninguno\n\n`;
+    
+    mensaje += `🟣 *ÁREAS LIBERADAS (${listasReporte.liberada.length}):*\n`;
+    mensaje += listasReporte.liberada.length > 0 ? `${listasReporte.liberada.join(', ')}\n\n` : `Ninguno\n\n`;
+    
+    mensaje += `🟡 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n`;
+    mensaje += listasReporte.culminada.length > 0 ? `${listasReporte.culminada.join(', ')}\n\n` : `Ninguno\n\n`;
+    
+    mensaje += `🔗 *Ver mapa interactivo:* https://vlacaspa.github.io/Entregas-anticipadas/`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
