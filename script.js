@@ -1,5 +1,7 @@
-// Inicializar el mapa centrado en Lima
+// 1. Inicializar el mapa centrado en Lima
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
+
+// Mover el control de zoom abajo a la derecha
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 // Capa de Google Maps gris tenue
@@ -11,6 +13,9 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 
 const markerLayer = L.layerGroup().addTo(map); 
 const polygonLayer = L.layerGroup(); 
+
+// Guardamos los marcadores en un array para forzarlos al frente después
+let circleMarkersArray = [];
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 let datosObras = {};
@@ -26,7 +31,7 @@ Papa.parse(urlCSV, {
         let kpiCulminado = 0;
 
         data.forEach(fila => {
-            if (fila.ID) { // Contamos desde que exista un ID, tenga coordenadas asignadas o no
+            if (fila.ID) { 
                 const idLimpio = fila.ID.toString().trim();
                 datosObras[idLimpio] = fila;
 
@@ -42,10 +47,13 @@ Papa.parse(urlCSV, {
                     kpiLiberado++;
                 }
 
-                // Dibujar pines geométricos solo si la estructura tiene coordenadas válidas
                 if (fila.Latitud && fila.Longitud) {
-                    const latStr = fila.Latitud.toString().replace(',', '.');
-                    const lngStr = fila.Longitud.toString().replace(',', '.');
+                    // BLINDAJE CONTRA EXCEL EN ESPAÑOL: 
+                    // Convertimos a string y usamos expresión regular para reemplazar 
+                    // TODAS las comas por puntos en la latitud y longitud.
+                    const latStr = fila.Latitud.toString().replace(/,/g, '.').trim();
+                    const lngStr = fila.Longitud.toString().replace(/,/g, '.').trim();
+                    
                     const lat = parseFloat(latStr);
                     const lng = parseFloat(lngStr);
 
@@ -63,13 +71,15 @@ Papa.parse(urlCSV, {
                             className: 'etiqueta-texto',
                             offset: [8, 0]
                         });
+                        
                         markerLayer.addLayer(pin);
+                        // Almacenamos el pin para traerlo al frente luego
+                        circleMarkersArray.push(pin);
                     }
                 }
             }
         });
 
-        // Búsqueda dual de identificadores (Nuevos o Antiguos) para asegurar la conexión
         const uiInicial = document.getElementById('kpi-inicial') || document.getElementById('kpi-estaciones');
         const uiLiberado = document.getElementById('kpi-liberado') || document.getElementById('kpi-pozos');
         const uiCulminado = document.getElementById('kpi-culminado') || document.getElementById('kpi-otros');
@@ -78,11 +88,14 @@ Papa.parse(urlCSV, {
         if(uiLiberado) uiLiberado.innerText = kpiLiberado;
         if(uiCulminado) uiCulminado.innerText = kpiCulminado;
 
+        // Una vez listos los marcadores, cargamos los polígonos
         cargarPoligonos();
     }
 });
 
 function cargarPoligonos() {
+    // Si tu archivo se sigue llamando "cerramientos.geojson", mantenlo así. 
+    // Si lo renombraste al subir los nuevos, ajusta el nombre aquí.
     fetch('cerramientos.geojson')
         .then(response => {
             if (!response.ok) return;
@@ -114,14 +127,28 @@ function cargarPoligonos() {
                     }
                 }
             }).addTo(polygonLayer);
+
+            // DESPUÉS de que los polígonos se hayan dibujado en el mapa, 
+            // forzamos todos nuestros pines almacenados a ir hacia adelante.
+            circleMarkersArray.forEach(pin => {
+                if(pin.bringToFront) {
+                    pin.bringToFront();
+                }
+            });
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("Error cargando polígonos:", err));
 }
 
 map.on('zoomend', function() {
     const currentZoom = map.getZoom();
     if (currentZoom >= 14) {
-        if (!map.hasLayer(polygonLayer)) map.addLayer(polygonLayer);
+        if (!map.hasLayer(polygonLayer)) {
+            map.addLayer(polygonLayer);
+            // Cuando los polígonos reaparecen por el zoom, volvemos a poner los pines al frente
+            circleMarkersArray.forEach(pin => {
+                if(pin.bringToFront) pin.bringToFront();
+            });
+        }
     } else {
         if (map.hasLayer(polygonLayer)) map.removeLayer(polygonLayer);
     }
