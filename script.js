@@ -17,82 +17,90 @@ const markerLayer = L.layerGroup().addTo(map);
 const polygonLayer = L.layerGroup(); 
 let circleMarkersArray = [];
 
-// Arrays para recopilar los IDs para el reporte gerencial
 let listasReporte = { inicial: [], liberada: [], culminada: [] };
+let datosObras = {};
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
-let datosObras = {};
 
 Papa.parse(urlCSV, {
     download: true,
     header: true,
     dynamicTyping: true,
     complete: function(results) {
-        const data = results.data;
-        let kpiInicial = 0;
-        let kpiLiberado = 0;
-        let kpiCulminado = 0;
+        try {
+            const data = results.data;
+            let kpiInicial = 0;
+            let kpiLiberado = 0;
+            let kpiCulminado = 0;
 
-        data.forEach(fila => {
-            if (fila.ID) { 
-                const idLimpio = fila.ID.toString().trim();
-                datosObras[idLimpio] = fila;
-                
-                const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                
-                let colorPin = '#B19CD9'; 
-                // Clasificación y conteo para KPIs y Reporte WhatsApp
-                if (estado === 'culminada') {
-                    colorPin = '#FFF275'; 
-                    kpiCulminado++;
-                    listasReporte.culminada.push(idLimpio);
-                } else if (estado === 'no') {
-                    kpiInicial++;
-                    listasReporte.inicial.push(idLimpio);
-                } else {
-                    kpiLiberado++;
-                    listasReporte.liberada.push(idLimpio);
-                }
+            data.forEach(fila => {
+                if (fila && fila.ID) { 
+                    const idLimpio = fila.ID.toString().trim();
+                    datosObras[idLimpio] = fila;
+                    
+                    const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                    
+                    let colorPin = '#B19CD9'; 
+                    if (estado === 'culminada') {
+                        colorPin = '#FFF275'; 
+                        kpiCulminado++;
+                        listasReporte.culminada.push(idLimpio);
+                    } else if (estado === 'no') {
+                        kpiInicial++;
+                        listasReporte.inicial.push(idLimpio);
+                    } else {
+                        kpiLiberado++;
+                        listasReporte.liberada.push(idLimpio);
+                    }
 
-                if (fila.Latitud && fila.Longitud) {
-                    const latStr = fila.Latitud.toString().replace(/,/g, '.').trim();
-                    const lngStr = fila.Longitud.toString().replace(/,/g, '.').trim();
-                    const lat = parseFloat(latStr);
-                    const lng = parseFloat(lngStr);
+                    // VALIDACIÓN ESTRICTA: Evita que celdas vacías rompan el código
+                    if (fila.Latitud !== undefined && fila.Latitud !== null && fila.Longitud !== undefined && fila.Longitud !== null) {
+                        const latStr = fila.Latitud.toString().replace(/,/g, '.').trim();
+                        const lngStr = fila.Longitud.toString().replace(/,/g, '.').trim();
+                        const lat = parseFloat(latStr);
+                        const lng = parseFloat(lngStr);
 
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        const pin = L.circleMarker([lat, lng], {
-                            pane: 'panelPines',
-                            radius: 7,
-                            fillColor: colorPin,
-                            color: "#ffffff",
-                            weight: 1.5,
-                            opacity: 1,
-                            fillOpacity: 0.95
-                        }).bindTooltip(idLimpio, {
-                            permanent: true,
-                            direction: 'right',
-                            className: 'etiqueta-texto',
-                            offset: [8, 0]
-                        });
-                        
-                        markerLayer.addLayer(pin);
-                        circleMarkersArray.push(pin);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const pin = L.circleMarker([lat, lng], {
+                                pane: 'panelPines',
+                                radius: 7,
+                                fillColor: colorPin,
+                                color: "#ffffff",
+                                weight: 1.5,
+                                opacity: 1,
+                                fillOpacity: 0.95
+                            }).bindTooltip(idLimpio, {
+                                permanent: true,
+                                direction: 'right',
+                                className: 'etiqueta-texto',
+                                offset: [8, 0]
+                            });
+                            
+                            markerLayer.addLayer(pin);
+                            circleMarkersArray.push(pin);
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        // Actualizar valores en el DOM (compatible con IDs antiguos y nuevos)
-        const uiInicial = document.getElementById('kpi-inicial') || document.getElementById('kpi-estaciones');
-        const uiLiberado = document.getElementById('kpi-liberado') || document.getElementById('kpi-pozos');
-        const uiCulminado = document.getElementById('kpi-culminado') || document.getElementById('kpi-otros');
+            // Actualizar interfaz gráfica
+            const uiInicial = document.getElementById('kpi-inicial') || document.getElementById('kpi-estaciones');
+            const uiLiberado = document.getElementById('kpi-liberado') || document.getElementById('kpi-pozos');
+            const uiCulminado = document.getElementById('kpi-culminado') || document.getElementById('kpi-otros');
 
-        if(uiInicial) uiInicial.innerText = kpiInicial;
-        if(uiLiberado) uiLiberado.innerText = kpiLiberado;
-        if(uiCulminado) uiCulminado.innerText = kpiCulminado;
+            if(uiInicial) uiInicial.innerText = kpiInicial;
+            if(uiLiberado) uiLiberado.innerText = kpiLiberado;
+            if(uiCulminado) uiCulminado.innerText = kpiCulminado;
 
-        cargarPoligonos();
+            // Se respeta tu lógica de conexión con los polígonos
+            cargarPoligonos();
+
+        } catch (error) {
+            console.error("Error interno procesando CSV:", error);
+        }
+    },
+    error: function(error) {
+        console.error("Fallo al descargar el archivo CSV:", error);
     }
 });
 
@@ -129,15 +137,13 @@ function cargarPoligonos() {
                 }
             }).addTo(polygonLayer);
 
-            // Forzar los pines al frente después de cargar polígonos
             circleMarkersArray.forEach(pin => {
                 if(pin.bringToFront) pin.bringToFront();
             });
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("Error en polígonos:", err));
 }
 
-// Función de visualización dinámica por Zoom
 map.on('zoomend', function() {
     const currentZoom = map.getZoom();
     if (currentZoom >= 14) {
@@ -152,7 +158,6 @@ map.on('zoomend', function() {
     }
 });
 
-// Función para generar y enviar el Reporte Gerencial por WhatsApp
 function generarReporteWhatsApp(e) {
     e.preventDefault();
     const fecha = new Date().toLocaleDateString('es-PE');
