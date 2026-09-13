@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cerramientos de Obra y Áreas Liberadas - Línea 2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cerramientos de Obra y Áreas Liberadas - Línea 2 y Ramal 4</title>
     <!-- CSS de Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <!-- Tu archivo de estilos -->
@@ -11,22 +11,23 @@
 </head>
 <body>
 
-    <!-- Título Principal -->
-    <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2 y Ramal 4</div>
-
-    <!-- Panel de Indicadores de Gestión (KPIs) -->
-    <div id="panel-kpis">
-        <div class="kpi-box">
-            <span class="kpi-title">ESTACIONES</span>
-            <span class="kpi-value" id="kpi-estaciones">0</span>
-        </div>
-        <div class="kpi-box">
-            <span class="kpi-title">POZOS</span>
-            <span class="kpi-value" id="kpi-pozos">0</span>
-        </div>
-        <div class="kpi-box">
-            <span class="kpi-title">OTROS (Patios/Túnel)</span>
-            <span class="kpi-value" id="kpi-otros">0</span>
+    <!-- Agrupamos Título y KPIs en la parte superior para móviles -->
+    <div id="panel-superior">
+        <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2 y Ramal 4</div>
+        
+        <div id="panel-kpis">
+            <div class="kpi-box">
+                <span class="kpi-title">CERRAMIENTO INICIAL</span>
+                <span class="kpi-value" id="kpi-inicial">0</span>
+            </div>
+            <div class="kpi-box">
+                <span class="kpi-title">ÁREAS LIBERADAS</span>
+                <span class="kpi-value" id="kpi-liberado">0</span>
+            </div>
+            <div class="kpi-box">
+                <span class="kpi-title">CULMINADAS</span>
+                <span class="kpi-value" id="kpi-culminado">0</span>
+            </div>
         </div>
     </div>
 
