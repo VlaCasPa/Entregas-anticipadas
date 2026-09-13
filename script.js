@@ -77,7 +77,7 @@ Papa.parse(urlCSV, {
 });
 
 function cargarPoligonos() {
-    fetch('cerramientos_2.geojson')
+    fetch('cerramientos.geojson')
         .then(response => {
             if (!response.ok) return;
             return response.json();
