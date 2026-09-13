@@ -1,7 +1,7 @@
-// Inicializar el mapa centrado en Lima (zoom control oculto por defecto para acomodarlo luego)
+// Inicializar el mapa centrado en Lima
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
 
-// Mover el control de zoom abajo a la derecha para evitar choques con tu interfaz
+// Mover el control de zoom abajo a la derecha
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 // Capa de Google Maps gris tenue
@@ -23,6 +23,8 @@ Papa.parse(urlCSV, {
     dynamicTyping: true,
     complete: function(results) {
         const data = results.data;
+        
+        // Variables de conteo corregidas
         let kpiInicial = 0;
         let kpiLiberado = 0;
         let kpiCulminado = 0;
@@ -39,7 +41,7 @@ Papa.parse(urlCSV, {
 
                 const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim() : 'No';
                 
-                let colorPin = '#B19CD9'; // Morado pastel siempre
+                let colorPin = '#B19CD9'; 
                 if (estado.toLowerCase() === 'culminada') {
                     colorPin = '#FFF275'; 
                     kpiCulminado++;
@@ -68,9 +70,10 @@ Papa.parse(urlCSV, {
             }
         });
 
-        if(document.getElementById('kpi-estaciones')) document.getElementById('kpi-estaciones').innerText = kpiInicial;
-        if(document.getElementById('kpi-pozos')) document.getElementById('kpi-pozos').innerText = kpiLiberado;
-        if(document.getElementById('kpi-otros')) document.getElementById('kpi-otros').innerText = kpiCulminado;
+        // Conexión corregida con los IDs exactos de tu nuevo HTML
+        if(document.getElementById('kpi-inicial')) document.getElementById('kpi-inicial').innerText = kpiInicial;
+        if(document.getElementById('kpi-liberado')) document.getElementById('kpi-liberado').innerText = kpiLiberado;
+        if(document.getElementById('kpi-culminado')) document.getElementById('kpi-culminado').innerText = kpiCulminado;
 
         cargarPoligonos();
     }
@@ -98,12 +101,10 @@ function cargarPoligonos() {
                     const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
                     if (estadoLib === 'culminada') return { opacity: 0, fillOpacity: 0 };
 
-                    // Reglas de colores actualizadas
                     if (estadoLib === 'no') {
                         if (tipoPoligono === 'inicial') return { color: '#808080', fillColor: '#808080', weight: 1, fillOpacity: 0.4 };
                         return { opacity: 0, fillOpacity: 0 }; 
                     } else {
-                        // Residual: FF009D | Liberado: 00DBFF
                         if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 2, fillOpacity: 0.4 };
                         if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 2, fillOpacity: 0.4 };
                         return { opacity: 0, fillOpacity: 0 }; 
@@ -114,7 +115,6 @@ function cargarPoligonos() {
         .catch(err => console.error(err));
 }
 
-// Zoom dinámico ajustado a 14 para mejor visualización en móvil
 map.on('zoomend', function() {
     const currentZoom = map.getZoom();
     if (currentZoom >= 14) {
