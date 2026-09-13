@@ -65,7 +65,7 @@ body, html {
     backdrop-filter: blur(8px);
     padding: 8px 10px;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
     text-align: center;
     flex: 1 1 80px;
     border-bottom: 3px solid #6c7a89;
