@@ -5,7 +5,7 @@ body, html {
     height: 100%;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f4f9;
-    overflow: hidden; /* Evita que el celular haga scroll accidental */
+    overflow: hidden; 
 }
 
 #map {
@@ -14,43 +14,47 @@ body, html {
     z-index: 1;
 }
 
-/* =========================================
-   DISEÑO PANTALLAS GRANDES (PC / TABLET)
-========================================= */
 #panel-superior {
     position: absolute;
-    top: 20px;
+    top: 15px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     width: 90%;
     max-width: 800px;
     z-index: 1000;
-    pointer-events: none; /* Permite hacer clic en el mapa a través de espacios vacíos */
+    pointer-events: none; 
 }
 
 #titulo-flotante {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
-    padding: 12px 24px;
+    padding: 8px 20px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     color: #2c3e50;
-    border-left: 5px solid #FF009D; /* Color institucional residual */
+    border-left: 5px solid #FF009D; 
     text-align: center;
     width: 100%;
     box-sizing: border-box;
     pointer-events: auto;
+    line-height: 1.2;
+}
+
+.subtitulo {
+    font-size: 11px;
+    font-weight: 500;
+    color: #7f8c8d;
 }
 
 #panel-kpis {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
     justify-content: center;
     pointer-events: auto;
@@ -59,76 +63,88 @@ body, html {
 .kpi-box {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
-    padding: 12px 20px;
+    padding: 8px 10px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.12);
     text-align: center;
-    flex: 1 1 100px;
-    min-width: 100px;
+    flex: 1 1 80px;
     border-bottom: 3px solid #6c7a89;
 }
 
+.kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.kpi-marker {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Colores idénticos a los polígonos/pines */
+.kpi-marker.inicial { background-color: #808080; }
+.kpi-marker.liberada { background: linear-gradient(135deg, #FF009D 50%, #00DBFF 50%); } /* Dualidad Fucsia/Celeste */
+.kpi-marker.culminada { background-color: #FFF275; border: 1px solid #e0d55e; }
+
 .kpi-title {
-    display: block;
-    font-size: 11px;
+    font-size: 8px;
     color: #7f8c8d;
     text-transform: uppercase;
     font-weight: 700;
-    margin-bottom: 4px;
-    letter-spacing: 0.5px;
 }
 
 .kpi-value {
     display: block;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 800;
     color: #2c3e50;
 }
 
-/* =========================================
-   DISEÑO PARA CELULARES (RESPONSIVO)
-========================================= */
 @media (max-width: 600px) {
     #panel-superior {
-        top: 10px;
-        gap: 8px;
+        top: 5px;
+        gap: 5px;
         width: 95%;
     }
-
     #titulo-flotante {
-        font-size: 13px;
-        padding: 8px 12px;
-        border-left: 4px solid #FF009D;
+        font-size: 12px;
+        padding: 6px 10px;
+        border-left: 3px solid #FF009D;
     }
-
+    .subtitulo {
+        font-size: 9px;
+    }
     #panel-kpis {
         gap: 5px;
     }
-
     .kpi-box {
-        padding: 6px 5px;
-        min-width: 70px;
+        padding: 4px 5px;
+        min-width: 60px;
     }
-
+    .kpi-header {
+        gap: 4px;
+    }
+    .kpi-marker {
+        width: 6px;
+        height: 6px;
+    }
     .kpi-title {
-        font-size: 9px;
-        letter-spacing: 0px;
+        font-size: 7px;
     }
-
     .kpi-value {
-        font-size: 16px;
+        font-size: 14px;
     }
 }
 
-/* =========================================
-   ESTILOS DEL MAPA Y ETIQUETAS
-========================================= */
-/* Filtro gris para Google Maps */
 .mapa-base-gris {
     filter: grayscale(100%) opacity(65%);
 }
 
-/* Etiqueta de texto transparente junto al pin */
 .etiqueta-texto {
     background: transparent !important;
     border: none !important;
@@ -136,11 +152,9 @@ body, html {
     font-weight: 800;
     font-size: 12px;
     color: #2c3e50;
-    /* Borde blanco grueso alrededor de las letras */
     text-shadow: 2px 2px 3px #ffffff, -2px -2px 3px #ffffff, 2px -2px 3px #ffffff, -2px 2px 3px #ffffff;
 }
 
-/* Oculta la flecha por defecto de Leaflet */
 .leaflet-tooltip-right.etiqueta-texto::before,
 .leaflet-tooltip-left.etiqueta-texto::before {
     display: none;
