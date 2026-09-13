@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<kml xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:atom="http://www.w3.org/2005/Atom" xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+<name>_kml de dwg</name>
+<visibility>1</visibility>
+<Schema name="_kml de dwg" id="kml_schema_ft__kml_de_dwg">
+<SimpleField type="xsd:string" name="ID">
+<displayName>ID</displayName>
+</SimpleField>
+<SimpleField type="xsd:string" name="tipo">
+<displayName>tipo</displayName>
+</SimpleField>
+</Schema>
+<Folder id="kml_ft__kml_de_dwg">
+<name>_kml de dwg</name>
+<Placemark id="kml_1">
+<name>kml_1</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>liberado</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffffff00</color>
+</LineStyle>
+<PolyStyle>
+<color>b0ffff00</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV13</SimpleData>
+<SimpleData name="tipo">liberado</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0347851202068,-12.0620175275364,0.0 -77.0348508108058,-12.0620436064502,0.0 -77.034719322981,-12.0623890058933,0.0 -77.0346297394998,-12.0626411671982,0.0 -77.0345628118618,-12.0626186261233,0.0 -77.0345949676243,-12.0625382318394,0.0 -77.0347851202068,-12.0620175275364,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_2">
+<name>kml_2</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV13</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0348508108058,-12.0620436064502,0.0 -77.0349929578358,-12.0621020942395,0.0 -77.0348618713105,-12.0624419492236,0.0 -77.034719322981,-12.0623890058933,0.0 -77.0348508108058,-12.0620436064502,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_3">
+<name>kml_3</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV12</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>liberado</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffffff00</color>
+</LineStyle>
+<PolyStyle>
+<color>b0ffff00</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV12</SimpleData>
+<SimpleData name="tipo">liberado</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0411223254294,-12.0602334847595,0.0 -77.0411270680057,-12.0601690629714,0.0 -77.0411365987079,-12.0601187981162,0.0 -77.0411625285398,-12.0600550695162,0.0 -77.041205968859,-12.0599897244971,0.0 -77.0412466351044,-12.0599390848936,0.0 -77.0412973625973,-12.0598967338656,0.0 -77.0413335891246,-12.0598738502317,0.0 -77.0413647179604,-12.0598567155159,0.0 -77.0414253857548,-12.059834027168,0.0 -77.0414592523606,-12.0598249701193,0.0 -77.0415035986912,-12.0598168467734,0.0 -77.0415446536707,-12.0598130847611,0.0 -77.0415890751717,-12.0598118051102,0.0 -77.0416717822158,-12.0598226486291,0.0 -77.0416649332381,-12.0598730783794,0.0 -77.0417803409619,-12.0598707651096,0.0 -77.0418216221033,-12.0599005447545,0.0 -77.0418805011399,-12.0599529342408,0.0 -77.0418990336103,-12.0599721986453,0.0 -77.0419141640153,-12.0600828702676,0.0 -77.0417353686088,-12.0601178598977,0.0 -77.0416646177759,-12.0601245626905,0.0 -77.0415738044708,-12.0601302130644,0.0 -77.0415419839795,-12.060131274544,0.0 -77.0415147515663,-12.0601377685554,0.0 -77.0414921059186,-12.0601495294843,0.0 -77.0414799763332,-12.0601594130535,0.0 -77.0414618800923,-12.0601804946625,0.0 -77.0414487069751,-12.0602043666314,0.0 -77.0414435967478,-12.0602215290332,0.0 -77.0411223254294,-12.0602334847595,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_4">
+<name>kml_4</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV12</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV12</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0413825128228,-12.0601095823557,0.0 -77.0413947458464,-12.0601007840825,0.0 -77.0414012469234,-12.0601095406652,0.0 -77.0413890137387,-12.0601183387053,0.0 -77.0413825128228,-12.0601095823557,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_5">
+<name>kml_5</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV12</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV12</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0413804630185,-12.0600804729034,0.0 -77.041392923591,-12.0600972565604,0.0 -77.0413773538791,-12.0601084542122,0.0 -77.0413648933069,-12.0600916705544,0.0 -77.0413804630185,-12.0600804729034,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_6">
+<name>kml_6</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV12</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV12</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0413352350514,-12.0600609215006,0.0 -77.0413548826084,-12.0600467912199,0.0 -77.0413711354257,-12.0600686830198,0.0 -77.0413514878684,-12.0600828133018,0.0 -77.0413352350514,-12.0600609215006,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_7">
+<name>kml_7</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV12</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV12</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0413522401097,-12.0600405399408,0.0 -77.0413106870743,-12.0599835138715,0.0 -77.0413752114293,-12.0599361996279,0.0 -77.0414212528423,-12.0599970237211,0.0 -77.0414753147671,-12.060071614231,0.0 -77.041411499435,-12.0601210401078,0.0 -77.0414018227501,-12.0601074171656,0.0 -77.0413522401097,-12.0600405399408,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_8">
+<name>kml_8</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>PV12</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">PV12</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0414435396919,-12.0599995424607,0.0 -77.0414835760656,-12.0599707484885,0.0 -77.0415302950119,-12.0600336761263,0.0 -77.0414904022839,-12.0600626635909,0.0 -77.0414435396919,-12.0599995424607,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_9">
+<name>kml_9</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>E13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>liberado</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffffff00</color>
+</LineStyle>
+<PolyStyle>
+<color>b0ffff00</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">E13</SimpleData>
+<SimpleData name="tipo">liberado</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0365133187678,-12.0597080204289,0.0 -77.0364843060429,-12.0596962394445,0.0 -77.0363712456123,-12.0596444904058,0.0 -77.0363284527149,-12.0596870598888,0.0 -77.0362719852771,-12.0597017039452,0.0 -77.0362537125319,-12.0596993377206,0.0 -77.0362579087355,-12.0596947813254,0.0 -77.0362780695691,-12.0596964428174,0.0 -77.0362838584061,-12.0596496853075,0.0 -77.0362451309429,-12.0596283957815,0.0 -77.0362388255204,-12.059593593317,0.0 -77.0362191653808,-12.0594602717216,0.0 -77.0362200438308,-12.059445641504,0.0 -77.036223659353,-12.0594283573424,0.0 -77.0362426523553,-12.0594072001292,0.0 -77.0363182223554,-12.0593634058415,0.0 -77.036333955319,-12.0593582487996,0.0 -77.0363507239155,-12.059359797414,0.0 -77.0363975870812,-12.0594066701331,0.0 -77.0364544946975,-12.0594648858569,0.0 -77.0364968091268,-12.0595171839503,0.0 -77.0365098553687,-12.059530517074,0.0 -77.0365853858025,-12.0595740377685,0.0 -77.0366396419003,-12.059600782693,0.0 -77.0366933217009,-12.0596213285683,0.0 -77.0367550103309,-12.0596437660453,0.0 -77.0368499394006,-12.0596674114414,0.0 -77.0369108151077,-12.0596812017293,0.0 -77.0370498549859,-12.0596930125867,0.0 -77.037283898129,-12.0597141093258,0.0 -77.0374898433338,-12.0597046744371,0.0 -77.03748416093,-12.0597613080219,0.0 -77.0377305376324,-12.0597828103344,0.0 -77.0377339698437,-12.0597426993344,0.0 -77.0377379658207,-12.0597038183908,0.0 -77.037773609703,-12.0596719101142,0.0 -77.0377743325303,-12.0596971521392,0.0 -77.0377836572034,-12.0597357183352,0.0 -77.0377813185489,-12.0598469731303,0.0 -77.0377801225041,-12.0598831592407,0.0 -77.037776306652,-12.0599054605831,0.0 -77.0377691925268,-12.0599932687338,0.0 -77.0377570225141,-12.059998876763,0.0 -77.0375890165405,-12.0599810197921,0.0 -77.0373780250776,-12.0599579427276,0.0 -77.0373110364509,-12.0599491242927,0.0 -77.0370677436665,-12.0599349239953,0.0 -77.0369376157104,-12.0599291888423,0.0 -77.036891555591,-12.0599311721836,0.0 -77.0367886935476,-12.0599382267271,0.0 -77.0367579067141,-12.059942264586,0.0 -77.0367000698723,-12.0599556210517,0.0 -77.0366611645729,-12.0599669229119,0.0 -77.0365576035851,-12.0599995308054,0.0 -77.0364942442131,-12.0600185368403,0.0 -77.0364476356813,-12.0600327883061,0.0 -77.0363953902117,-12.0600459326329,0.0 -77.0363461482921,-12.0600545507989,0.0 -77.0363310981741,-12.0600557096721,0.0 -77.0362883737494,-12.060017982665,0.0 -77.0362586485937,-12.0599573100123,0.0 -77.0363028729513,-12.0600122179873,0.0 -77.0363350035324,-12.0599985375948,0.0 -77.0363675005305,-12.0599857230238,0.0 -77.0364003398663,-12.0599737837696,0.0 -77.0364389053068,-12.059960342139,0.0 -77.0364778132946,-12.0599478934763,0.0 -77.0365170374424,-12.0599364462241,0.0 -77.0365133187678,-12.0597080204289,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_10">
+<name>kml_10</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>E13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">E13</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0382401880223,-12.0597575213094,0.0 -77.0383892560749,-12.0597713409084,0.0 -77.0383867164677,-12.0598096148781,0.0 -77.0382367054151,-12.0597958311297,0.0 -77.0382401880223,-12.0597575213094,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_11">
+<name>kml_11</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>E13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">E13</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.038212409786,-12.060119742355,0.0 -77.038361478043,-12.0601335619365,0.0 -77.0383589384371,-12.0601718359062,0.0 -77.0382089271788,-12.0601580521754,0.0 -77.038212409786,-12.060119742355,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_12">
+<name>kml_12</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>E13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">E13</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0372922522215,-12.0600645749172,0.0 -77.0372955167228,-12.0600301828709,0.0 -77.0375556061838,-12.0600589587279,0.0 -77.0375678537553,-12.0600604458354,0.0 -77.037610330478,-12.0600657147109,0.0 -77.0376872215592,-12.0600749705443,0.0 -77.037708859002,-12.0600840124232,0.0 -77.0377073941526,-12.0601266458514,0.0 -77.0373339041016,-12.0600953099437,0.0 -77.0372922522215,-12.0600645749172,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_13">
+<name>kml_13</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>E13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">E13</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0362365991208,-12.0596971216226,0.0 -77.0362719852771,-12.0597017039452,0.0 -77.0363284527149,-12.0596870598888,0.0 -77.0363712456123,-12.0596444904058,0.0 -77.0364843060429,-12.0596962394445,0.0 -77.0365133187678,-12.0597080204289,0.0 -77.0365170374424,-12.0599364462241,0.0 -77.0364778132946,-12.0599478934763,0.0 -77.0364389053068,-12.059960342139,0.0 -77.0364003398663,-12.0599737837696,0.0 -77.0363675005305,-12.0599857230238,0.0 -77.0363350035324,-12.0599985375948,0.0 -77.0363028729513,-12.0600122179873,0.0 -77.0362586485937,-12.0599573100123,0.0 -77.0362389242405,-12.0599550014524,0.0 -77.036203439204,-12.0599504774112,0.0 -77.0362365991208,-12.0596971216226,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_14">
+<name>kml_14</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>E13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>residual</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffbf00ff</color>
+</LineStyle>
+<PolyStyle>
+<color>b0bf00ff</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">E13</SimpleData>
+<SimpleData name="tipo">residual</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0375389948425,-12.0594195956316,0.0 -77.0375833417129,-12.0594224724072,0.0 -77.0376591243373,-12.0592903115128,0.0 -77.0376773696115,-12.0591951719685,0.0 -77.0376916842492,-12.0591205286067,0.0 -77.0377476246254,-12.0591265449851,0.0 -77.037791613031,-12.0591312759228,0.0 -77.0378126238026,-12.0591335356213,0.0 -77.0378107038668,-12.0591560151053,0.0 -77.0377863592547,-12.0593989871527,0.0 -77.0377926855594,-12.059427287523,0.0 -77.037773609703,-12.0596719101142,0.0 -77.0377379658207,-12.0597038183908,0.0 -77.0377339698437,-12.0597426993344,0.0 -77.0377305376324,-12.0597828103344,0.0 -77.03748416093,-12.0597613080219,0.0 -77.0374898433338,-12.0597046744371,0.0 -77.037496431138,-12.0596390171882,0.0 -77.0375169852356,-12.0596182101654,0.0 -77.0375389948425,-12.0594195956316,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+<Placemark id="kml_15">
+<name>kml_15</name>
+<snippet> </snippet>
+<description><![CDATA[<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor="#E3E3F3">
+<th>ID</th>
+<td>E13</td>
+</tr><tr bgcolor="">
+<th>tipo</th>
+<td>liberado</td>
+</tr></table></center>]]></description>
+<Style>
+<LineStyle>
+<color>ffffff00</color>
+</LineStyle>
+<PolyStyle>
+<color>b0ffff00</color>
+</PolyStyle>
+</Style>
+<ExtendedData>
+<SchemaData schemaUrl="#kml_schema_ft__kml_de_dwg">
+<SimpleData name="ID">E13</SimpleData>
+<SimpleData name="tipo">liberado</SimpleData>
+</SchemaData>
+</ExtendedData>
+<Polygon>
+<outerBoundaryIs>
+<LinearRing>
+<coordinates>-77.0380697970974,-12.0597421997749,0.0 -77.0380453691487,-12.0599942911845,0.0 -77.0380621284017,-12.0600230938194,0.0 -77.0381398047207,-12.0600380726768,0.0 -77.0383039557575,-12.060051426003,0.0 -77.0384798877999,-12.0600677208832,0.0 -77.0387664169213,-12.0601002404637,0.0 -77.0389187165735,-12.0601115113603,0.0 -77.0389425798781,-12.0598944278543,0.0 -77.0388627036619,-12.0598697572247,0.0 -77.0388297395592,-12.0598442022313,0.0 -77.0388337116846,-12.0598128351704,0.0 -77.0387596792617,-12.0598059600478,0.0 -77.0387422924505,-12.05979814377,0.0 -77.0383892560749,-12.0597713409084,0.0 -77.0383867164677,-12.0598096148781,0.0 -77.0382367054151,-12.0597958311297,0.0 -77.0382401880223,-12.0597575213094,0.0 -77.0380697970974,-12.0597421997749,0.0</coordinates>
+</LinearRing>
+</outerBoundaryIs>
+</Polygon>
+</Placemark>
+</Folder>
+</Document></kml>
