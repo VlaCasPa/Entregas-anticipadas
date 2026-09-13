@@ -1,4 +1,3 @@
-// Inicializar el mapa centrado en Lima
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -19,7 +18,6 @@ let datosObras = {};
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 
-// Función para diseñar la tarjeta emergente
 function generarPopupHTML(datos, idLimpio) {
     const fechaConst = datos['Fecha de constatacion notarial'] || datos.Fecha_Constatacion || 'Sin registro';
     const fechaLib = datos['Fecha de liberacion parcial'] || datos.Fecha_Liberacion || 'Sin registro';
@@ -32,15 +30,29 @@ function generarPopupHTML(datos, idLimpio) {
                 <h3>${idLimpio}</h3>
                 <span class="popup-subtitle">📍 Línea 2 y Ramal 4</span>
             </div>
+            
             <div class="popup-card residual-card">
-                <h4><span class="icon">🚧</span> Constatación y Liberación</h4>
-                <p><b>Constatación:</b> ${fechaConst}</p>
-                <p><b>Liberación:</b> ${fechaLib}</p>
+                <h4><span class="icon">🚧</span> Cerramiento</h4>
+                <div class="popup-detail">
+                    <span>Constatación:</span>
+                    <b>${fechaConst}</b>
+                </div>
+                <div class="popup-detail">
+                    <span>Liberación:</span>
+                    <b>${fechaLib}</b>
+                </div>
             </div>
+            
             <div class="popup-card doc-card">
-                <h4><span class="icon">📄</span> Documentación Técnica</h4>
-                <p><b>Asiento de Obra:</b> ${asiento}</p>
-                <p><b>Plano Asociado:</b> ${plano}</p>
+                <h4><span class="icon">📄</span> Técnico</h4>
+                <div class="popup-detail">
+                    <span>Asiento N°:</span>
+                    <b>${asiento}</b>
+                </div>
+                <div class="popup-detail">
+                    <span>Plano:</span>
+                    <b>${plano}</b>
+                </div>
             </div>
         </div>
     `;
@@ -82,7 +94,6 @@ Papa.parse(urlCSV, {
                         const lng = parseFloat(lngStr);
 
                         if (!isNaN(lat) && !isNaN(lng)) {
-                            // Dibuja el pin indiferentemente del estado[cite: 5, 6]
                             const pin = L.circleMarker([lat, lng], {
                                 pane: 'panelPines',
                                 radius: 7,
@@ -98,7 +109,6 @@ Papa.parse(urlCSV, {
                                 offset: [8, 0]
                             });
 
-                            // SOLO agregar la ventana emergente (Popup) a las áreas liberadas activas
                             if (estado !== 'no' && estado !== 'culminada') {
                                 pin.bindPopup(generarPopupHTML(fila, idLimpio), { className: 'custom-popup-wrapper' });
                             }
@@ -161,7 +171,6 @@ function cargarPoligonos() {
                     const datosCSV = datosObras[idLimpio];
                     if (datosCSV) {
                         const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                        // Condicionar también el popup para el clic sobre la geometría del polígono
                         if (estadoLib !== 'no' && estadoLib !== 'culminada') {
                             layer.bindPopup(generarPopupHTML(datosCSV, idLimpio), { className: 'custom-popup-wrapper' });
                         }
