@@ -1,7 +1,5 @@
 // Inicializar el mapa centrado en Lima
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
-
-// Mover el control de zoom abajo a la derecha
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 // Capa de Google Maps gris tenue
@@ -23,57 +21,62 @@ Papa.parse(urlCSV, {
     dynamicTyping: true,
     complete: function(results) {
         const data = results.data;
-        
-        // Variables de conteo corregidas
         let kpiInicial = 0;
         let kpiLiberado = 0;
         let kpiCulminado = 0;
 
         data.forEach(fila => {
-            if (fila.Latitud && fila.Longitud && fila.ID) {
+            if (fila.ID) { // Contamos desde que exista un ID, tenga coordenadas asignadas o no
                 const idLimpio = fila.ID.toString().trim();
                 datosObras[idLimpio] = fila;
 
-                const latStr = fila.Latitud.toString().replace(',', '.');
-                const lngStr = fila.Longitud.toString().replace(',', '.');
-                const lat = parseFloat(latStr);
-                const lng = parseFloat(lngStr);
-
-                const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim() : 'No';
+                const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
                 
                 let colorPin = '#B19CD9'; 
-                if (estado.toLowerCase() === 'culminada') {
+                if (estado === 'culminada') {
                     colorPin = '#FFF275'; 
                     kpiCulminado++;
-                } else if (estado.toLowerCase() === 'no') {
+                } else if (estado === 'no') {
                     kpiInicial++;
                 } else {
                     kpiLiberado++;
                 }
 
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    const pin = L.circleMarker([lat, lng], {
-                        radius: 7,
-                        fillColor: colorPin,
-                        color: "#ffffff",
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.95
-                    }).bindTooltip(idLimpio, {
-                        permanent: true,
-                        direction: 'right',
-                        className: 'etiqueta-texto',
-                        offset: [8, 0]
-                    });
-                    markerLayer.addLayer(pin);
+                // Dibujar pines geométricos solo si la estructura tiene coordenadas válidas
+                if (fila.Latitud && fila.Longitud) {
+                    const latStr = fila.Latitud.toString().replace(',', '.');
+                    const lngStr = fila.Longitud.toString().replace(',', '.');
+                    const lat = parseFloat(latStr);
+                    const lng = parseFloat(lngStr);
+
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const pin = L.circleMarker([lat, lng], {
+                            radius: 7,
+                            fillColor: colorPin,
+                            color: "#ffffff",
+                            weight: 1.5,
+                            opacity: 1,
+                            fillOpacity: 0.95
+                        }).bindTooltip(idLimpio, {
+                            permanent: true,
+                            direction: 'right',
+                            className: 'etiqueta-texto',
+                            offset: [8, 0]
+                        });
+                        markerLayer.addLayer(pin);
+                    }
                 }
             }
         });
 
-        // Conexión corregida con los IDs exactos de tu nuevo HTML
-        if(document.getElementById('kpi-inicial')) document.getElementById('kpi-inicial').innerText = kpiInicial;
-        if(document.getElementById('kpi-liberado')) document.getElementById('kpi-liberado').innerText = kpiLiberado;
-        if(document.getElementById('kpi-culminado')) document.getElementById('kpi-culminado').innerText = kpiCulminado;
+        // Búsqueda dual de identificadores (Nuevos o Antiguos) para asegurar la conexión
+        const uiInicial = document.getElementById('kpi-inicial') || document.getElementById('kpi-estaciones');
+        const uiLiberado = document.getElementById('kpi-liberado') || document.getElementById('kpi-pozos');
+        const uiCulminado = document.getElementById('kpi-culminado') || document.getElementById('kpi-otros');
+
+        if(uiInicial) uiInicial.innerText = kpiInicial;
+        if(uiLiberado) uiLiberado.innerText = kpiLiberado;
+        if(uiCulminado) uiCulminado.innerText = kpiCulminado;
 
         cargarPoligonos();
     }
