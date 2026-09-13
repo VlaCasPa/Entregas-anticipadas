@@ -4,40 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cerramientos de Obra y Áreas Liberadas - Línea 2 y Ramal 4</title>
-    <!-- CSS de Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <!-- Tu archivo de estilos -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Agrupamos Título y KPIs en la parte superior para móviles -->
     <div id="panel-superior">
-        <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2 y Ramal 4</div>
+        <div id="titulo-flotante">
+            Cerramientos de Obra y Áreas Liberadas<br>
+            <span class="subtitulo">Línea 2 y Ramal 4</span>
+        </div>
         
         <div id="panel-kpis">
             <div class="kpi-box">
-                <span class="kpi-title">CERRAMIENTO INICIAL</span>
+                <div class="kpi-header">
+                    <span class="kpi-marker inicial"></span>
+                    <span class="kpi-title">CERRAMIENTOS DE OBRA</span>
+                </div>
                 <span class="kpi-value" id="kpi-inicial">0</span>
             </div>
             <div class="kpi-box">
-                <span class="kpi-title">ÁREAS LIBERADAS</span>
+                <div class="kpi-header">
+                    <span class="kpi-marker liberada"></span>
+                    <span class="kpi-title">LIBERADAS</span>
+                </div>
                 <span class="kpi-value" id="kpi-liberado">0</span>
             </div>
             <div class="kpi-box">
-                <span class="kpi-title">CULMINADAS</span>
+                <div class="kpi-header">
+                    <span class="kpi-marker culminada"></span>
+                    <span class="kpi-title">CULMINADAS</span>
+                </div>
                 <span class="kpi-value" id="kpi-culminado">0</span>
             </div>
         </div>
     </div>
 
-    <!-- Contenedor del Mapa -->
     <div id="map"></div>
 
-    <!-- Librerías JS y Script -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <!-- Tu archivo de lógica -->
     <script src="script.js"></script>
 </body>
 </html>
