@@ -73,7 +73,7 @@ Papa.parse(urlCSV, {
                     datosObras[idLimpio] = fila;
                     
                     const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                    let colorPin = '#B19CD9'; 
+                    let colorPin = '#B19CD9'; // Morado pastel para todos los pines
                     
                     if (estado === 'culminada') {
                         colorPin = '#FFF275'; 
@@ -157,7 +157,8 @@ function cargarPoligonos() {
                     if (estadoLib === 'culminada') return { opacity: 0, fillOpacity: 0 };
 
                     if (estadoLib === 'no') {
-                        if (tipoPoligono === 'inicial') return { color: '#808080', fillColor: '#808080', weight: 1, fillOpacity: 0.4 };
+                        // AQUÍ SE CAMBIÓ A #DBA4A0 Y SE AUMENTÓ EL GROSOR A 2
+                        if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 2, fillOpacity: 0.5 };
                         return { opacity: 0, fillOpacity: 0 }; 
                     } else {
                         if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 2, fillOpacity: 0.4 };
