@@ -86,7 +86,8 @@ body, html {
     display: inline-block;
 }
 
-.kpi-marker.inicial { background-color: #808080; }
+/* AQUÍ SE APLICÓ EL NUEVO COLOR AL KPI */
+.kpi-marker.inicial { background-color: #DBA4A0; }
 .kpi-marker.liberada { background: linear-gradient(135deg, #FF009D 50%, #00DBFF 50%); }
 .kpi-marker.culminada { background-color: #FFF275; border: 1px solid #e0d55e; }
 
@@ -148,7 +149,8 @@ body, html {
     display: inline-block;
 }
 
-.legend-color.inicial { background-color: rgba(128, 128, 128, 0.4); border: 1px solid #808080; }
+/* AQUÍ SE APLICÓ EL NUEVO COLOR A LA LEYENDA */
+.legend-color.inicial { background-color: rgba(219, 164, 160, 0.5); border: 1px solid #DBA4A0; }
 .legend-color.residual { background-color: rgba(255, 0, 157, 0.4); border: 1px solid #FF009D; }
 .legend-color.liberada { background-color: rgba(0, 219, 255, 0.4); border: 1px solid #00DBFF; }
 
