@@ -1,7 +1,6 @@
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// Panel exclusivo para garantizar que los pines siempre estén por encima de todo
 map.createPane('panelPines');
 map.getPane('panelPines').style.zIndex = 650;
 
@@ -14,10 +13,21 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 const markerLayer = L.layerGroup().addTo(map); 
 const polygonLayer = L.layerGroup(); 
 let circleMarkersArray = [];
-let listasReporte = { inicial: [], liberada: [], culminada: [] };
+let listasReporte = { inicial: [], liberada: [], culminada: [], recientes: [] };
 let datosObras = {};
+let filtroActivo = 'todos';
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
+
+// Helper: Convertir fechas DD/MM/YYYY a objetos Date reales
+function parseDatePeru(fechaStr) {
+    if (!fechaStr || typeof fechaStr !== 'string' || fechaStr === 'Sin registro') return null;
+    const partes = fechaStr.split('/');
+    if (partes.length === 3) {
+        return new Date(partes[2], partes[1] - 1, partes[0]);
+    }
+    return null;
+}
 
 function generarPopupHTML(datos, idLimpio) {
     const fechaConst = datos['Fecha de constatacion notarial'] || datos.Fecha_Constatacion || 'Sin registro';
@@ -74,18 +84,41 @@ Papa.parse(urlCSV, {
                     datosObras[idLimpio] = fila;
                     
                     const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                    let categoria = 'liberada';
                     let colorPin = '#B19CD9'; 
                     
                     if (estado === 'culminada') {
+                        categoria = 'culminada';
                         colorPin = '#FFF275'; 
                         kpiCulminado++;
                         listasReporte.culminada.push(idLimpio);
                     } else if (estado === 'no') {
+                        categoria = 'inicial';
                         kpiInicial++;
                         listasReporte.inicial.push(idLimpio);
                     } else {
+                        categoria = 'liberada';
                         kpiLiberado++;
                         listasReporte.liberada.push(idLimpio);
+                    }
+
+                    // --- AUDITORÍA DE FECHAS: < 30 DÍAS ---
+                    if (categoria === 'liberada' || categoria === 'culminada') {
+                        const fechaC = parseDatePeru(fila['Fecha de constatacion notarial'] || fila.Fecha_Constatacion);
+                        const fechaL = parseDatePeru(fila['Fecha de liberacion parcial'] || fila.Fecha_Liberacion);
+                        
+                        // Encontrar la fecha más reciente
+                        let maxDate = null;
+                        if (fechaC && fechaL) maxDate = new Date(Math.max(fechaC, fechaL));
+                        else if (fechaC) maxDate = fechaC;
+                        else if (fechaL) maxDate = fechaL;
+
+                        if (maxDate) {
+                            const diffDias = (new Date() - maxDate) / (1000 * 60 * 60 * 24);
+                            if (diffDias >= 0 && diffDias <= 30) {
+                                listasReporte.recientes.push(idLimpio);
+                            }
+                        }
                     }
 
                     if (fila.Latitud !== undefined && fila.Latitud !== null && fila.Longitud !== undefined && fila.Longitud !== null) {
@@ -96,7 +129,7 @@ Papa.parse(urlCSV, {
 
                         if (!isNaN(lat) && !isNaN(lng)) {
                             const pin = L.circleMarker([lat, lng], {
-                                pane: 'panelPines', // Esto garantiza que el marcador siempre esté arriba de los polígonos
+                                pane: 'panelPines',
                                 radius: 7,
                                 fillColor: colorPin,
                                 color: "#ffffff",
@@ -110,7 +143,10 @@ Papa.parse(urlCSV, {
                                 offset: [8, 0]
                             });
 
-                            if (estado !== 'no' && estado !== 'culminada') {
+                            pin.categoriaObj = categoria; // Guardar categoría en el pin para el filtro
+
+                            // Ahora SÍ permitimos ventana de datos a las Culminadas
+                            if (categoria !== 'inicial') {
                                 pin.bindPopup(generarPopupHTML(fila, idLimpio), { className: 'custom-popup-wrapper' });
                             }
                             
@@ -136,6 +172,29 @@ Papa.parse(urlCSV, {
     error: function(error) { console.error("Fallo al descargar CSV:", error); }
 });
 
+// Función Centralizada de Diseño de Polígonos
+function obtenerEstiloPoligono(categoria, tipoPoligono) {
+    // Para Culminadas: mantiene el tono pero con opacidad drásticamente reducida y bordes ligeros
+    if (categoria === 'culminada') {
+        if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
+        if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
+        if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
+        return { opacity: 0, fillOpacity: 0 };
+    }
+    
+    // Para Iniciales y Liberadas actuales
+    if (categoria === 'inicial') {
+        if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 2, fillOpacity: 0.5, opacity: 1 };
+        return { opacity: 0, fillOpacity: 0 }; 
+    } 
+    
+    if (categoria === 'liberada') {
+        if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 2, fillOpacity: 0.4, opacity: 1 };
+        if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 2, fillOpacity: 0.4, opacity: 1 };
+        return { opacity: 0, fillOpacity: 0 }; 
+    }
+}
+
 function cargarPoligonos() {
     fetch('cerramientos.geojson')
         .then(response => {
@@ -145,57 +204,101 @@ function cargarPoligonos() {
         .then(geojsonData => {
             if (!geojsonData || !geojsonData.features) return;
             
-            // LÓGICA DE SUPERPOSICIÓN: Ordenamos los polígonos antes de dibujarlos
-            // El último en la lista se dibuja encima de todos. (Residual > Liberado > Inicial)
             geojsonData.features.sort((a, b) => {
-                const tipoA = (a.properties.tipo || a.properties.TIPO || a.properties.Tipo || "").toString().trim().toLowerCase();
-                const tipoB = (b.properties.tipo || b.properties.TIPO || b.properties.Tipo || "").toString().trim().toLowerCase();
-                
+                const tipoA = (a.properties.tipo || "").toString().trim().toLowerCase();
+                const tipoB = (b.properties.tipo || "").toString().trim().toLowerCase();
                 const peso = { "inicial": 1, "liberado": 2, "residual": 3 };
-                const pesoA = peso[tipoA] || 0;
-                const pesoB = peso[tipoB] || 0;
-                
-                return pesoA - pesoB;
+                return (peso[tipoA] || 0) - (peso[tipoB] || 0);
             });
             
             L.geoJSON(geojsonData, {
                 style: function(feature) {
                     const id = feature.properties.ID || feature.properties.id;
                     const idLimpio = id ? id.toString().trim() : "";
-                    const tipoPoligono = (feature.properties.tipo || "").toString().trim().toLowerCase();
                     const datosCSV = datosObras[idLimpio];
                     
                     if (!datosCSV) return { opacity: 0, fillOpacity: 0 };
                     
-                    const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                    if (estadoLib === 'culminada') return { opacity: 0, fillOpacity: 0 };
+                    const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                    let categoria = 'liberada';
+                    if (estado === 'no') categoria = 'inicial';
+                    else if (estado === 'culminada') categoria = 'culminada';
 
-                    if (estadoLib === 'no') {
-                        if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 2, fillOpacity: 0.5 };
-                        return { opacity: 0, fillOpacity: 0 }; 
-                    } else {
-                        if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 2, fillOpacity: 0.4 };
-                        if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 2, fillOpacity: 0.4 };
-                        return { opacity: 0, fillOpacity: 0 }; 
-                    }
+                    const tipoPoligono = (feature.properties.tipo || "").toString().trim().toLowerCase();
+                    
+                    // Si el filtro no coincide desde la carga, lo oculta
+                    if (filtroActivo !== 'todos' && filtroActivo !== categoria) return { opacity: 0, fillOpacity: 0 };
+
+                    return obtenerEstiloPoligono(categoria, tipoPoligono);
                 },
                 onEachFeature: function(feature, layer) {
                     const id = feature.properties.ID || feature.properties.id;
                     const idLimpio = id ? id.toString().trim() : "";
                     const datosCSV = datosObras[idLimpio];
                     if (datosCSV) {
-                        const estadoLib = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                        if (estadoLib !== 'no' && estadoLib !== 'culminada') {
+                        const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                        // Ahora permitimos acceso a datos a las culminadas también
+                        if (estado !== 'no') {
                             layer.bindPopup(generarPopupHTML(datosCSV, idLimpio), { className: 'custom-popup-wrapper' });
                         }
                     }
                 }
             }).addTo(polygonLayer);
 
-            // Refuerzo de seguridad visual para los pines
             circleMarkersArray.forEach(pin => { if(pin.bringToFront) pin.bringToFront(); });
         })
         .catch(err => console.error("Error en polígonos:", err));
+}
+
+// Lógica del Filtro Interactivo
+document.querySelectorAll('.btn-filtro').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
+        e.target.classList.add('activo');
+        
+        filtroActivo = e.target.getAttribute('data-filtro');
+        aplicarFiltro(filtroActivo);
+    });
+});
+
+function aplicarFiltro(filtro) {
+    let bounds = L.latLngBounds();
+
+    // Filtro Pines
+    circleMarkersArray.forEach(pin => {
+        if (filtro === 'todos' || pin.categoriaObj === filtro) {
+            if (!map.hasLayer(pin)) markerLayer.addLayer(pin);
+            bounds.extend(pin.getLatLng());
+        } else {
+            if (map.hasLayer(pin)) markerLayer.removeLayer(pin);
+        }
+    });
+
+    // Filtro Polígonos
+    polygonLayer.eachLayer(layer => {
+        const id = layer.feature.properties.ID || layer.feature.properties.id;
+        const idLimpio = id ? id.toString().trim() : "";
+        const datosCSV = datosObras[idLimpio];
+        
+        if (datosCSV) {
+            const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+            let categoria = 'liberada';
+            if (estado === 'no') categoria = 'inicial';
+            else if (estado === 'culminada') categoria = 'culminada';
+
+            if (filtro === 'todos' || categoria === filtro) {
+                const tipoPoligono = (layer.feature.properties.tipo || "").toString().trim().toLowerCase();
+                layer.setStyle(obtenerEstiloPoligono(categoria, tipoPoligono));
+            } else {
+                layer.setStyle({ opacity: 0, fillOpacity: 0 });
+            }
+        }
+    });
+
+    // Zoom out dinámico para enfocar todo el resultado filtrado
+    if (bounds.isValid()) {
+        map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    }
 }
 
 map.on('zoomend', function() {
@@ -213,10 +316,23 @@ map.on('zoomend', function() {
 function generarReporteWhatsApp(e) {
     e.preventDefault();
     const fecha = new Date().toLocaleDateString('es-PE');
-    let mensaje = `*Gestión de Cerramientos - Línea 2 Metro* 🚧\n📊 *REPORTE DE ESTADO*\nFecha: ${fecha}\n\n`;
-    mensaje += `🔘 *CERRAMIENTOS DE OBRA (${listasReporte.inicial.length}):*\n${listasReporte.inicial.length > 0 ? listasReporte.inicial.join(', ') : 'Ninguno'}\n\n`;
-    mensaje += `🟣 *ÁREAS LIBERADAS (${listasReporte.liberada.length}):*\n${listasReporte.liberada.length > 0 ? listasReporte.liberada.join(', ') : 'Ninguno'}\n\n`;
-    mensaje += `🟡 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n${listasReporte.culminada.length > 0 ? listasReporte.culminada.join(', ') : 'Ninguno'}\n\n`;
+    
+    let mensaje = `*Gestión de Cerramientos - Línea 2 Metro* 🚧\n`;
+    mensaje += `📊 *REPORTE DE ESTADO*\nFecha: ${fecha}\n\n`;
+    
+    mensaje += `🔘 *CERRAMIENTOS DE OBRA (${listasReporte.inicial.length}):*\n`;
+    mensaje += listasReporte.inicial.length > 0 ? `${listasReporte.inicial.join(', ')}\n\n` : `Ninguno\n\n`;
+    
+    mensaje += `🟣 *ÁREAS LIBERADAS (${listasReporte.liberada.length}):*\n`;
+    mensaje += listasReporte.liberada.length > 0 ? `${listasReporte.liberada.join(', ')}\n\n` : `Ninguno\n\n`;
+    
+    mensaje += `🟡 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n`;
+    mensaje += listasReporte.culminada.length > 0 ? `${listasReporte.culminada.join(', ')}\n\n` : `Ninguno\n\n`;
+
+    mensaje += `🆕 *LIBERACIONES RECIENTES (< 30 DÍAS) (${listasReporte.recientes.length}):*\n`;
+    mensaje += listasReporte.recientes.length > 0 ? `${listasReporte.recientes.join(', ')}\n\n` : `Ninguna\n\n`;
+    
     mensaje += `🔗 *Ver mapa:* https://vlacaspa.github.io/Entregas-anticipadas/`;
+    
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
