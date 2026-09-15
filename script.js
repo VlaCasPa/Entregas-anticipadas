@@ -1,6 +1,7 @@
 const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+// Panel exclusivo para garantizar que los pines siempre estén por encima de todo
 map.createPane('panelPines');
 map.getPane('panelPines').style.zIndex = 650;
 
@@ -73,7 +74,7 @@ Papa.parse(urlCSV, {
                     datosObras[idLimpio] = fila;
                     
                     const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                    let colorPin = '#B19CD9'; // Morado pastel para todos los pines
+                    let colorPin = '#B19CD9'; 
                     
                     if (estado === 'culminada') {
                         colorPin = '#FFF275'; 
@@ -95,7 +96,7 @@ Papa.parse(urlCSV, {
 
                         if (!isNaN(lat) && !isNaN(lng)) {
                             const pin = L.circleMarker([lat, lng], {
-                                pane: 'panelPines',
+                                pane: 'panelPines', // Esto garantiza que el marcador siempre esté arriba de los polígonos
                                 radius: 7,
                                 fillColor: colorPin,
                                 color: "#ffffff",
@@ -142,7 +143,20 @@ function cargarPoligonos() {
             return response.json();
         })
         .then(geojsonData => {
-            if (!geojsonData) return;
+            if (!geojsonData || !geojsonData.features) return;
+            
+            // LÓGICA DE SUPERPOSICIÓN: Ordenamos los polígonos antes de dibujarlos
+            // El último en la lista se dibuja encima de todos. (Residual > Liberado > Inicial)
+            geojsonData.features.sort((a, b) => {
+                const tipoA = (a.properties.tipo || a.properties.TIPO || a.properties.Tipo || "").toString().trim().toLowerCase();
+                const tipoB = (b.properties.tipo || b.properties.TIPO || b.properties.Tipo || "").toString().trim().toLowerCase();
+                
+                const peso = { "inicial": 1, "liberado": 2, "residual": 3 };
+                const pesoA = peso[tipoA] || 0;
+                const pesoB = peso[tipoB] || 0;
+                
+                return pesoA - pesoB;
+            });
             
             L.geoJSON(geojsonData, {
                 style: function(feature) {
@@ -157,7 +171,6 @@ function cargarPoligonos() {
                     if (estadoLib === 'culminada') return { opacity: 0, fillOpacity: 0 };
 
                     if (estadoLib === 'no') {
-                        // AQUÍ SE CAMBIÓ A #DBA4A0 Y SE AUMENTÓ EL GROSOR A 2
                         if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 2, fillOpacity: 0.5 };
                         return { opacity: 0, fillOpacity: 0 }; 
                     } else {
@@ -179,6 +192,7 @@ function cargarPoligonos() {
                 }
             }).addTo(polygonLayer);
 
+            // Refuerzo de seguridad visual para los pines
             circleMarkersArray.forEach(pin => { if(pin.bringToFront) pin.bringToFront(); });
         })
         .catch(err => console.error("Error en polígonos:", err));
