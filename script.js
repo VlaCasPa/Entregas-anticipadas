@@ -120,7 +120,6 @@ Papa.parse(urlCSV, {
                         }
                     }
 
-                    // Guardamos la marca de reciente en el objeto de datos para que el filtro de polígonos la lea
                     datosObras[idLimpio].isReciente = isReciente;
 
                     if (fila.Latitud !== undefined && fila.Latitud !== null && fila.Longitud !== undefined && fila.Longitud !== null) {
@@ -252,7 +251,7 @@ function cargarPoligonos() {
         .catch(err => console.error("Error en polígonos:", err));
 }
 
-// Lógica Avanzada del Filtro Interactivo con Zoom Seguro
+// Lógica Corregida del Filtro Interactivo
 document.querySelectorAll('.btn-filtro').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
@@ -267,7 +266,7 @@ function aplicarFiltro(filtro) {
     let bounds = L.latLngBounds();
     let elementosVisibles = 0;
 
-    // Filtro Pines
+    // 1. Filtrar y encuadrar los Pines
     circleMarkersArray.forEach(pin => {
         let mostrar = false;
         if (filtro === 'todos') mostrar = true;
@@ -283,7 +282,7 @@ function aplicarFiltro(filtro) {
         }
     });
 
-    // Filtro Polígonos
+    // 2. Filtrar y encuadrar TODA EL ÁREA de los Polígonos
     polygonLayer.eachLayer(layer => {
         const id = layer.feature.properties.ID || layer.feature.properties.id;
         const idLimpio = id ? id.toString().trim() : "";
@@ -303,28 +302,34 @@ function aplicarFiltro(filtro) {
             if (mostrar) {
                 const tipoPoligono = (layer.feature.properties.tipo || "").toString().trim().toLowerCase();
                 layer.setStyle(obtenerEstiloPoligono(categoria, tipoPoligono));
+                
+                // ESTA LÍNEA ES LA QUE FALTABA: Obligar a la cámara a considerar el borde de los polígonos
+                if (layer.getBounds) {
+                    bounds.extend(layer.getBounds());
+                }
             } else {
                 layer.setStyle({ opacity: 0, fillOpacity: 0 });
             }
         }
     });
 
-    // Zoom out dinámico evitando la superposición del panel web/celular
+    // 3. Ejecutar el Zoom out seguro ajustando márgenes
     if (elementosVisibles > 0 && bounds.isValid()) {
         const isMobile = window.innerWidth <= 600;
-        // Asignar padding [izquierdo, superior] y [derecho, inferior]
-        const paddingArriba = isMobile ? [20, 150] : [20, 160];
-        const paddingAbajo = isMobile ? [20, 90] : [20, 90];
+        
+        // Ajuste conservador para que la cámara no se bloquee por márgenes extremos
+        const padTop = isMobile ? 140 : 120;
+        const padBottom = isMobile ? 70 : 60;
         
         map.flyToBounds(bounds, { 
-            paddingTopLeft: paddingArriba,
-            paddingBottomRight: paddingAbajo,
+            paddingTopLeft: [15, padTop],
+            paddingBottomRight: [15, padBottom],
             maxZoom: 15,
-            duration: 1.2
+            duration: 1.5 
         });
-    } else if (elementosVisibles === 0) {
-        // Retorno seguro por si el filtro no tiene resultados en ese momento
-        map.flyTo([-12.059, -77.038], 14, { duration: 1.2 });
+    } else {
+        // Vista por defecto si no hay elementos
+        map.flyTo([-12.059, -77.038], 14, { duration: 1.5 });
     }
 }
 
