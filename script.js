@@ -251,7 +251,7 @@ function cargarPoligonos() {
         .catch(err => console.error("Error en polígonos:", err));
 }
 
-// Lógica Corregida del Filtro Interactivo
+// Lógica de Filtro Interactivo y Encuadre (Zoom Dinámico)
 document.querySelectorAll('.btn-filtro').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
@@ -266,7 +266,7 @@ function aplicarFiltro(filtro) {
     let bounds = L.latLngBounds();
     let elementosVisibles = 0;
 
-    // 1. Filtrar y encuadrar los Pines
+    // 1. Filtrar Pines y sumar coordenadas
     circleMarkersArray.forEach(pin => {
         let mostrar = false;
         if (filtro === 'todos') mostrar = true;
@@ -282,7 +282,7 @@ function aplicarFiltro(filtro) {
         }
     });
 
-    // 2. Filtrar y encuadrar TODA EL ÁREA de los Polígonos
+    // 2. Filtrar Polígonos y sumar el área completa al zoom
     polygonLayer.eachLayer(layer => {
         const id = layer.feature.properties.ID || layer.feature.properties.id;
         const idLimpio = id ? id.toString().trim() : "";
@@ -303,7 +303,6 @@ function aplicarFiltro(filtro) {
                 const tipoPoligono = (layer.feature.properties.tipo || "").toString().trim().toLowerCase();
                 layer.setStyle(obtenerEstiloPoligono(categoria, tipoPoligono));
                 
-                // ESTA LÍNEA ES LA QUE FALTABA: Obligar a la cámara a considerar el borde de los polígonos
                 if (layer.getBounds) {
                     bounds.extend(layer.getBounds());
                 }
@@ -313,11 +312,10 @@ function aplicarFiltro(filtro) {
         }
     });
 
-    // 3. Ejecutar el Zoom out seguro ajustando márgenes
+    // 3. Ejecutar el Zoom out con márgenes seguros para web y celular
     if (elementosVisibles > 0 && bounds.isValid()) {
         const isMobile = window.innerWidth <= 600;
         
-        // Ajuste conservador para que la cámara no se bloquee por márgenes extremos
         const padTop = isMobile ? 140 : 120;
         const padBottom = isMobile ? 70 : 60;
         
@@ -328,7 +326,6 @@ function aplicarFiltro(filtro) {
             duration: 1.5 
         });
     } else {
-        // Vista por defecto si no hay elementos
         map.flyTo([-12.059, -77.038], 14, { duration: 1.5 });
     }
 }
