@@ -49,7 +49,7 @@ body, html {
 .subtitulo {
     font-size: 11px;
     font-weight: 500;
-    color: #4a5152;
+    color: #7f8c8d;
 }
 
 #panel-kpis {
@@ -91,8 +91,8 @@ body, html {
 .kpi-marker.culminada { background-color: #FFF275; border: 1px solid #e0d55e; }
 
 .kpi-title {
-    font-size: 10px;
-    color: #565b5c;
+    font-size: 8px;
+    color: #7f8c8d;
     text-transform: uppercase;
     font-weight: 700;
 }
@@ -102,6 +102,59 @@ body, html {
     font-size: 18px;
     font-weight: 800;
     color: #2c3e50;
+}
+
+/* Nuevo Panel de Filtros */
+#panel-filtros {
+    position: absolute;
+    top: 95px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 12px 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    z-index: 1000;
+    pointer-events: auto;
+    border-left: 4px solid #34495e;
+}
+
+.filtro-titulo {
+    font-size: 10px;
+    font-weight: 700;
+    color: #7f8c8d;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.filtro-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 220px;
+}
+
+.btn-filtro {
+    background: #f4f4f9;
+    border: 1px solid #dcdde1;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #34495e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-filtro:hover {
+    background: #e1e2e6;
+}
+
+.btn-filtro.activo {
+    background: #34495e;
+    color: #ffffff;
+    border-color: #34495e;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 #map-legend {
@@ -303,6 +356,11 @@ body, html {
     .kpi-marker { width: 6px; height: 6px; }
     .kpi-title { font-size: 7px; }
     .kpi-value { font-size: 14px; }
+    
+    #panel-filtros { top: 90px; left: 10px; padding: 8px 10px; }
+    .filtro-botones { max-width: 180px; }
+    .btn-filtro { font-size: 9px; padding: 5px 8px; }
+
     #map-legend { bottom: 15px; left: 10px; padding: 8px 10px; font-size: 9px; }
     #map-legend h4 { font-size: 10px; }
     .legend-color { width: 10px; height: 10px; margin-right: 5px; }
