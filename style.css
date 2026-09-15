@@ -47,7 +47,7 @@ body, html {
 }
 
 .subtitulo {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: #7f8c8d;
 }
@@ -86,7 +86,6 @@ body, html {
     display: inline-block;
 }
 
-/* AQUÍ SE APLICÓ EL NUEVO COLOR AL KPI */
 .kpi-marker.inicial { background-color: #DBA4A0; }
 .kpi-marker.liberada { background: linear-gradient(135deg, #FF009D 50%, #00DBFF 50%); }
 .kpi-marker.culminada { background-color: #FFF275; border: 1px solid #e0d55e; }
@@ -105,7 +104,6 @@ body, html {
     color: #2c3e50;
 }
 
-/* Leyenda Inferior del Mapa */
 #map-legend {
     position: absolute;
     bottom: 20px;
@@ -149,12 +147,10 @@ body, html {
     display: inline-block;
 }
 
-/* AQUÍ SE APLICÓ EL NUEVO COLOR A LA LEYENDA */
 .legend-color.inicial { background-color: rgba(219, 164, 160, 0.5); border: 1px solid #DBA4A0; }
 .legend-color.residual { background-color: rgba(255, 0, 157, 0.4); border: 1px solid #FF009D; }
 .legend-color.liberada { background-color: rgba(0, 219, 255, 0.4); border: 1px solid #00DBFF; }
 
-/* Botón de Reporte WhatsApp */
 #btn-reporte {
     position: absolute;
     bottom: 25px;
@@ -186,7 +182,6 @@ body, html {
     margin-top: 2px;
 }
 
-/* Diseño de la Ventana Emergente (Popup) */
 .custom-popup-wrapper .leaflet-popup-content-wrapper {
     padding: 0;
     border-radius: 12px;
@@ -300,13 +295,13 @@ body, html {
 
 @media (max-width: 600px) {
     #panel-superior { top: 5px; gap: 5px; width: 95%; }
-    #titulo-flotante { font-size: 13px; padding: 6px 10px; border-left: 3px solid #FF009D; }
+    #titulo-flotante { font-size: 12px; padding: 6px 10px; border-left: 3px solid #FF009D; }
     .subtitulo { font-size: 9px; }
     #panel-kpis { gap: 5px; }
     .kpi-box { padding: 4px 5px; min-width: 60px; }
     .kpi-header { gap: 4px; }
     .kpi-marker { width: 6px; height: 6px; }
-    .kpi-title { font-size: 8px; }
+    .kpi-title { font-size: 7px; }
     .kpi-value { font-size: 14px; }
     #map-legend { bottom: 15px; left: 10px; padding: 8px 10px; font-size: 9px; }
     #map-legend h4 { font-size: 10px; }
