@@ -19,7 +19,6 @@ let filtroActivo = 'todos';
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 
-// Helper: Convertir fechas DD/MM/YYYY a objetos Date reales
 function parseDatePeru(fechaStr) {
     if (!fechaStr || typeof fechaStr !== 'string' || fechaStr === 'Sin registro') return null;
     const partes = fechaStr.split('/');
@@ -86,6 +85,7 @@ Papa.parse(urlCSV, {
                     const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
                     let categoria = 'liberada';
                     let colorPin = '#B19CD9'; 
+                    let isReciente = false;
                     
                     if (estado === 'culminada') {
                         categoria = 'culminada';
@@ -102,12 +102,10 @@ Papa.parse(urlCSV, {
                         listasReporte.liberada.push(idLimpio);
                     }
 
-                    // --- AUDITORÍA DE FECHAS: < 30 DÍAS ---
                     if (categoria === 'liberada' || categoria === 'culminada') {
                         const fechaC = parseDatePeru(fila['Fecha de constatacion notarial'] || fila.Fecha_Constatacion);
                         const fechaL = parseDatePeru(fila['Fecha de liberacion parcial'] || fila.Fecha_Liberacion);
                         
-                        // Encontrar la fecha más reciente
                         let maxDate = null;
                         if (fechaC && fechaL) maxDate = new Date(Math.max(fechaC, fechaL));
                         else if (fechaC) maxDate = fechaC;
@@ -117,9 +115,13 @@ Papa.parse(urlCSV, {
                             const diffDias = (new Date() - maxDate) / (1000 * 60 * 60 * 24);
                             if (diffDias >= 0 && diffDias <= 30) {
                                 listasReporte.recientes.push(idLimpio);
+                                isReciente = true;
                             }
                         }
                     }
+
+                    // Guardamos la marca de reciente en el objeto de datos para que el filtro de polígonos la lea
+                    datosObras[idLimpio].isReciente = isReciente;
 
                     if (fila.Latitud !== undefined && fila.Latitud !== null && fila.Longitud !== undefined && fila.Longitud !== null) {
                         const latStr = fila.Latitud.toString().replace(/,/g, '.').trim();
@@ -143,9 +145,9 @@ Papa.parse(urlCSV, {
                                 offset: [8, 0]
                             });
 
-                            pin.categoriaObj = categoria; // Guardar categoría en el pin para el filtro
+                            pin.categoriaObj = categoria;
+                            pin.isRecienteObj = isReciente;
 
-                            // Ahora SÍ permitimos ventana de datos a las Culminadas
                             if (categoria !== 'inicial') {
                                 pin.bindPopup(generarPopupHTML(fila, idLimpio), { className: 'custom-popup-wrapper' });
                             }
@@ -172,9 +174,7 @@ Papa.parse(urlCSV, {
     error: function(error) { console.error("Fallo al descargar CSV:", error); }
 });
 
-// Función Centralizada de Diseño de Polígonos
 function obtenerEstiloPoligono(categoria, tipoPoligono) {
-    // Para Culminadas: mantiene el tono pero con opacidad drásticamente reducida y bordes ligeros
     if (categoria === 'culminada') {
         if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
         if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
@@ -182,7 +182,6 @@ function obtenerEstiloPoligono(categoria, tipoPoligono) {
         return { opacity: 0, fillOpacity: 0 };
     }
     
-    // Para Iniciales y Liberadas actuales
     if (categoria === 'inicial') {
         if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 2, fillOpacity: 0.5, opacity: 1 };
         return { opacity: 0, fillOpacity: 0 }; 
@@ -226,8 +225,12 @@ function cargarPoligonos() {
 
                     const tipoPoligono = (feature.properties.tipo || "").toString().trim().toLowerCase();
                     
-                    // Si el filtro no coincide desde la carga, lo oculta
-                    if (filtroActivo !== 'todos' && filtroActivo !== categoria) return { opacity: 0, fillOpacity: 0 };
+                    let mostrar = false;
+                    if (filtroActivo === 'todos') mostrar = true;
+                    else if (filtroActivo === 'recientes' && datosCSV.isReciente) mostrar = true;
+                    else if (filtroActivo === categoria) mostrar = true;
+
+                    if (!mostrar) return { opacity: 0, fillOpacity: 0 };
 
                     return obtenerEstiloPoligono(categoria, tipoPoligono);
                 },
@@ -237,7 +240,6 @@ function cargarPoligonos() {
                     const datosCSV = datosObras[idLimpio];
                     if (datosCSV) {
                         const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                        // Ahora permitimos acceso a datos a las culminadas también
                         if (estado !== 'no') {
                             layer.bindPopup(generarPopupHTML(datosCSV, idLimpio), { className: 'custom-popup-wrapper' });
                         }
@@ -250,7 +252,7 @@ function cargarPoligonos() {
         .catch(err => console.error("Error en polígonos:", err));
 }
 
-// Lógica del Filtro Interactivo
+// Lógica Avanzada del Filtro Interactivo con Zoom Seguro
 document.querySelectorAll('.btn-filtro').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
@@ -263,12 +265,19 @@ document.querySelectorAll('.btn-filtro').forEach(btn => {
 
 function aplicarFiltro(filtro) {
     let bounds = L.latLngBounds();
+    let elementosVisibles = 0;
 
     // Filtro Pines
     circleMarkersArray.forEach(pin => {
-        if (filtro === 'todos' || pin.categoriaObj === filtro) {
+        let mostrar = false;
+        if (filtro === 'todos') mostrar = true;
+        else if (filtro === 'recientes' && pin.isRecienteObj) mostrar = true;
+        else if (pin.categoriaObj === filtro) mostrar = true;
+
+        if (mostrar) {
             if (!map.hasLayer(pin)) markerLayer.addLayer(pin);
             bounds.extend(pin.getLatLng());
+            elementosVisibles++;
         } else {
             if (map.hasLayer(pin)) markerLayer.removeLayer(pin);
         }
@@ -286,7 +295,12 @@ function aplicarFiltro(filtro) {
             if (estado === 'no') categoria = 'inicial';
             else if (estado === 'culminada') categoria = 'culminada';
 
-            if (filtro === 'todos' || categoria === filtro) {
+            let mostrar = false;
+            if (filtro === 'todos') mostrar = true;
+            else if (filtro === 'recientes' && datosCSV.isReciente) mostrar = true;
+            else if (categoria === filtro) mostrar = true;
+
+            if (mostrar) {
                 const tipoPoligono = (layer.feature.properties.tipo || "").toString().trim().toLowerCase();
                 layer.setStyle(obtenerEstiloPoligono(categoria, tipoPoligono));
             } else {
@@ -295,9 +309,22 @@ function aplicarFiltro(filtro) {
         }
     });
 
-    // Zoom out dinámico para enfocar todo el resultado filtrado
-    if (bounds.isValid()) {
-        map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    // Zoom out dinámico evitando la superposición del panel web/celular
+    if (elementosVisibles > 0 && bounds.isValid()) {
+        const isMobile = window.innerWidth <= 600;
+        // Asignar padding [izquierdo, superior] y [derecho, inferior]
+        const paddingArriba = isMobile ? [20, 150] : [20, 160];
+        const paddingAbajo = isMobile ? [20, 90] : [20, 90];
+        
+        map.flyToBounds(bounds, { 
+            paddingTopLeft: paddingArriba,
+            paddingBottomRight: paddingAbajo,
+            maxZoom: 15,
+            duration: 1.2
+        });
+    } else if (elementosVisibles === 0) {
+        // Retorno seguro por si el filtro no tiene resultados en ese momento
+        map.flyTo([-12.059, -77.038], 14, { duration: 1.2 });
     }
 }
 
