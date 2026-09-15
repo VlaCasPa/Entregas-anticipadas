@@ -131,7 +131,7 @@ body, html {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    max-width: 220px;
+    max-width: 280px;
 }
 
 .btn-filtro {
@@ -358,7 +358,7 @@ body, html {
     .kpi-value { font-size: 14px; }
     
     #panel-filtros { top: 90px; left: 10px; padding: 8px 10px; }
-    .filtro-botones { max-width: 180px; }
+    .filtro-botones { max-width: 250px; }
     .btn-filtro { font-size: 9px; padding: 5px 8px; }
 
     #map-legend { bottom: 15px; left: 10px; padding: 8px 10px; font-size: 9px; }
