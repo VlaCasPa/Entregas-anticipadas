@@ -1,4 +1,4 @@
-const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 14); 
+const map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 13); 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 map.createPane('panelPines');
@@ -11,7 +11,7 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 }).addTo(map);
 
 const markerLayer = L.layerGroup().addTo(map); 
-const polygonLayer = L.layerGroup(); 
+const polygonLayer = L.layerGroup().addTo(map); // Añadido desde el inicio
 let circleMarkersArray = [];
 let listasReporte = { inicial: [], liberada: [], culminada: [], recientes: [] };
 let datosObras = {};
@@ -251,7 +251,6 @@ function cargarPoligonos() {
         .catch(err => console.error("Error en polígonos:", err));
 }
 
-// Lógica de Filtro Interactivo y Encuadre Mejorada y 100% Segura
 document.querySelectorAll('.btn-filtro').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
@@ -263,9 +262,8 @@ document.querySelectorAll('.btn-filtro').forEach(btn => {
 });
 
 function aplicarFiltro(filtro) {
-    let latlngs = []; // Arreglo confiable para guardar todas las coordenadas válidas
+    let latlngs = [];
 
-    // 1. Filtrar Pines y sumar coordenadas
     circleMarkersArray.forEach(pin => {
         let mostrar = false;
         if (filtro === 'todos') mostrar = true;
@@ -274,13 +272,12 @@ function aplicarFiltro(filtro) {
 
         if (mostrar) {
             if (!markerLayer.hasLayer(pin)) markerLayer.addLayer(pin);
-            latlngs.push(pin.getLatLng()); // Empujar al arreglo
+            latlngs.push(pin.getLatLng()); 
         } else {
             if (markerLayer.hasLayer(pin)) markerLayer.removeLayer(pin);
         }
     });
 
-    // 2. Filtrar Polígonos y sumar el área completa
     polygonLayer.eachLayer(layer => {
         const id = layer.feature.properties.ID || layer.feature.properties.id;
         const idLimpio = id ? id.toString().trim() : "";
@@ -311,17 +308,15 @@ function aplicarFiltro(filtro) {
         }
     });
 
-    // 3. Ejecutar el Zoom out con protección para resoluciones móviles
     if (latlngs.length > 0) {
-        let bounds = L.latLngBounds(latlngs); // Crear caja matemática usando el arreglo asegurado
+        let bounds = L.latLngBounds(latlngs); 
         
         const isMobile = window.innerWidth <= 600;
-        const mapHeight = map.getSize().y; // Altura real del mapa en la pantalla del usuario
+        const mapHeight = map.getSize().y; 
         
         let padTop = isMobile ? 140 : 120;
         let padBottom = isMobile ? 70 : 60;
         
-        // Prevención de error catastrófico: si la pantalla es muy pequeña y el padding excede la pantalla, se reduce.
         if ((padTop + padBottom) >= (mapHeight - 50)) {
             padTop = 15;
             padBottom = 15;
@@ -334,22 +329,9 @@ function aplicarFiltro(filtro) {
             duration: 1.5 
         });
     } else {
-        // En caso de que un filtro no devuelva resultados (ej. 0 recientes)
-        map.flyTo([-12.059, -77.038], 14, { duration: 1.5 });
+        map.flyTo([-12.059, -77.038], 13, { duration: 1.5 });
     }
 }
-
-map.on('zoomend', function() {
-    const currentZoom = map.getZoom();
-    if (currentZoom >= 14) {
-        if (!map.hasLayer(polygonLayer)) {
-            map.addLayer(polygonLayer);
-            circleMarkersArray.forEach(pin => { if(pin.bringToFront) pin.bringToFront(); });
-        }
-    } else {
-        if (map.hasLayer(polygonLayer)) map.removeLayer(polygonLayer);
-    }
-});
 
 function generarReporteWhatsApp(e) {
     e.preventDefault();
