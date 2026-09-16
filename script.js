@@ -251,7 +251,7 @@ function cargarPoligonos() {
         .catch(err => console.error("Error en polígonos:", err));
 }
 
-// Lógica de Filtro Interactivo y Encuadre (Zoom Dinámico)
+// Lógica de Filtro Interactivo y Encuadre Mejorada y 100% Segura
 document.querySelectorAll('.btn-filtro').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
@@ -263,8 +263,7 @@ document.querySelectorAll('.btn-filtro').forEach(btn => {
 });
 
 function aplicarFiltro(filtro) {
-    let bounds = L.latLngBounds();
-    let elementosVisibles = 0;
+    let latlngs = []; // Arreglo confiable para guardar todas las coordenadas válidas
 
     // 1. Filtrar Pines y sumar coordenadas
     circleMarkersArray.forEach(pin => {
@@ -274,15 +273,14 @@ function aplicarFiltro(filtro) {
         else if (pin.categoriaObj === filtro) mostrar = true;
 
         if (mostrar) {
-            if (!map.hasLayer(pin)) markerLayer.addLayer(pin);
-            bounds.extend(pin.getLatLng());
-            elementosVisibles++;
+            if (!markerLayer.hasLayer(pin)) markerLayer.addLayer(pin);
+            latlngs.push(pin.getLatLng()); // Empujar al arreglo
         } else {
-            if (map.hasLayer(pin)) markerLayer.removeLayer(pin);
+            if (markerLayer.hasLayer(pin)) markerLayer.removeLayer(pin);
         }
     });
 
-    // 2. Filtrar Polígonos y sumar el área completa al zoom
+    // 2. Filtrar Polígonos y sumar el área completa
     polygonLayer.eachLayer(layer => {
         const id = layer.feature.properties.ID || layer.feature.properties.id;
         const idLimpio = id ? id.toString().trim() : "";
@@ -304,7 +302,8 @@ function aplicarFiltro(filtro) {
                 layer.setStyle(obtenerEstiloPoligono(categoria, tipoPoligono));
                 
                 if (layer.getBounds) {
-                    bounds.extend(layer.getBounds());
+                    latlngs.push(layer.getBounds().getSouthWest());
+                    latlngs.push(layer.getBounds().getNorthEast());
                 }
             } else {
                 layer.setStyle({ opacity: 0, fillOpacity: 0 });
@@ -312,12 +311,21 @@ function aplicarFiltro(filtro) {
         }
     });
 
-    // 3. Ejecutar el Zoom out con márgenes seguros para web y celular
-    if (elementosVisibles > 0 && bounds.isValid()) {
-        const isMobile = window.innerWidth <= 600;
+    // 3. Ejecutar el Zoom out con protección para resoluciones móviles
+    if (latlngs.length > 0) {
+        let bounds = L.latLngBounds(latlngs); // Crear caja matemática usando el arreglo asegurado
         
-        const padTop = isMobile ? 140 : 120;
-        const padBottom = isMobile ? 70 : 60;
+        const isMobile = window.innerWidth <= 600;
+        const mapHeight = map.getSize().y; // Altura real del mapa en la pantalla del usuario
+        
+        let padTop = isMobile ? 140 : 120;
+        let padBottom = isMobile ? 70 : 60;
+        
+        // Prevención de error catastrófico: si la pantalla es muy pequeña y el padding excede la pantalla, se reduce.
+        if ((padTop + padBottom) >= (mapHeight - 50)) {
+            padTop = 15;
+            padBottom = 15;
+        }
         
         map.flyToBounds(bounds, { 
             paddingTopLeft: [15, padTop],
@@ -326,6 +334,7 @@ function aplicarFiltro(filtro) {
             duration: 1.5 
         });
     } else {
+        // En caso de que un filtro no devuelva resultados (ej. 0 recientes)
         map.flyTo([-12.059, -77.038], 14, { duration: 1.5 });
     }
 }
