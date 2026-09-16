@@ -40,6 +40,7 @@
         </div>
     </div>
 
+    <!-- Panel de Filtros Interactivo -->
     <div id="panel-filtros">
         <div class="filtro-titulo">Filtro por Estado</div>
         <div class="filtro-botones">
@@ -51,6 +52,7 @@
         </div>
     </div>
 
+    <!-- Leyenda de Colores del Mapa -->
     <div id="map-legend">
         <h4>Leyenda de Cerramientos</h4>
         <div class="legend-item">
@@ -65,12 +67,17 @@
             <span class="legend-color liberada"></span>
             <span>Área Liberada</span>
         </div>
+        <div class="legend-item">
+            <span class="legend-color culminada"></span>
+            <span>Obra Culminada</span>
+        </div>
     </div>
 
     <div id="map"></div>
 
-    <a href="#" id="btn-reporte" onclick="generarReporteWhatsApp(event)">
-        📋 Reporte WhatsApp
+    <!-- Botón de Copiar Reporte -->
+    <a href="#" id="btn-reporte" onclick="copiarReporte(event)">
+        📋 Copiar Reporte
         <span>diseñado por Vladimir Casas</span>
     </a>
 
