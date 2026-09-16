@@ -11,7 +11,7 @@ L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 }).addTo(map);
 
 const markerLayer = L.layerGroup().addTo(map); 
-const polygonLayer = L.layerGroup().addTo(map); // Añadido desde el inicio
+const polygonLayer = L.layerGroup().addTo(map); 
 let circleMarkersArray = [];
 let listasReporte = { inicial: [], liberada: [], culminada: [], recientes: [] };
 let datosObras = {};
@@ -261,9 +261,12 @@ document.querySelectorAll('.btn-filtro').forEach(btn => {
     });
 });
 
+// ¡ESTA ES LA FUNCIÓN CLAVE CORREGIDA PARA EL ZOOM!
 function aplicarFiltro(filtro) {
-    let latlngs = [];
+    let bounds = L.latLngBounds();
+    let elementosVisibles = 0;
 
+    // 1. Filtrar Pines y sumar coordenadas
     circleMarkersArray.forEach(pin => {
         let mostrar = false;
         if (filtro === 'todos') mostrar = true;
@@ -272,51 +275,57 @@ function aplicarFiltro(filtro) {
 
         if (mostrar) {
             if (!markerLayer.hasLayer(pin)) markerLayer.addLayer(pin);
-            latlngs.push(pin.getLatLng()); 
+            bounds.extend(pin.getLatLng()); // Suma segura a la caja matemática
+            elementosVisibles++;
         } else {
             if (markerLayer.hasLayer(pin)) markerLayer.removeLayer(pin);
         }
     });
 
-    polygonLayer.eachLayer(layer => {
-        const id = layer.feature.properties.ID || layer.feature.properties.id;
-        const idLimpio = id ? id.toString().trim() : "";
-        const datosCSV = datosObras[idLimpio];
-        
-        if (datosCSV) {
-            const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-            let categoria = 'liberada';
-            if (estado === 'no') categoria = 'inicial';
-            else if (estado === 'culminada') categoria = 'culminada';
+    // 2. Filtrar Polígonos de forma segura (sin errores de lectura)
+    polygonLayer.eachLayer(grupoGeojson => {
+        if (grupoGeojson.eachLayer) {
+            grupoGeojson.eachLayer(layer => {
+                if (layer.feature && layer.feature.properties) {
+                    const id = layer.feature.properties.ID || layer.feature.properties.id;
+                    const idLimpio = id ? id.toString().trim() : "";
+                    const datosCSV = datosObras[idLimpio];
+                    
+                    if (datosCSV) {
+                        const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                        let categoria = 'liberada';
+                        if (estado === 'no') categoria = 'inicial';
+                        else if (estado === 'culminada') categoria = 'culminada';
 
-            let mostrar = false;
-            if (filtro === 'todos') mostrar = true;
-            else if (filtro === 'recientes' && datosCSV.isReciente) mostrar = true;
-            else if (categoria === filtro) mostrar = true;
+                        let mostrar = false;
+                        if (filtro === 'todos') mostrar = true;
+                        else if (filtro === 'recientes' && datosCSV.isReciente) mostrar = true;
+                        else if (categoria === filtro) mostrar = true;
 
-            if (mostrar) {
-                const tipoPoligono = (layer.feature.properties.tipo || "").toString().trim().toLowerCase();
-                layer.setStyle(obtenerEstiloPoligono(categoria, tipoPoligono));
-                
-                if (layer.getBounds) {
-                    latlngs.push(layer.getBounds().getSouthWest());
-                    latlngs.push(layer.getBounds().getNorthEast());
+                        if (mostrar) {
+                            const tipoPoligono = (layer.feature.properties.tipo || "").toString().trim().toLowerCase();
+                            layer.setStyle(obtenerEstiloPoligono(categoria, tipoPoligono));
+                            if (layer.getBounds) {
+                                bounds.extend(layer.getBounds());
+                            }
+                        } else {
+                            layer.setStyle({ opacity: 0, fillOpacity: 0 });
+                        }
+                    }
                 }
-            } else {
-                layer.setStyle({ opacity: 0, fillOpacity: 0 });
-            }
+            });
         }
     });
 
-    if (latlngs.length > 0) {
-        let bounds = L.latLngBounds(latlngs); 
-        
+    // 3. Ejecutar el Vuelo (Zoom Dinámico)
+    if (elementosVisibles > 0 && bounds.isValid()) {
         const isMobile = window.innerWidth <= 600;
         const mapHeight = map.getSize().y; 
         
-        let padTop = isMobile ? 140 : 120;
-        let padBottom = isMobile ? 70 : 60;
+        let padTop = isMobile ? 150 : 130;
+        let padBottom = isMobile ? 80 : 60;
         
+        // Protección extrema para pantallas muy pequeñas
         if ((padTop + padBottom) >= (mapHeight - 50)) {
             padTop = 15;
             padBottom = 15;
