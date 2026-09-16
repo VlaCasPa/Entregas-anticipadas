@@ -89,7 +89,7 @@ Papa.parse(urlCSV, {
                     
                     if (estado === 'culminada') {
                         categoria = 'culminada';
-                        colorPin = '#FFF275'; 
+                        colorPin = '#365735'; // Cambio a verde oscuro
                         kpiCulminado++;
                         listasReporte.culminada.push(idLimpio);
                     } else if (estado === 'no') {
@@ -175,10 +175,8 @@ Papa.parse(urlCSV, {
 
 function obtenerEstiloPoligono(categoria, tipoPoligono) {
     if (categoria === 'culminada') {
-        if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
-        if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
-        if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 1, fillOpacity: 0.15, opacity: 0.4 };
-        return { opacity: 0, fillOpacity: 0 };
+        // Todas las estructuras de una ID culminada adoptan el verde oscuro con transparencia
+        return { color: '#365735', fillColor: '#365735', weight: 2, fillOpacity: 0.4, opacity: 0.8 };
     }
     
     if (categoria === 'inicial') {
@@ -261,12 +259,10 @@ document.querySelectorAll('.btn-filtro').forEach(btn => {
     });
 });
 
-// ¡ESTA ES LA FUNCIÓN CLAVE CORREGIDA PARA EL ZOOM!
 function aplicarFiltro(filtro) {
     let bounds = L.latLngBounds();
     let elementosVisibles = 0;
 
-    // 1. Filtrar Pines y sumar coordenadas
     circleMarkersArray.forEach(pin => {
         let mostrar = false;
         if (filtro === 'todos') mostrar = true;
@@ -275,14 +271,13 @@ function aplicarFiltro(filtro) {
 
         if (mostrar) {
             if (!markerLayer.hasLayer(pin)) markerLayer.addLayer(pin);
-            bounds.extend(pin.getLatLng()); // Suma segura a la caja matemática
+            bounds.extend(pin.getLatLng()); 
             elementosVisibles++;
         } else {
             if (markerLayer.hasLayer(pin)) markerLayer.removeLayer(pin);
         }
     });
 
-    // 2. Filtrar Polígonos de forma segura (sin errores de lectura)
     polygonLayer.eachLayer(grupoGeojson => {
         if (grupoGeojson.eachLayer) {
             grupoGeojson.eachLayer(layer => {
@@ -317,7 +312,6 @@ function aplicarFiltro(filtro) {
         }
     });
 
-    // 3. Ejecutar el Vuelo (Zoom Dinámico)
     if (elementosVisibles > 0 && bounds.isValid()) {
         const isMobile = window.innerWidth <= 600;
         const mapHeight = map.getSize().y; 
@@ -325,7 +319,6 @@ function aplicarFiltro(filtro) {
         let padTop = isMobile ? 150 : 130;
         let padBottom = isMobile ? 80 : 60;
         
-        // Protección extrema para pantallas muy pequeñas
         if ((padTop + padBottom) >= (mapHeight - 50)) {
             padTop = 15;
             padBottom = 15;
@@ -342,7 +335,7 @@ function aplicarFiltro(filtro) {
     }
 }
 
-function generarReporteWhatsApp(e) {
+function copiarReporte(e) {
     e.preventDefault();
     const fecha = new Date().toLocaleDateString('es-PE');
     
@@ -355,7 +348,7 @@ function generarReporteWhatsApp(e) {
     mensaje += `🟣 *ÁREAS LIBERADAS (${listasReporte.liberada.length}):*\n`;
     mensaje += listasReporte.liberada.length > 0 ? `${listasReporte.liberada.join(', ')}\n\n` : `Ninguno\n\n`;
     
-    mensaje += `🟡 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n`;
+    mensaje += `🟢 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n`;
     mensaje += listasReporte.culminada.length > 0 ? `${listasReporte.culminada.join(', ')}\n\n` : `Ninguno\n\n`;
 
     mensaje += `🆕 *LIBERACIONES RECIENTES (< 30 DÍAS) (${listasReporte.recientes.length}):*\n`;
@@ -363,5 +356,20 @@ function generarReporteWhatsApp(e) {
     
     mensaje += `🔗 *Ver mapa:* https://vlacaspa.github.io/Entregas-anticipadas/`;
     
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
+    // Función moderna para copiar al portapapeles
+    navigator.clipboard.writeText(mensaje).then(() => {
+        // Feedback visual en el botón
+        const btn = document.getElementById('btn-reporte');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = `✅ ¡Copiado con éxito!<span>pégalo donde necesites</span>`;
+        btn.style.backgroundColor = '#27ae60';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.style.backgroundColor = '';
+        }, 2500);
+    }).catch(err => {
+        console.error('Error al copiar el texto: ', err);
+        alert('No se pudo copiar el reporte. Asegúrate de tener permisos en el navegador.');
+    });
 }
