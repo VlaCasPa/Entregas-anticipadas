@@ -88,7 +88,7 @@ body, html {
 
 .kpi-marker.inicial { background-color: #DBA4A0; }
 .kpi-marker.liberada { background: linear-gradient(135deg, #FF009D 50%, #00DBFF 50%); }
-.kpi-marker.culminada { background-color: #FFF275; border: 1px solid #e0d55e; }
+.kpi-marker.culminada { background-color: #365735; } /* Cambiado a Verde Oscuro */
 
 .kpi-title {
     font-size: 8px;
@@ -202,12 +202,13 @@ body, html {
 .legend-color.inicial { background-color: rgba(219, 164, 160, 0.5); border: 1px solid #DBA4A0; }
 .legend-color.residual { background-color: rgba(255, 0, 157, 0.4); border: 1px solid #FF009D; }
 .legend-color.liberada { background-color: rgba(0, 219, 255, 0.4); border: 1px solid #00DBFF; }
+.legend-color.culminada { background-color: rgba(54, 87, 53, 0.4); border: 1px solid #365735; } /* Nueva Leyenda */
 
 #btn-reporte {
     position: absolute;
     bottom: 25px;
     right: 20px;
-    background-color: #25D366;
+    background-color: #2c3e50;
     color: white;
     padding: 10px 18px;
     border-radius: 25px;
@@ -224,7 +225,7 @@ body, html {
 
 #btn-reporte:hover {
     transform: scale(1.05);
-    background-color: #20bd5a;
+    background-color: #34495e;
 }
 
 #btn-reporte span {
