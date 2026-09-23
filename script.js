@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 // 1. CREDENCIALES DE TU BÓVEDA FIREBASE
 const firebaseConfig = {
@@ -17,7 +17,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD
-const CORREO_MAESTRO = "zehaxx@gmail.com"; // Tu correo personal autorizado
+const CORREO_MAESTRO = "zehaxx@gmail.com"; 
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
 
 // 3. INTERFAZ DE INICIO DE SESIÓN
@@ -26,34 +26,43 @@ const mensajeError = document.getElementById('mensaje-error');
 const pantallaBloqueo = document.getElementById('pantalla-bloqueo');
 const appPrincipal = document.getElementById('app-principal');
 
-// Atrapamos errores si el celular bloquea la redirección
-getRedirectResult(auth).catch((error) => {
-    mensajeError.innerText = "Error en el navegador. Por favor, abre este enlace directamente en Chrome o Safari, no desde otra aplicación (como WhatsApp).";
-    mensajeError.style.display = 'block';
-});
+// 4. CONFIGURAR PERSISTENCIA Y EVENTO DE LOGIN
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    btnLogin.addEventListener('click', () => {
+        mensajeError.style.display = 'none';
+        btnLogin.innerHTML = "Conectando..."; 
+        signInWithPopup(auth, provider)
+            .then(() => {
+                // El auth state listener se encarga del resto
+            })
+            .catch((error) => {
+                mensajeError.innerText = "Error de autenticación. Verifica tus permisos o prueba desde otra ventana.";
+                mensajeError.style.display = 'block';
+                btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
+            });
+    });
+  })
+  .catch((error) => {
+    console.error("Error al configurar la persistencia:", error);
+  });
 
-btnLogin.addEventListener('click', () => {
-    mensajeError.style.display = 'none';
-    btnLogin.innerHTML = "Conectando..."; 
-    // Usamos Redirect en lugar de Popup para garantizar compatibilidad móvil
-    signInWithRedirect(auth, provider);
-});
-
-// 4. VIGILANTE DE AUTENTICACIÓN
+// 5. VIGILANTE DE AUTENTICACIÓN
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const email = user.email.toLowerCase();
         
-        // Verificamos si es del dominio corporativo o si eres tú (el creador)
+        // Verificamos si es del dominio corporativo o si eres tú
         if (email.endsWith(DOMINIO_PERMITIDO) || email === CORREO_MAESTRO.toLowerCase()) {
             pantallaBloqueo.style.display = 'none';
             appPrincipal.style.display = 'block';
             iniciarMotorDelMapa(); 
         } else {
-            signOut(auth);
-            mensajeError.innerText = `El correo ${email} no está autorizado en nuestra base de datos.`;
-            mensajeError.style.display = 'block';
-            btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
+            signOut(auth).then(() => {
+                mensajeError.innerText = `El correo ${email} no está autorizado en nuestra base de datos.`;
+                mensajeError.style.display = 'block';
+                btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
+            });
         }
     } else {
         pantallaBloqueo.style.display = 'flex';
@@ -62,7 +71,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 5. MOTOR ESPACIAL (MAPA Y DATOS)
+// 6. MOTOR ESPACIAL (MAPA Y DATOS)
 let mapaInicializado = false;
 let map, markerLayer, polygonLayer;
 let circleMarkersArray = [];
