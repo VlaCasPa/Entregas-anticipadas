@@ -17,7 +17,8 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD
-const CORREO_MAESTRO = "zebaxx@gmail.com"; 
+// Agregamos ambas variaciones de tu correo para evitar cualquier error de tipeo al registrarte en Google
+const CORREOS_MAESTROS = ["zebaxx@gmail.com", "zehaxx@gmail.com"]; 
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
 
 // 3. INTERFAZ DE INICIO DE SESIÓN
@@ -33,9 +34,6 @@ setPersistence(auth, browserLocalPersistence)
         mensajeError.style.display = 'none';
         btnLogin.innerHTML = "Conectando..."; 
         signInWithPopup(auth, provider)
-            .then(() => {
-                // El auth state listener se encarga del resto
-            })
             .catch((error) => {
                 mensajeError.innerText = "Error de autenticación. Verifica tus permisos o prueba desde otra ventana.";
                 mensajeError.style.display = 'block';
@@ -52,8 +50,8 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         const email = user.email.toLowerCase();
         
-        // Verificamos si es del dominio corporativo o si eres tú
-        if (email.endsWith(DOMINIO_PERMITIDO) || email === CORREO_MAESTRO.toLowerCase()) {
+        // Verificamos si es del dominio corporativo o si está en la lista de maestros
+        if (email.endsWith(DOMINIO_PERMITIDO) || CORREOS_MAESTROS.includes(email)) {
             pantallaBloqueo.style.display = 'none';
             appPrincipal.style.display = 'block';
             iniciarMotorDelMapa(); 
