@@ -17,7 +17,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD
-const CORREO_MAESTRO = "zehaxx@gmail.com"; 
+const CORREO_MAESTRO = "zebaxx@gmail.com"; 
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
 
 // 3. INTERFAZ DE INICIO DE SESIÓN
