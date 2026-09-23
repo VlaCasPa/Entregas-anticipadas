@@ -19,8 +19,8 @@ const provider = new GoogleAuthProvider();
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD (LISTA BLANCA)
 const CORREOS_MAESTROS = [
     "zebaxx@gmail.com", 
-    "zehaxx@gmail.com",
-    "colega1@gmail.com",    // Ejemplo: Añade correos aquí
+    "permisosccm2l@gmail.com",
+    "tnoriega.arq@gmail.com",    // Ejemplo: Añade correos aquí
     "supervisor@gmail.com"  // Siempre entre comillas y separados por coma
 ]; 
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
