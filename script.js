@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 // 1. CREDENCIALES DE TU BÓVEDA FIREBASE
 const firebaseConfig = {
@@ -17,7 +17,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD
-const CORREO_MAESTRO = "zebaxx@gmail.com"; // Escribe tu correo personal aquí
+const CORREO_MAESTRO = "zehaxx@gmail.com"; // Tu correo personal autorizado
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
 
 // 3. INTERFAZ DE INICIO DE SESIÓN
@@ -26,12 +26,17 @@ const mensajeError = document.getElementById('mensaje-error');
 const pantallaBloqueo = document.getElementById('pantalla-bloqueo');
 const appPrincipal = document.getElementById('app-principal');
 
+// Atrapamos errores si el celular bloquea la redirección
+getRedirectResult(auth).catch((error) => {
+    mensajeError.innerText = "Error en el navegador. Por favor, abre este enlace directamente en Chrome o Safari, no desde otra aplicación (como WhatsApp).";
+    mensajeError.style.display = 'block';
+});
+
 btnLogin.addEventListener('click', () => {
     mensajeError.style.display = 'none';
-    signInWithPopup(auth, provider).catch(error => {
-        mensajeError.innerText = "Error al intentar conectar con Google.";
-        mensajeError.style.display = 'block';
-    });
+    btnLogin.innerHTML = "Conectando..."; 
+    // Usamos Redirect en lugar de Popup para garantizar compatibilidad móvil
+    signInWithRedirect(auth, provider);
 });
 
 // 4. VIGILANTE DE AUTENTICACIÓN
@@ -43,15 +48,17 @@ onAuthStateChanged(auth, (user) => {
         if (email.endsWith(DOMINIO_PERMITIDO) || email === CORREO_MAESTRO.toLowerCase()) {
             pantallaBloqueo.style.display = 'none';
             appPrincipal.style.display = 'block';
-            iniciarMotorDelMapa(); // Solo encendemos el mapa si está autorizado
+            iniciarMotorDelMapa(); 
         } else {
             signOut(auth);
             mensajeError.innerText = `El correo ${email} no está autorizado en nuestra base de datos.`;
             mensajeError.style.display = 'block';
+            btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
         }
     } else {
         pantallaBloqueo.style.display = 'flex';
         appPrincipal.style.display = 'none';
+        btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
     }
 });
 
@@ -66,7 +73,7 @@ let filtroActivo = 'todos';
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
 
 function iniciarMotorDelMapa() {
-    if (mapaInicializado) return; // Evita que el mapa se cargue dos veces
+    if (mapaInicializado) return; 
     mapaInicializado = true;
 
     map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 13); 
@@ -177,7 +184,6 @@ function iniciarMotorDelMapa() {
 
                 cargarPoligonos();
                 
-                // Activar listeners de filtros una vez que el DOM está listo
                 document.querySelectorAll('.btn-filtro').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
@@ -319,7 +325,6 @@ function aplicarFiltro(filtro) {
     }
 }
 
-// Como el script ahora es de tipo módulo, debemos exportar la función del botón de reporte a nivel global
 window.copiarReporte = function(e) {
     e.preventDefault();
     const fecha = new Date().toLocaleDateString('es-PE');
