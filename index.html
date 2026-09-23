@@ -12,11 +12,23 @@
     <div id="pantalla-bloqueo">
         <div class="tarjeta-login">
             <h2>Línea 2 del Metro</h2>
-            <p>Gestión de Áreas entregadas</p>
-            <button id="btn-login" class="btn-google">
-                <img src="https://media.licdn.com/dms/image/v2/C4D0BAQE9P01fwoJrRw/company-logo_200_200/company-logo_200_200/0/1631307001523?e=1792022400&v=beta&t=c_GpsPSdKACvr7ECXdTKrzOTweK6uSjzC-IozibVYWU" alt="Google Logo">
-                Ingresar con cuenta corporativa
+            <p>Sistema de Gestión de Cerramientos</p>
+            
+            <!-- Acceso Corporativo -->
+            <div class="grupo-input">
+                <input type="email" id="email-corp" placeholder="Correo (@ccmetrolima.com)">
+                <input type="password" id="pass-corp" placeholder="Contraseña">
+                <button id="btn-login-corp" class="btn-corporativo">Ingresar al Sistema</button>
+            </div>
+
+            <div class="divisor"><span>O</span></div>
+
+            <!-- Acceso Externos/Administrador -->
+            <button id="btn-login-google" class="btn-google">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
+                Ingresar con Google
             </button>
+            
             <div id="mensaje-error"></div>
         </div>
     </div>
