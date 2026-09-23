@@ -9,7 +9,6 @@
 </head>
 <body>
 
-    <!-- PANTALLA DE BLOQUEO DE FIREBASE -->
     <div id="pantalla-bloqueo">
         <div class="tarjeta-login">
             <h2>Línea 2 del Metro</h2>
@@ -22,7 +21,6 @@
         </div>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL (Oculto hasta autenticar) -->
     <div id="app-principal" style="display: none;">
         <div id="panel-superior">
             <div id="titulo-flotante">
@@ -32,24 +30,15 @@
             
             <div id="panel-kpis">
                 <div class="kpi-box">
-                    <div class="kpi-header">
-                        <span class="kpi-marker inicial"></span>
-                        <span class="kpi-title">CERRAMIENTOS</span>
-                    </div>
+                    <div class="kpi-header"><span class="kpi-marker inicial"></span><span class="kpi-title">CERRAMIENTOS</span></div>
                     <span class="kpi-value" id="kpi-inicial">0</span>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-header">
-                        <span class="kpi-marker liberada"></span>
-                        <span class="kpi-title">LIBERADAS</span>
-                    </div>
+                    <div class="kpi-header"><span class="kpi-marker liberada"></span><span class="kpi-title">LIBERADAS</span></div>
                     <span class="kpi-value" id="kpi-liberado">0</span>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-header">
-                        <span class="kpi-marker culminada"></span>
-                        <span class="kpi-title">CULMINADAS</span>
-                    </div>
+                    <div class="kpi-header"><span class="kpi-marker culminada"></span><span class="kpi-title">CULMINADAS</span></div>
                     <span class="kpi-value" id="kpi-culminado">0</span>
                 </div>
             </div>
@@ -84,7 +73,6 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <!-- Script convertido a módulo para integrar la seguridad -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
