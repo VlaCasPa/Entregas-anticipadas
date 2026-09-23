@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 // 1. CREDENCIALES DE TU BÓVEDA FIREBASE
 const firebaseConfig = {
@@ -17,29 +17,56 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD
-// Agregamos ambas variaciones de tu correo para evitar cualquier error de tipeo al registrarte en Google
 const CORREOS_MAESTROS = ["zebaxx@gmail.com", "zehaxx@gmail.com"]; 
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
 
 // 3. INTERFAZ DE INICIO DE SESIÓN
-const btnLogin = document.getElementById('btn-login');
+const btnLoginGoogle = document.getElementById('btn-login-google');
+const btnLoginCorp = document.getElementById('btn-login-corp');
+const inputEmailCorp = document.getElementById('email-corp');
+const inputPassCorp = document.getElementById('pass-corp');
 const mensajeError = document.getElementById('mensaje-error');
 const pantallaBloqueo = document.getElementById('pantalla-bloqueo');
 const appPrincipal = document.getElementById('app-principal');
 
-// 4. CONFIGURAR PERSISTENCIA Y EVENTO DE LOGIN
+// 4. LÓGICA DE PERSISTENCIA Y EVENTOS DE LOGIN
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
-    btnLogin.addEventListener('click', () => {
+    
+    // Login con Google (Para ti o usuarios externos)
+    btnLoginGoogle.addEventListener('click', () => {
         mensajeError.style.display = 'none';
-        btnLogin.innerHTML = "Conectando..."; 
+        btnLoginGoogle.innerHTML = "Conectando..."; 
         signInWithPopup(auth, provider)
             .catch((error) => {
                 mensajeError.innerText = "Error de autenticación. Verifica tus permisos o prueba desde otra ventana.";
                 mensajeError.style.display = 'block';
-                btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
+                btnLoginGoogle.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con Google`;
             });
     });
+
+    // Login Corporativo (Para gerentes con contraseña)
+    btnLoginCorp.addEventListener('click', () => {
+        const email = inputEmailCorp.value.trim();
+        const password = inputPassCorp.value;
+
+        if (!email || !password) {
+            mensajeError.innerText = "Por favor, ingresa el correo y la contraseña corporativa.";
+            mensajeError.style.display = 'block';
+            return;
+        }
+
+        mensajeError.style.display = 'none';
+        btnLoginCorp.innerHTML = "Validando credenciales..."; 
+
+        signInWithEmailAndPassword(auth, email, password)
+            .catch((error) => {
+                mensajeError.innerText = "Credenciales incorrectas o acceso denegado. Contacte al administrador.";
+                mensajeError.style.display = 'block';
+                btnLoginCorp.innerHTML = "Ingresar al Sistema";
+            });
+    });
+
   })
   .catch((error) => {
     console.error("Error al configurar la persistencia:", error);
@@ -50,22 +77,21 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         const email = user.email.toLowerCase();
         
-        // Verificamos si es del dominio corporativo o si está en la lista de maestros
+        // Verificamos si es del dominio corporativo o si eres tú
         if (email.endsWith(DOMINIO_PERMITIDO) || CORREOS_MAESTROS.includes(email)) {
             pantallaBloqueo.style.display = 'none';
             appPrincipal.style.display = 'block';
             iniciarMotorDelMapa(); 
         } else {
             signOut(auth).then(() => {
-                mensajeError.innerText = `El correo ${email} no está autorizado en nuestra base de datos.`;
+                mensajeError.innerText = `Acceso denegado. Comunícate con Vladimir Casas para solicitar permiso de ingreso.`;
                 mensajeError.style.display = 'block';
-                btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
+                btnLoginGoogle.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con Google`;
             });
         }
     } else {
         pantallaBloqueo.style.display = 'flex';
         appPrincipal.style.display = 'none';
-        btnLogin.innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Ingresar con cuenta corporativa`;
     }
 });
 
