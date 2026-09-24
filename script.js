@@ -19,13 +19,12 @@ const provider = new GoogleAuthProvider();
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD (LISTA BLANCA)
 const CORREOS_MAESTROS = [
     "zebaxx@gmail.com", 
-    "permisosccm2l@gmail.com",
-    "tnoriega.arq@gmail.com",    // Ejemplo: Añade correos aquí
-    "supervisor@gmail.com"  // Siempre entre comillas y separados por coma
+    "zehaxx@gmail.com",
+    "colega1@gmail.com",
+    "supervisor@gmail.com"
 ]; 
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
 
-// Constante para el diseño del botón de Google
 const googleBtnHTML = `
     <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -47,58 +46,43 @@ const appPrincipal = document.getElementById('app-principal');
 // 4. LÓGICA DE PERSISTENCIA Y EVENTOS DE LOGIN
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
-    
-    // Login con Google
     btnLoginGoogle.addEventListener('click', () => {
         mensajeError.style.display = 'none';
         btnLoginGoogle.innerHTML = "Conectando..."; 
-        signInWithPopup(auth, provider)
-            .catch((error) => {
-                mensajeError.innerText = "Error de autenticación. Verifica tus permisos o prueba desde otra ventana.";
-                mensajeError.style.display = 'block';
-                btnLoginGoogle.innerHTML = googleBtnHTML;
-            });
+        signInWithPopup(auth, provider).catch(() => {
+            mensajeError.innerText = "Error de autenticación.";
+            mensajeError.style.display = 'block';
+            btnLoginGoogle.innerHTML = googleBtnHTML;
+        });
     });
 
-    // Login Corporativo 
     btnLoginCorp.addEventListener('click', () => {
         const email = inputEmailCorp.value.trim();
         const password = inputPassCorp.value;
-
-        if (!email || !password) {
-            mensajeError.innerText = "Por favor, ingresa el correo y la contraseña corporativa.";
-            mensajeError.style.display = 'block';
-            return;
-        }
+        if (!email || !password) return;
 
         mensajeError.style.display = 'none';
-        btnLoginCorp.innerHTML = "Validando credenciales..."; 
+        btnLoginCorp.innerHTML = "Validando..."; 
 
-        signInWithEmailAndPassword(auth, email, password)
-            .catch((error) => {
-                mensajeError.innerText = "Credenciales incorrectas o acceso denegado. Contacte al administrador.";
-                mensajeError.style.display = 'block';
-                btnLoginCorp.innerHTML = "Ingresar al Sistema";
-            });
+        signInWithEmailAndPassword(auth, email, password).catch(() => {
+            mensajeError.innerText = "Credenciales incorrectas o acceso denegado.";
+            mensajeError.style.display = 'block';
+            btnLoginCorp.innerHTML = "Ingresar al Sistema";
+        });
     });
-
-  })
-  .catch((error) => {
-    console.error("Error al configurar la persistencia:", error);
   });
 
 // 5. VIGILANTE DE AUTENTICACIÓN
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const email = user.email.toLowerCase();
-        
         if (email.endsWith(DOMINIO_PERMITIDO) || CORREOS_MAESTROS.includes(email)) {
             pantallaBloqueo.style.display = 'none';
             appPrincipal.style.display = 'block';
             iniciarMotorDelMapa(); 
         } else {
             signOut(auth).then(() => {
-                mensajeError.innerText = `Acceso denegado. Comunícate con Vladimir Casas para solicitar permiso de ingreso.`;
+                mensajeError.innerText = `Acceso denegado. Comunícate con Vladimir Casas.`;
                 mensajeError.style.display = 'block';
                 btnLoginGoogle.innerHTML = googleBtnHTML;
             });
@@ -109,12 +93,12 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 6. MOTOR ESPACIAL (MAPA Y DATOS)
+// 6. MOTOR ESPACIAL Y GESTIÓN DE DATOS GLOBALES
 let mapaInicializado = false;
 let map, markerLayer, polygonLayer;
 let circleMarkersArray = [];
 let listasReporte = { inicial: [], liberada: [], culminada: [], recientes: [] };
-let datosObras = {};
+let datosObras = {}; // ¡La base de datos viva para nuestro asistente!
 let filtroActivo = 'todos';
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
@@ -125,15 +109,9 @@ function iniciarMotorDelMapa() {
 
     map = L.map('map', { zoomControl: false }).setView([-12.059, -77.038], 13); 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-
     map.createPane('panelPines');
     map.getPane('panelPines').style.zIndex = 650;
-
-    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-        maxZoom: 20,
-        attribution: '© Google',
-        className: 'mapa-base-gris'
-    }).addTo(map);
+    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google', className: 'mapa-base-gris' }).addTo(map);
 
     markerLayer = L.layerGroup().addTo(map); 
     polygonLayer = L.layerGroup().addTo(map); 
@@ -143,104 +121,64 @@ function iniciarMotorDelMapa() {
         header: true,
         dynamicTyping: true,
         complete: function(results) {
-            try {
-                const data = results.data;
-                let kpiInicial = 0; let kpiLiberado = 0; let kpiCulminado = 0;
+            let kpiInicial = 0; let kpiLiberado = 0; let kpiCulminado = 0;
 
-                data.forEach(fila => {
-                    if (fila && fila.ID) { 
-                        const idLimpio = fila.ID.toString().trim();
-                        datosObras[idLimpio] = fila;
-                        
-                        const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                        let categoria = 'liberada';
-                        let colorPin = '#B19CD9'; 
-                        let isReciente = false;
-                        
-                        if (estado === 'culminada') {
-                            categoria = 'culminada';
-                            colorPin = '#365735'; 
-                            kpiCulminado++;
-                            listasReporte.culminada.push(idLimpio);
-                        } else if (estado === 'no') {
-                            categoria = 'inicial';
-                            kpiInicial++;
-                            listasReporte.inicial.push(idLimpio);
-                        } else {
-                            categoria = 'liberada';
-                            kpiLiberado++;
-                            listasReporte.liberada.push(idLimpio);
-                        }
+            results.data.forEach(fila => {
+                if (fila && fila.ID) { 
+                    const idLimpio = fila.ID.toString().trim();
+                    datosObras[idLimpio] = fila;
+                    
+                    const estado = fila.Tiene_Liberacion ? fila.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                    let categoria = 'liberada';
+                    let colorPin = '#B19CD9'; 
+                    let isReciente = false;
+                    
+                    if (estado === 'culminada') { categoria = 'culminada'; colorPin = '#365735'; kpiCulminado++; listasReporte.culminada.push(idLimpio); } 
+                    else if (estado === 'no') { categoria = 'inicial'; kpiInicial++; listasReporte.inicial.push(idLimpio); } 
+                    else { categoria = 'liberada'; kpiLiberado++; listasReporte.liberada.push(idLimpio); }
 
-                        if (categoria === 'liberada' || categoria === 'culminada') {
-                            const fechaC = parseDatePeru(fila['Fecha de constatacion notarial'] || fila.Fecha_Constatacion);
-                            const fechaL = parseDatePeru(fila['Fecha de liberacion parcial'] || fila.Fecha_Liberacion);
-                            
-                            let maxDate = null;
-                            if (fechaC && fechaL) maxDate = new Date(Math.max(fechaC, fechaL));
-                            else if (fechaC) maxDate = fechaC;
-                            else if (fechaL) maxDate = fechaL;
-
-                            if (maxDate) {
-                                const diffDias = (new Date() - maxDate) / (1000 * 60 * 60 * 24);
-                                if (diffDias >= 0 && diffDias <= 30) {
-                                    listasReporte.recientes.push(idLimpio);
-                                    isReciente = true;
-                                }
-                            }
-                        }
-
-                        datosObras[idLimpio].isReciente = isReciente;
-
-                        if (fila.Latitud !== undefined && fila.Latitud !== null && fila.Longitud !== undefined && fila.Longitud !== null) {
-                            const latStr = fila.Latitud.toString().replace(/,/g, '.').trim();
-                            const lngStr = fila.Longitud.toString().replace(/,/g, '.').trim();
-                            const lat = parseFloat(latStr);
-                            const lng = parseFloat(lngStr);
-
-                            if (!isNaN(lat) && !isNaN(lng)) {
-                                const pin = L.circleMarker([lat, lng], {
-                                    pane: 'panelPines',
-                                    radius: 7,
-                                    fillColor: colorPin,
-                                    color: "#ffffff",
-                                    weight: 1.5,
-                                    opacity: 1,
-                                    fillOpacity: 0.95
-                                }).bindTooltip(idLimpio, {
-                                    permanent: true, direction: 'right', className: 'etiqueta-texto', offset: [8, 0]
-                                });
-
-                                pin.categoriaObj = categoria;
-                                pin.isRecienteObj = isReciente;
-
-                                if (categoria !== 'inicial') {
-                                    pin.bindPopup(generarPopupHTML(fila, idLimpio), { className: 'custom-popup-wrapper' });
-                                }
-                                
-                                markerLayer.addLayer(pin);
-                                circleMarkersArray.push(pin);
-                            }
+                    if (categoria === 'liberada' || categoria === 'culminada') {
+                        const fechaC = parseDatePeru(fila['Fecha de constatacion notarial'] || fila.Fecha_Constatacion);
+                        const fechaL = parseDatePeru(fila['Fecha de liberacion parcial'] || fila.Fecha_Liberacion);
+                        let maxDate = (fechaC && fechaL) ? new Date(Math.max(fechaC, fechaL)) : (fechaC || fechaL);
+                        if (maxDate && ((new Date() - maxDate) / (1000 * 60 * 60 * 24)) <= 30 && ((new Date() - maxDate) >= 0)) {
+                            listasReporte.recientes.push(idLimpio);
+                            isReciente = true;
                         }
                     }
+
+                    datosObras[idLimpio].isReciente = isReciente;
+
+                    if (fila.Latitud !== undefined && fila.Latitud !== null && fila.Longitud !== undefined && fila.Longitud !== null) {
+                        const lat = parseFloat(fila.Latitud.toString().replace(/,/g, '.').trim());
+                        const lng = parseFloat(fila.Longitud.toString().replace(/,/g, '.').trim());
+
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const pin = L.circleMarker([lat, lng], { pane: 'panelPines', radius: 7, fillColor: colorPin, color: "#ffffff", weight: 1.5, opacity: 1, fillOpacity: 0.95 }).bindTooltip(idLimpio, { permanent: true, direction: 'right', className: 'etiqueta-texto', offset: [8, 0] });
+                            pin.categoriaObj = categoria;
+                            pin.isRecienteObj = isReciente;
+                            if (categoria !== 'inicial') pin.bindPopup(generarPopupHTML(fila, idLimpio), { className: 'custom-popup-wrapper' });
+                            markerLayer.addLayer(pin);
+                            circleMarkersArray.push(pin);
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('kpi-inicial').innerText = kpiInicial;
+            document.getElementById('kpi-liberado').innerText = kpiLiberado;
+            document.getElementById('kpi-culminado').innerText = kpiCulminado;
+
+            cargarPoligonos();
+            
+            document.querySelectorAll('.btn-filtro').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
+                    e.target.classList.add('activo');
+                    filtroActivo = e.target.getAttribute('data-filtro');
+                    aplicarFiltro(filtroActivo);
                 });
-
-                document.getElementById('kpi-inicial').innerText = kpiInicial;
-                document.getElementById('kpi-liberado').innerText = kpiLiberado;
-                document.getElementById('kpi-culminado').innerText = kpiCulminado;
-
-                cargarPoligonos();
-                
-                document.querySelectorAll('.btn-filtro').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
-                        e.target.classList.add('activo');
-                        filtroActivo = e.target.getAttribute('data-filtro');
-                        aplicarFiltro(filtroActivo);
-                    });
-                });
-
-            } catch (error) { console.error("Error interno:", error); }
+            });
         }
     });
 }
@@ -258,89 +196,58 @@ function generarPopupHTML(datos, idLimpio) {
     const asiento = datos['Asiento de obra'] || datos.Asiento_Obra || 'Sin registro';
     const plano = datos['Codigo de plano'] || datos.Codigo_Plano || 'Sin registro';
 
-    return `
-        <div class="popup-container">
-            <div class="popup-header"><h3>${idLimpio}</h3><span class="popup-subtitle">📍 Línea 2 y Ramal 4</span></div>
-            <div class="popup-card residual-card">
-                <h4><span class="icon">🚧</span> Cerramiento</h4>
-                <div class="popup-detail"><span>Constatación:</span><b>${fechaConst}</b></div>
-                <div class="popup-detail"><span>Liberación:</span><b>${fechaLib}</b></div>
-            </div>
-            <div class="popup-card doc-card">
-                <h4><span class="icon">📄</span> Técnico</h4>
-                <div class="popup-detail"><span>Asiento N°:</span><b>${asiento}</b></div>
-                <div class="popup-detail"><span>Plano:</span><b>${plano}</b></div>
-            </div>
-        </div>
-    `;
+    return `<div class="popup-container">
+        <div class="popup-header"><h3>${idLimpio}</h3><span class="popup-subtitle">📍 Línea 2 y Ramal 4</span></div>
+        <div class="popup-card residual-card"><h4><span class="icon">🚧</span> Cerramiento</h4><div class="popup-detail"><span>Constatación:</span><b>${fechaConst}</b></div><div class="popup-detail"><span>Liberación:</span><b>${fechaLib}</b></div></div>
+        <div class="popup-card doc-card"><h4><span class="icon">📄</span> Técnico</h4><div class="popup-detail"><span>Asiento N°:</span><b>${asiento}</b></div><div class="popup-detail"><span>Plano:</span><b>${plano}</b></div></div>
+    </div>`;
 }
 
 function obtenerEstiloPoligono(categoria, tipoPoligono) {
     if (categoria === 'culminada') return { color: '#365735', fillColor: '#365735', weight: 2, fillOpacity: 0.4, opacity: 0.8 };
-    if (categoria === 'inicial') {
-        if (tipoPoligono === 'inicial') return { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 2, fillOpacity: 0.5, opacity: 1 };
-        return { opacity: 0, fillOpacity: 0 }; 
-    } 
+    if (categoria === 'inicial') return tipoPoligono === 'inicial' ? { color: '#DBA4A0', fillColor: '#DBA4A0', weight: 2, fillOpacity: 0.5, opacity: 1 } : { opacity: 0, fillOpacity: 0 }; 
     if (categoria === 'liberada') {
         if (tipoPoligono === 'residual') return { color: '#FF009D', fillColor: '#FF009D', weight: 2, fillOpacity: 0.4, opacity: 1 };
         if (tipoPoligono === 'liberado') return { color: '#00DBFF', fillColor: '#00DBFF', weight: 2, fillOpacity: 0.4, opacity: 1 };
-        return { opacity: 0, fillOpacity: 0 }; 
     }
+    return { opacity: 0, fillOpacity: 0 }; 
 }
 
 function cargarPoligonos() {
-    fetch('cerramientos.geojson')
-        .then(response => response.json())
-        .then(geojsonData => {
-            geojsonData.features.sort((a, b) => {
-                const peso = { "inicial": 1, "liberado": 2, "residual": 3 };
-                return (peso[(a.properties.tipo || "").toString().trim().toLowerCase()] || 0) - 
-                       (peso[(b.properties.tipo || "").toString().trim().toLowerCase()] || 0);
-            });
-            
-            L.geoJSON(geojsonData, {
-                style: function(feature) {
-                    const idLimpio = (feature.properties.ID || feature.properties.id || "").toString().trim();
-                    const datosCSV = datosObras[idLimpio];
-                    if (!datosCSV) return { opacity: 0, fillOpacity: 0 };
-                    
-                    const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
-                    let categoria = estado === 'no' ? 'inicial' : (estado === 'culminada' ? 'culminada' : 'liberada');
-                    const tipoPoligono = (feature.properties.tipo || "").toString().trim().toLowerCase();
-                    
-                    let mostrar = (filtroActivo === 'todos') || 
-                                  (filtroActivo === 'recientes' && datosCSV.isReciente) || 
-                                  (filtroActivo === categoria);
-
-                    return mostrar ? obtenerEstiloPoligono(categoria, tipoPoligono) : { opacity: 0, fillOpacity: 0 };
-                },
-                onEachFeature: function(feature, layer) {
-                    const idLimpio = (feature.properties.ID || feature.properties.id || "").toString().trim();
-                    const datosCSV = datosObras[idLimpio];
-                    if (datosCSV && (datosCSV.Tiene_Liberacion || "").toString().trim().toLowerCase() !== 'no') {
-                        layer.bindPopup(generarPopupHTML(datosCSV, idLimpio), { className: 'custom-popup-wrapper' });
-                    }
-                }
-            }).addTo(polygonLayer);
-            circleMarkersArray.forEach(pin => { if(pin.bringToFront) pin.bringToFront(); });
+    fetch('cerramientos.geojson').then(r => r.json()).then(geojsonData => {
+        geojsonData.features.sort((a, b) => {
+            const peso = { "inicial": 1, "liberado": 2, "residual": 3 };
+            return (peso[(a.properties.tipo || "").toString().trim().toLowerCase()] || 0) - (peso[(b.properties.tipo || "").toString().trim().toLowerCase()] || 0);
         });
+        L.geoJSON(geojsonData, {
+            style: function(feature) {
+                const idLimpio = (feature.properties.ID || feature.properties.id || "").toString().trim();
+                const datosCSV = datosObras[idLimpio];
+                if (!datosCSV) return { opacity: 0, fillOpacity: 0 };
+                const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
+                let categoria = estado === 'no' ? 'inicial' : (estado === 'culminada' ? 'culminada' : 'liberada');
+                let mostrar = (filtroActivo === 'todos') || (filtroActivo === 'recientes' && datosCSV.isReciente) || (filtroActivo === categoria);
+                return mostrar ? obtenerEstiloPoligono(categoria, (feature.properties.tipo || "").toString().trim().toLowerCase()) : { opacity: 0, fillOpacity: 0 };
+            },
+            onEachFeature: function(feature, layer) {
+                const idLimpio = (feature.properties.ID || feature.properties.id || "").toString().trim();
+                const datosCSV = datosObras[idLimpio];
+                if (datosCSV && (datosCSV.Tiene_Liberacion || "").toString().trim().toLowerCase() !== 'no') {
+                    layer.bindPopup(generarPopupHTML(datosCSV, idLimpio), { className: 'custom-popup-wrapper' });
+                }
+            }
+        }).addTo(polygonLayer);
+        circleMarkersArray.forEach(pin => { if(pin.bringToFront) pin.bringToFront(); });
+    });
 }
 
 function aplicarFiltro(filtro) {
-    let bounds = L.latLngBounds();
-    let elementosVisibles = 0;
-
+    let bounds = L.latLngBounds(); let elementosVisibles = 0;
     circleMarkersArray.forEach(pin => {
         let mostrar = (filtro === 'todos') || (filtro === 'recientes' && pin.isRecienteObj) || (pin.categoriaObj === filtro);
-        if (mostrar) {
-            if (!markerLayer.hasLayer(pin)) markerLayer.addLayer(pin);
-            bounds.extend(pin.getLatLng()); 
-            elementosVisibles++;
-        } else {
-            if (markerLayer.hasLayer(pin)) markerLayer.removeLayer(pin);
-        }
+        if (mostrar) { if (!markerLayer.hasLayer(pin)) markerLayer.addLayer(pin); bounds.extend(pin.getLatLng()); elementosVisibles++; } 
+        else { if (markerLayer.hasLayer(pin)) markerLayer.removeLayer(pin); }
     });
-
     polygonLayer.eachLayer(grupoGeojson => {
         if (grupoGeojson.eachLayer) {
             grupoGeojson.eachLayer(layer => {
@@ -350,26 +257,18 @@ function aplicarFiltro(filtro) {
                     const estado = datosCSV.Tiene_Liberacion ? datosCSV.Tiene_Liberacion.toString().trim().toLowerCase() : 'no';
                     let categoria = estado === 'no' ? 'inicial' : (estado === 'culminada' ? 'culminada' : 'liberada');
                     let mostrar = (filtro === 'todos') || (filtro === 'recientes' && datosCSV.isReciente) || (categoria === filtro);
-
-                    if (mostrar) {
-                        layer.setStyle(obtenerEstiloPoligono(categoria, (layer.feature.properties.tipo || "").toString().trim().toLowerCase()));
-                        if (layer.getBounds) bounds.extend(layer.getBounds());
-                    } else {
-                        layer.setStyle({ opacity: 0, fillOpacity: 0 });
-                    }
+                    if (mostrar) { layer.setStyle(obtenerEstiloPoligono(categoria, (layer.feature.properties.tipo || "").toString().trim().toLowerCase())); if (layer.getBounds) bounds.extend(layer.getBounds()); } 
+                    else { layer.setStyle({ opacity: 0, fillOpacity: 0 }); }
                 }
             });
         }
     });
-
     if (elementosVisibles > 0 && bounds.isValid()) {
         const isMobile = window.innerWidth <= 600;
         let padTop = isMobile ? 150 : 130, padBottom = isMobile ? 80 : 60;
         if ((padTop + padBottom) >= (map.getSize().y - 50)) { padTop = 15; padBottom = 15; }
         map.flyToBounds(bounds, { paddingTopLeft: [15, padTop], paddingBottomRight: [15, padBottom], maxZoom: 15, duration: 1.5 });
-    } else {
-        map.flyTo([-12.059, -77.038], 13, { duration: 1.5 });
-    }
+    } else { map.flyTo([-12.059, -77.038], 13, { duration: 1.5 }); }
 }
 
 window.copiarReporte = function(e) {
@@ -379,9 +278,6 @@ window.copiarReporte = function(e) {
     mensaje += `🔘 *CERRAMIENTOS DE OBRA (${listasReporte.inicial.length}):*\n${listasReporte.inicial.length > 0 ? listasReporte.inicial.join(', ') : 'Ninguno'}\n\n`;
     mensaje += `🟣 *ÁREAS LIBERADAS (${listasReporte.liberada.length}):*\n${listasReporte.liberada.length > 0 ? listasReporte.liberada.join(', ') : 'Ninguno'}\n\n`;
     mensaje += `🟢 *OBRAS CULMINADAS (${listasReporte.culminada.length}):*\n${listasReporte.culminada.length > 0 ? listasReporte.culminada.join(', ') : 'Ninguno'}\n\n`;
-    mensaje += `🆕 *LIBERACIONES RECIENTES (< 30 DÍAS) (${listasReporte.recientes.length}):*\n${listasReporte.recientes.length > 0 ? listasReporte.recientes.join(', ') : 'Ninguna'}\n\n`;
-    mensaje += `🔗 *Ver mapa:* https://vlacaspa.github.io/Entregas-anticipadas/`;
-    
     navigator.clipboard.writeText(mensaje).then(() => {
         const btn = document.getElementById('btn-reporte');
         const originalHTML = btn.innerHTML;
@@ -390,3 +286,86 @@ window.copiarReporte = function(e) {
         setTimeout(() => { btn.innerHTML = originalHTML; btn.style.backgroundColor = ''; }, 2500);
     });
 };
+
+// 7. ASISTENTE VIRTUAL LOCAL (IA SEMÁNTICA)
+const chatbotToggle = document.getElementById('chatbot-toggle');
+const chatbotWindow = document.getElementById('chatbot-window');
+const closeChat = document.getElementById('close-chat');
+const sendChat = document.getElementById('send-chat');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+
+chatbotToggle.addEventListener('click', () => { chatbotWindow.style.display = 'flex'; chatbotToggle.style.display = 'none'; });
+closeChat.addEventListener('click', () => { chatbotWindow.style.display = 'none'; chatbotToggle.style.display = 'block'; });
+
+function addMessage(text, isUser) {
+    const div = document.createElement('div');
+    div.className = `msg ${isUser ? 'user-msg' : 'bot-msg'}`;
+    div.innerText = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function procesarPregunta(pregunta) {
+    const p = pregunta.toLowerCase();
+    let idEncontrado = null;
+
+    // A. Búsqueda Inversa por Asiento de Obra (Ej: "asiento 2025 a que estructura")
+    if (p.includes("asiento")) {
+        const match = p.match(/\d+/); 
+        if (match) {
+            const numeroAsiento = match[0];
+            for (const id in datosObras) {
+                const asientoOficial = (datosObras[id]['Asiento de obra'] || datosObras[id].Asiento_Obra || "").toString();
+                if (asientoOficial.includes(numeroAsiento)) {
+                    return `El asiento de obra N° ${numeroAsiento} está asociado a la estructura: ${id}.`;
+                }
+            }
+        }
+    }
+
+    // B. Búsqueda Directa por Estructura (Ej: "liberación de la E12")
+    for (const id in datosObras) {
+        const idLower = id.toLowerCase();
+        if (p.includes(idLower) || p.replace(/\s/g, '').includes(idLower)) {
+            idEncontrado = id;
+            break;
+        }
+    }
+
+    if (idEncontrado) {
+        const datos = datosObras[idEncontrado];
+        const asiento = datos['Asiento de obra'] || datos.Asiento_Obra || 'Sin registro';
+        const liberacion = datos['Fecha de liberacion parcial'] || datos.Fecha_Liberacion || 'Sin registro';
+        const constatacion = datos['Fecha de constatacion notarial'] || datos.Fecha_Constatacion || 'Sin registro';
+
+        if (p.includes("asiento")) {
+            return `El asiento de obra para la ${idEncontrado} es el N° ${asiento}.`;
+        } else if (p.includes("constat") || p.includes("notarial")) {
+            return `La constatación notarial de la ${idEncontrado} fue el ${constatacion}.`;
+        } else if (p.includes("liber") || p.includes("cuando")) {
+            return `El área de la ${idEncontrado} se liberó el ${liberacion}.`;
+        } else {
+            return `Datos de ${idEncontrado}:\n- Constatación: ${constatacion}\n- Liberación: ${liberacion}\n- Asiento N°: ${asiento}`;
+        }
+    }
+
+    // C. Si no encuentra coincidencias
+    return "No tengo dicha información en el registro oficial.";
+}
+
+function handleSend() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    addMessage(text, true);
+    chatInput.value = '';
+    
+    // Simular un pequeño tiempo de "pensamiento"
+    setTimeout(() => {
+        const botReply = procesarPregunta(text);
+        addMessage(botReply, false);
+    }, 600);
+}
+
+sendChat.addEventListener('click', handleSend);
+chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
