@@ -294,7 +294,7 @@ const sendChat = document.getElementById('send-chat');
 const chatInput = document.getElementById('chat-input');
 const chatMessages = document.getElementById('chat-messages');
 
-let ultimoIdConsultado = null; // Memoria de contexto del asistente
+let ultimoIdConsultado = null; 
 
 chatbotToggle.addEventListener('click', () => { chatbotWindow.style.display = 'flex'; chatbotToggle.style.display = 'none'; });
 closeChat.addEventListener('click', () => { chatbotWindow.style.display = 'none'; chatbotToggle.style.display = 'block'; });
@@ -311,47 +311,45 @@ function procesarPregunta(pregunta) {
     const p = pregunta.toLowerCase();
     let idEncontrado = null;
 
-    // A. Búsqueda Inversa por Asiento (Requiere al menos 3 números para no confundir con E01)
-    if (p.includes("asiento")) {
-        const matchNumeros = p.match(/\d{3,}/); 
-        if (matchNumeros) {
-            const numeroAsiento = matchNumeros[0];
-            for (const id in datosObras) {
-                const asientoOficial = (datosObras[id]['Asiento de obra'] || datosObras[id].Asiento_Obra || "").toString();
-                if (asientoOficial.includes(numeroAsiento)) {
-                    ultimoIdConsultado = id; 
-                    return `El asiento de obra N° ${numeroAsiento} está registrado para la estructura: ${id}.`;
-                }
+    if (p.includes("asiento") && p.match(/\d{3,}/)) {
+        const numeroAsiento = p.match(/\d{3,}/)[0];
+        for (const id in datosObras) {
+            const asientoOficial = (datosObras[id]['Asiento de obra'] || datosObras[id].Asiento_Obra || "").toString();
+            if (asientoOficial.includes(numeroAsiento)) {
+                ultimoIdConsultado = id; 
+                return `El asiento de obra N° ${numeroAsiento} está registrado para la estructura: ${id}.`;
             }
         }
     }
 
-    // B. Buscar si menciona una estructura en el mensaje actual
     for (const id in datosObras) {
         const idLower = id.toLowerCase();
         if (p.includes(idLower) || p.replace(/\s/g, '').includes(idLower)) {
             idEncontrado = id;
-            ultimoIdConsultado = id; // Guardamos el nombre de la estación para futuras preguntas
+            ultimoIdConsultado = id; 
             break;
         }
     }
 
-    // C. Si no mencionó ninguna estructura ahora, pero tenemos una en memoria
     if (!idEncontrado && ultimoIdConsultado) {
         idEncontrado = ultimoIdConsultado;
     }
 
-    // D. Procesamiento de la respuesta usando el ID final (encontrado o recordado)
     if (idEncontrado) {
         const datos = datosObras[idEncontrado];
         const asiento = datos['Asiento de obra'] || datos.Asiento_Obra || 'Sin registro';
         const liberacion = datos['Fecha de liberacion parcial'] || datos.Fecha_Liberacion || 'Sin registro';
         const constatacion = datos['Fecha de constatacion notarial'] || datos.Fecha_Constatacion || 'Sin registro';
+        const plano = datos['Codigo de plano'] || datos.Codigo_Plano || 'Sin registro';
 
         if (p.includes("asiento")) {
             return asiento !== 'Sin registro' 
                 ? `El asiento de obra asociado a la ${idEncontrado} es el N° ${asiento}.`
                 : `Actualmente no hay un número de asiento de obra registrado para la ${idEncontrado}.`;
+        } else if (p.includes("plano")) {
+            return plano !== 'Sin registro'
+                ? `Sí, el plano asociado a la ${idEncontrado} es: ${plano}.`
+                : `Actualmente no hay un código de plano registrado para la ${idEncontrado}.`;
         } else if (p.includes("constat") || p.includes("notarial")) {
             return constatacion !== 'Sin registro'
                 ? `La constatación notarial de la ${idEncontrado} se realizó el ${constatacion}.`
@@ -361,12 +359,11 @@ function procesarPregunta(pregunta) {
                 ? `El área de la ${idEncontrado} se liberó el ${liberacion}.`
                 : `Aún no hay fecha de liberación parcial registrada para la ${idEncontrado}.`;
         } else {
-            return `Información general de ${idEncontrado}:\n- Constatación: ${constatacion !== 'Sin registro' ? constatacion : 'Pendiente'}\n- Liberación: ${liberacion !== 'Sin registro' ? liberacion : 'Pendiente'}\n- Asiento N°: ${asiento !== 'Sin registro' ? asiento : 'Pendiente'}`;
+            return `Información general de ${idEncontrado}:\n- Constatación: ${constatacion !== 'Sin registro' ? constatacion : 'Pendiente'}\n- Liberación: ${liberacion !== 'Sin registro' ? liberacion : 'Pendiente'}\n- Asiento N°: ${asiento !== 'Sin registro' ? asiento : 'Pendiente'}\n- Plano: ${plano !== 'Sin registro' ? plano : 'Pendiente'}`;
         }
     }
 
-    // E. Fallback si no hay contexto ni coincidencias
-    return "No tengo esa información. Por favor especifica a qué estación te refieres (ejemplo: E01) o indícame el número de asiento.";
+    return "No tengo esa información. Por favor especifica a qué estación te refieres (ejemplo: TVOB) o indícame el número de asiento.";
 }
 
 function handleSend() {
