@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cerramientos de Obra y Áreas Liberadas - Línea 2 y Ramal 4</title>
+    <title>Gestión de Permisos L2L4</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
     <div id="pantalla-bloqueo">
         <div class="tarjeta-login">
             <h2>Línea 2 del Metro</h2>
-            <p>Gestión de Cerramientos</p>
+            <p>Sistema de Gestión de Cerramientos</p>
             
             <!-- Acceso Corporativo -->
             <div class="grupo-input">
@@ -86,6 +86,24 @@
             📋 Copiar Reporte
             <span>diseñado por Vladimir Casas</span>
         </a>
+
+        <!-- Nuevo Asistente de IA Local -->
+        <div id="chat-widget">
+            <button id="btn-chat-toggle">💬 Consultas IA</button>
+            <div id="chat-panel" style="display: none;">
+                <div class="chat-header">
+                    <span>🤖 Asistente de Datos L2L4</span>
+                    <button id="btn-chat-close">✖</button>
+                </div>
+                <div id="chat-messages">
+                    <div class="chat-msg bot">Hola, soy tu asistente local. Pregúntame por Asientos de Obra, Fechas de Liberación o Constataciones (Ej: "¿Cuándo se liberó la E12?"). Mi análisis es 100% privado.</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Escribe tu consulta...">
+                    <button id="btn-chat-send">Enviar</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
