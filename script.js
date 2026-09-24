@@ -20,8 +20,7 @@ const provider = new GoogleAuthProvider();
 const CORREOS_MAESTROS = [
     "zebaxx@gmail.com", 
     "zehaxx@gmail.com",
-    "colega1@gmail.com",
-    "supervisor@gmail.com"
+    "vcasasp@ccmetrolima.com"
 ]; 
 const DOMINIO_PERMITIDO = "@ccmetrolima.com";
 
@@ -98,7 +97,7 @@ let mapaInicializado = false;
 let map, markerLayer, polygonLayer;
 let circleMarkersArray = [];
 let listasReporte = { inicial: [], liberada: [], culminada: [], recientes: [] };
-let datosObras = {}; // ¡La base de datos viva para nuestro asistente!
+let datosObras = {}; 
 let filtroActivo = 'todos';
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";
@@ -287,13 +286,15 @@ window.copiarReporte = function(e) {
     });
 };
 
-// 7. ASISTENTE VIRTUAL LOCAL (IA SEMÁNTICA)
+// 7. ASISTENTE VIRTUAL LOCAL (IA SEMÁNTICA) - EVOLUCIONADO
 const chatbotToggle = document.getElementById('chatbot-toggle');
 const chatbotWindow = document.getElementById('chatbot-window');
 const closeChat = document.getElementById('close-chat');
 const sendChat = document.getElementById('send-chat');
 const chatInput = document.getElementById('chat-input');
 const chatMessages = document.getElementById('chat-messages');
+
+let ultimoIdConsultado = null; // Memoria de contexto del asistente
 
 chatbotToggle.addEventListener('click', () => { chatbotWindow.style.display = 'flex'; chatbotToggle.style.display = 'none'; });
 closeChat.addEventListener('click', () => { chatbotWindow.style.display = 'none'; chatbotToggle.style.display = 'block'; });
@@ -310,29 +311,37 @@ function procesarPregunta(pregunta) {
     const p = pregunta.toLowerCase();
     let idEncontrado = null;
 
-    // A. Búsqueda Inversa por Asiento de Obra (Ej: "asiento 2025 a que estructura")
+    // A. Búsqueda Inversa por Asiento (Requiere al menos 3 números para no confundir con E01)
     if (p.includes("asiento")) {
-        const match = p.match(/\d+/); 
-        if (match) {
-            const numeroAsiento = match[0];
+        const matchNumeros = p.match(/\d{3,}/); 
+        if (matchNumeros) {
+            const numeroAsiento = matchNumeros[0];
             for (const id in datosObras) {
                 const asientoOficial = (datosObras[id]['Asiento de obra'] || datosObras[id].Asiento_Obra || "").toString();
                 if (asientoOficial.includes(numeroAsiento)) {
-                    return `El asiento de obra N° ${numeroAsiento} está asociado a la estructura: ${id}.`;
+                    ultimoIdConsultado = id; 
+                    return `El asiento de obra N° ${numeroAsiento} está registrado para la estructura: ${id}.`;
                 }
             }
         }
     }
 
-    // B. Búsqueda Directa por Estructura (Ej: "liberación de la E12")
+    // B. Buscar si menciona una estructura en el mensaje actual
     for (const id in datosObras) {
         const idLower = id.toLowerCase();
         if (p.includes(idLower) || p.replace(/\s/g, '').includes(idLower)) {
             idEncontrado = id;
+            ultimoIdConsultado = id; // Guardamos el nombre de la estación para futuras preguntas
             break;
         }
     }
 
+    // C. Si no mencionó ninguna estructura ahora, pero tenemos una en memoria
+    if (!idEncontrado && ultimoIdConsultado) {
+        idEncontrado = ultimoIdConsultado;
+    }
+
+    // D. Procesamiento de la respuesta usando el ID final (encontrado o recordado)
     if (idEncontrado) {
         const datos = datosObras[idEncontrado];
         const asiento = datos['Asiento de obra'] || datos.Asiento_Obra || 'Sin registro';
@@ -340,18 +349,24 @@ function procesarPregunta(pregunta) {
         const constatacion = datos['Fecha de constatacion notarial'] || datos.Fecha_Constatacion || 'Sin registro';
 
         if (p.includes("asiento")) {
-            return `El asiento de obra para la ${idEncontrado} es el N° ${asiento}.`;
+            return asiento !== 'Sin registro' 
+                ? `El asiento de obra asociado a la ${idEncontrado} es el N° ${asiento}.`
+                : `Actualmente no hay un número de asiento de obra registrado para la ${idEncontrado}.`;
         } else if (p.includes("constat") || p.includes("notarial")) {
-            return `La constatación notarial de la ${idEncontrado} fue el ${constatacion}.`;
+            return constatacion !== 'Sin registro'
+                ? `La constatación notarial de la ${idEncontrado} se realizó el ${constatacion}.`
+                : `Aún no hay fecha de constatación notarial registrada para la ${idEncontrado}.`;
         } else if (p.includes("liber") || p.includes("cuando")) {
-            return `El área de la ${idEncontrado} se liberó el ${liberacion}.`;
+            return liberacion !== 'Sin registro' 
+                ? `El área de la ${idEncontrado} se liberó el ${liberacion}.`
+                : `Aún no hay fecha de liberación parcial registrada para la ${idEncontrado}.`;
         } else {
-            return `Datos de ${idEncontrado}:\n- Constatación: ${constatacion}\n- Liberación: ${liberacion}\n- Asiento N°: ${asiento}`;
+            return `Información general de ${idEncontrado}:\n- Constatación: ${constatacion !== 'Sin registro' ? constatacion : 'Pendiente'}\n- Liberación: ${liberacion !== 'Sin registro' ? liberacion : 'Pendiente'}\n- Asiento N°: ${asiento !== 'Sin registro' ? asiento : 'Pendiente'}`;
         }
     }
 
-    // C. Si no encuentra coincidencias
-    return "No tengo dicha información en el registro oficial.";
+    // E. Fallback si no hay contexto ni coincidencias
+    return "No tengo esa información. Por favor especifica a qué estación te refieres (ejemplo: E01) o indícame el número de asiento.";
 }
 
 function handleSend() {
@@ -360,7 +375,6 @@ function handleSend() {
     addMessage(text, true);
     chatInput.value = '';
     
-    // Simular un pequeño tiempo de "pensamiento"
     setTimeout(() => {
         const botReply = procesarPregunta(text);
         addMessage(botReply, false);
