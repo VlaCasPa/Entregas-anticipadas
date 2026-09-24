@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 // 1. CREDENCIALES DE TU BÓVEDA FIREBASE
 const firebaseConfig = {
@@ -15,6 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const db = getFirestore(app); // Inicializamos el auditor de base de datos
 
 // 2. CONFIGURACIÓN DEL CANDADO DE SEGURIDAD (LISTA BLANCA)
 const CORREOS_MAESTROS = [
@@ -286,7 +288,7 @@ window.copiarReporte = function(e) {
     });
 };
 
-// 7. ASISTENTE VIRTUAL LOCAL (IA SEMÁNTICA) - EVOLUCIONADO
+// 7. ASISTENTE VIRTUAL LOCAL (IA SEMÁNTICA)
 const chatbotToggle = document.getElementById('chatbot-toggle');
 const chatbotWindow = document.getElementById('chatbot-window');
 const closeChat = document.getElementById('close-chat');
@@ -371,6 +373,20 @@ function handleSend() {
     if (!text) return;
     addMessage(text, true);
     chatInput.value = '';
+    
+    // --- AUDITORÍA SILENCIOSA EN FIRESTORE ---
+    if (auth.currentUser) {
+        try {
+            addDoc(collection(db, "consultas_historial"), {
+                pregunta: text,
+                usuario: auth.currentUser.email,
+                fecha: serverTimestamp()
+            });
+        } catch (error) {
+            // Falla de forma silenciosa para no interrumpir al usuario
+            console.warn("No se pudo registrar la consulta en Firestore.");
+        }
+    }
     
     setTimeout(() => {
         const botReply = procesarPregunta(text);
