@@ -61,7 +61,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Evaluando las 77 estructuras de la base de datos)
+ // 1. PROCESAMIENTO ESTRICTAMENTE UNÍVOCO POR ID (Estructuras Únicas)
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -69,6 +69,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      let idNorm = normalizarID(item.ID);  
      mapaDatosSheets[idNorm] = item;  
 
+     // Consolidar de manera que cada ID único se procese una sola vez
      if (!estructurasUnicasMap.has(idNorm)) {
        let keys = Object.keys(item);
        let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
@@ -78,27 +79,31 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        let esCulminada = (valColD === "culminada" || tipoC === "culminada" || valColD === "si" || valColD === "culminado");
        let esResidual = (tipoC.includes("residual") || tipoC === "residual");
        let esLiberado = (tieneLib === "SI" || tipoC.includes("liberado"));
-       let esInicial = (!tipoC || tipoC.includes("inicial") || tipoC.includes("cerco"));
 
+       let estadoCalculado = 'inicial';
        if (esCulminada) {
          countCulminada++;
+         estadoCalculado = 'culminada';
        } else if (esResidual) {
          countResidual++;
+         estadoCalculado = 'residual';
        } else if (esLiberado) {
          countLiberado++;
+         estadoCalculado = 'liberado';
        } else {
          countInicial++;
+         estadoCalculado = 'inicial';
        }
 
        estructurasUnicasMap.set(idNorm, {
          ...item,
-         estadoCalculado: esCulminada ? 'culminada' : (esResidual ? 'residual' : (esLiberado ? 'liberado' : 'inicial'))
+         estadoCalculado: estadoCalculado
        });
      }
    }  
  });  
 
- // Actualizar los KPIs basándose estrictamente en las estructuras únicas
+ // Actualizar los KPIs en base al universo real y unívoco de estructuras
  document.getElementById('kpi-inicial').innerText = countInicial;  
  document.getElementById('kpi-residual').innerText = countResidual;  
  document.getElementById('kpi-liberado').innerText = countLiberado;  
