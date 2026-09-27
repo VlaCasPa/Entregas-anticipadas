@@ -11,14 +11,13 @@
 </head>
 <body>
 
- <!-- 1. Contenedor del Mapa -->
+ <!-- 1. Contenedor del Mapa (Debe estar al inicio para renderizar el fondo Leaflet) -->
  <div id="map"></div>
 
- <!-- 2. Cabecera Flotante Superior (Título, KPIs y Filtros) -->
+ <!-- 2. Cabecera Web Superior Izquierda (Título y KPIs) -->
  <div id="header-flotante">
    <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
    
-   <!-- Panel de Indicadores de Gestión (KPIs) -->
    <div id="panel-kpis">
      <div class="kpi-card kpi-inicial">
        <span class="kpi-title">Cerco Inicial</span>
@@ -37,28 +36,28 @@
        <span class="kpi-value" id="kpi-culminada">0</span>
      </div>
    </div>
+ </div>
 
-   <!-- Panel de Filtro por Estado -->
-   <div id="panel-filtros">
-     <div class="filtro-header-mobile" onclick="toggleFiltros()">
-       <span>🔍 FILTRAR POR ESTADO</span>
-       <span id="filtro-icon">▼</span>
-     </div>
-     <div class="filtros-contenido" id="filtrosContenido">
-       <div class="filtro-titulo-web">FILTRO POR ESTADO</div>
-       <div class="filtros-botones">
-         <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
-         <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
-         <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
-         <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
-         <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
-         <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
-       </div>
+ <!-- 3. Panel de Filtro por Estado (Esquina Superior Derecha en Web) -->
+ <div id="panel-filtros">
+   <div class="filtro-header-mobile" onclick="toggleFiltros()">
+     <span>🔍 FILTRAR POR ESTADO</span>
+     <span id="filtro-icon">▼</span>
+   </div>
+   <div class="filtros-contenido" id="filtrosContenido">
+     <div class="filtro-titulo-web">FILTRO POR ESTADO</div>
+     <div class="filtros-botones">
+       <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+       <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+       <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+       <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+       <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+       <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
      </div>
    </div>
  </div>
 
- <!-- 3. Leyenda de Cerramientos (Inferior Izquierda en Web, Colapsable hacia arriba en Móvil) -->
+ <!-- 4. Leyenda de Cerramientos (Inferior Izquierda) -->
  <div id="panel-leyenda">
    <div class="leyenda-header-mobile" onclick="toggleLeyenda()">
      <span>📋 LEYENDA DE CERRAMIENTOS</span>
@@ -73,26 +72,26 @@
    </div>
  </div>
 
- <!-- 4. Botones de Acciones (Consultor IA y Reporte con estado "Copiado" discreto) -->
+ <!-- 5. Botones de Acciones (Inferior Derecha) -->
  <div id="panel-acciones">
    <div id="desplegableIA" class="ia-desplegable-arriba">
-     <div class="ia-header"><span>🤖 Asistente IA Contractual</span> <button onclick="toggleConsultorIA()">×</button></div>
+     <div class="ia-header"><span> Asistente IA </span> <button onclick="toggleConsultorIA()">×</button></div>
      <div class="ia-body">
-       <input type="text" id="inputConsultaIA" placeholder="Ingrese ID de estructura (Ej: E04, PV02)...">
+       <input type="text" id="inputConsultaIA" placeholder="Ingrese ID (Ej: E04, PV02)...">
        <button onclick="ejecutarConsultaIA()">Consultar ID</button>
        <div id="respuestaIA">Ingrese un ID para consultar su estado en la BD.</div>
      </div>
    </div>
    
    <button class="btn-accion btn-consultor" onclick="toggleConsultorIA()">
-     🤖 Consultar Datos
+     Consultar Datos
    </button>
    <button id="btnReporte" class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
      📄 Reporte
    </button>
  </div>
 
- <!-- 5. Marca de Agua Discreta -->
+ <!-- 6. Marca de Agua Discreta -->
  <div id="marca-agua">Diseñado por Vladimir Casas</div>
 
  <!-- Librerías JS y Script -->
