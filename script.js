@@ -1,153 +1,260 @@
-body, html {
- margin: 0; padding: 0; height: 100%; width: 100%;
- font-family: 'Inter', sans-serif; background-color: #f3f4f6; overflow: hidden;
+const map = L.map('map').setView([-12.055, -77.050], 13);  
+
+L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
+ maxZoom: 20,  
+ subdomains: ['mt0','mt1','mt2','mt3'],  
+ attribution: '&copy; Google',  
+ opacity: 0.65,  
+ className: 'mapa-google-gris'  
+}).addTo(map);  
+
+const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
+
+let grupoPoligonos = L.featureGroup().addTo(map);  
+let grupoMarcadoresIDs = L.featureGroup().addTo(map);  
+
+let mapaDatosSheets = {};  
+let datosGlobalesCSV = [];
+let geojsonDataGlobal = null;
+let filtroActualGlobal = 'todos';
+
+function normalizarID(texto) {  
+ if (!texto) return "";  
+ return texto.toString().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();  
+}  
+
+function estiloPoligono(feature) {  
+ let tipo = feature.properties.tipo ? feature.properties.tipo.toLowerCase() : "";  
+ if (tipo === "residual") {
+   return { color: "#f472b6", fillColor: "#fce7f3", weight: 3, opacity: 1, fillOpacity: 0.65 };  
+ }  
+ if (tipo === "liberado") {  
+   return { color: "#38bdf8", fillColor: "#e0f2fe", weight: 2, opacity: 0.9, fillOpacity: 0.5 };  
+ }  
+ if (tipo === "culminada") {  
+   return { color: "#315738", fillColor: "#eaf2eb", weight: 2, opacity: 0.9, fillOpacity: 0.5 };  
+ }  
+ return { color: "#d4a39b", fillColor: "#f5ebe9", weight: 2, opacity: 0.8, fillOpacity: 0.4 };  
+}  
+
+Promise.all([  
+ fetch('cerramientos.geojson').then(res => res.json()),  
+ new Promise(resolve => {  
+   Papa.parse(urlCSV, {  
+     download: true,  
+     header: true,  
+     complete: results => resolve(results.data)  
+   });  
+ })  
+]).then(([geojsonData, csvData]) => {  
+ geojsonDataGlobal = geojsonData;
+ datosGlobalesCSV = csvData;
+
+ actualizarDashboardYMapa(csvData, geojsonData, 'todos');
+});
+
+function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
+ filtroActualGlobal = filtroEstado;
+ let countInicial = 0, countResidual = 0, countLiberado = 0, countCulminada = 0;  
+
+ grupoPoligonos.clearLayers();
+ grupoMarcadoresIDs.clearLayers();
+ mapaDatosSheets = {};
+
+ // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Evaluación exacta de las estructuras únicas de la BD)
+ let estructurasUnicasMap = new Map();
+
+ csvData.forEach(item => {  
+   if (item.ID) {  
+     let idNorm = normalizarID(item.ID);  
+     mapaDatosSheets[idNorm] = item;  
+
+     if (!estructurasUnicasMap.has(idNorm)) {
+       let keys = Object.keys(item);
+       // Evaluación precisa de la Columna D o estado de culminación
+       let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
+       let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
+       let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
+
+       let esCulminada = (valColD === "culminada" || tipoC === "culminada" || valColD === "culminado" || valColD === "si");
+       let esResidual = (tipoC.includes("residual") || tipoC === "residual");
+       let esLiberado = (tieneLib === "SI" || tipoC.includes("liberado"));
+
+       let estadoCalculado = 'inicial';
+       if (esCulminada) {
+         countCulminada++;
+         estadoCalculado = 'culminada';
+       } else if (esResidual) {
+         countResidual++;
+         estadoCalculado = 'residual';
+       } else if (esLiberado) {
+         countLiberado++;
+         estadoCalculado = 'liberado';
+       } else {
+         countInicial++;
+         estadoCalculado = 'inicial';
+       }
+
+       estructurasUnicasMap.set(idNorm, {
+         ...item,
+         estadoCalculado: estadoCalculado
+       });
+     }
+   }  
+ });  
+
+ document.getElementById('kpi-inicial').innerText = countInicial;  
+ document.getElementById('kpi-residual').innerText = countResidual;  
+ document.getElementById('kpi-liberado').innerText = countLiberado;  
+ document.getElementById('kpi-culminada').innerText = countCulminada;  
+
+ // 2. ORDEN DE CARGA DE POLÍGONOS (Residual al final)
+ let featuresOrdenadas = [...geojsonData.features].sort((a, b) => {
+   let tA = (a.properties.tipo || "").toLowerCase();
+   let tB = (b.properties.tipo || "").toLowerCase();
+   if (tA === "residual") return 1;  
+   if (tB === "residual") return -1;
+   return 0;
+ });
+
+ let geojsonFiltrado = {
+   type: "FeatureCollection",
+   features: featuresOrdenadas.filter(feature => {
+     if (filtroEstado === 'todos') return true;
+     let tipoGeo = feature.properties.tipo ? feature.properties.tipo.toLowerCase() : "";
+     if (filtroEstado === 'inicial') return tipoGeo === 'inicial' || !tipoGeo;
+     if (filtroEstado === 'residual') return tipoGeo === 'residual';
+     if (filtroEstado === 'liberado') return tipoGeo === 'liberado';
+     if (filtroEstado === 'culminada') return tipoGeo === 'culminada';
+     if (filtroEstado === '30dias') return false; 
+     return true;
+   })
+ };
+
+ L.geoJSON(geojsonFiltrado, {  
+   style: estiloPoligono,  
+   onEachFeature: function(feature, layer) {  
+     let idGeo = normalizarID(feature.properties.id || feature.properties.ID);  
+     let datos = mapaDatosSheets[idGeo] || { ID: feature.properties.id || 'N/A', Nombre: 'Estructura Línea 2 y 4' };  
+     layer.bindPopup(generarHTMLPopup(datos.ID || feature.properties.id, datos));   
+   }  
+ }).addTo(grupoPoligonos);  
+
+ // 3. CARGA DE MARCADORES E IDS (Garantizando presencia y zoom out en todos los estados)
+ let boundsArray = [];
+ estructurasUnicasMap.forEach((item, idNorm) => {  
+   let cumpleFiltro = true;
+   if (filtroEstado === 'inicial') cumpleFiltro = (item.estadoCalculado === 'inicial');
+   if (filtroEstado === 'residual') cumpleFiltro = (item.estadoCalculado === 'residual');
+   if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado');
+   if (filtroEstado === 'culminada') cumpleFiltro = (item.estadoCalculado === 'culminada');
+   if (filtroEstado === '30dias') cumpleFiltro = false;
+
+   if (cumpleFiltro) {
+     let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
+     let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
+
+     if (!isNaN(lat) && !isNaN(lon)) {  
+       boundsArray.push([lat, lon]);
+
+       let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: "#FACC15", color: "#1E293B", weight: 2, opacity: 1, fillOpacity: 1 });  
+       marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
+       marker.bindPopup(generarHTMLPopup(item.ID, item));
+       marker.addTo(grupoMarcadoresIDs);  
+     }  
+   }  
+ });  
+
+ // Zoom Out dinámico (fitBounds) garantizado para cualquier filtro
+ if (boundsArray.length > 0 && filtroEstado !== 'todos') {
+   map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
+ } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
+   map.setView([-12.055, -77.050], 13);
+ }
+
+ setTimeout(() => { map.invalidateSize(); }, 200);
 }
 
-#map {
- position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1;
+function generarHTMLPopup(idEstructura, datos) {
+  return `  
+    <div style="min-width: 200px; font-size: 11px;">  
+      <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${idEstructura}: ${datos.Nombre || 'Estructura L2 y L4'}</h3>  
+      <div style="color: #64748b; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Tipo: ${datos.Tipo_Cerramiento || 'Cerramiento'}</div>  
+      <div>📅 <b>Constatación:</b> ${datos.Fecha_Constatacion || '-'}</div>  
+      <div>🚧 <b>Liberación:</b> ${datos.Fecha_Liberacion || '-'}</div>  
+      <div>📖 <b>Asiento:</b> ${datos.Asiento_Obra || '-'}</div>  
+      <div>📐 <b>Plano:</b> ${datos.Codigo_Plano || '-'}</div>  
+    </div>  
+  `;
 }
 
-.mapa-google-gris {
- filter: grayscale(100%) brightness(1.05) contrast(0.9);
+function filtrarEstado(tipo) {
+ document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
+ event.target.classList.add('active');
+ if (geojsonDataGlobal && datosGlobalesCSV) actualizarDashboardYMapa(datosGlobalesCSV, geojsonDataGlobal, tipo);
 }
 
-/* --- Cabecera Web (Desplazada para no tapar los controles de zoom) --- */
-#header-flotante {
- position: absolute; top: 15px; left: 55px; right: 15px; z-index: 1000;
- display: flex; flex-direction: column; gap: 10px; pointer-events: none; max-width: 480px;
-}
-#header-flotante > * { pointer-events: auto; }
+function toggleFiltros() {  
+ const contenido = document.getElementById('filtrosContenido');  
+ const icon = document.getElementById('filtro-icon');  
+ contenido.classList.toggle('show');  
+ icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';  
+}  
 
-#titulo-principal {
- background-color: rgba(255, 255, 255, 0.95); padding: 10px 18px; border-radius: 8px;
- font-size: clamp(13px, 2vw, 15px); font-weight: 700; color: #111827;
- box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: fit-content; border-left: 5px solid #2563EB;
-}
-
-/* --- KPIs Web --- */
-#panel-kpis {
- display: flex; gap: 8px;
-}
-.kpi-card {
- background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
- box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; min-width: 85px; border-top: 4px solid #94a3b8;
-}
-.kpi-title { display: block; font-size: 8px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-.kpi-value { display: block; font-size: 17px; font-weight: 700; }
-.kpi-inicial { border-top-color: #d4a39b; } .kpi-inicial .kpi-value { color: #7f1d1d; }
-.kpi-residual { border-top-color: #f472b6; } .kpi-residual .kpi-value { color: #831843; }
-.kpi-liberado { border-top-color: #38bdf8; } .kpi-liberado .kpi-value { color: #0369a1; }
-.kpi-culminada { border-top-color: #315738; } .kpi-culminada .kpi-value { color: #315738; }
-
-/* --- Filtros Web (Esquina Superior Derecha) --- */
-#panel-filtros {
- position: absolute; top: 15px; right: 15px; z-index: 1000;
- background-color: rgba(255, 255, 255, 0.95); padding: 10px 14px; border-radius: 8px;
- box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 270px;
-}
-.filtro-header-mobile { display: none; font-weight: 700; font-size: 11px; color: #64748b; cursor: pointer; justify-content: space-between; align-items: center; }
-.filtro-titulo-web { font-weight: 700; font-size: 9px; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
-.filtros-botones { display: flex; flex-wrap: wrap; gap: 5px; }
-
-.filtro-btn {
- font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; padding: 5px 10px;
- border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s ease;
- background-color: #f8fafc; color: #334155;
-}
-.filtro-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-
-.filtro-btn.btn-todos { background-color: #334155; color: #ffffff; border-color: #1e293b; }
-.filtro-btn.btn-inicial { background-color: #f5ebe9; color: #7f1d1d; border-color: #d4a39b; }
-.filtro-btn.btn-residual { background-color: #fce7f3; color: #831843; border-color: #f472b6; }
-.filtro-btn.btn-liberado { background-color: #e0f2fe; color: #0369a1; border-color: #38bdf8; }
-.filtro-btn.btn-culminada { background-color: #eaf2eb; color: #315738; border-color: #94a3b8; }
-.filtro-btn.btn-temporal { background-color: #ffffff; color: #475569; border-color: #cbd5e1; }
-.filtro-btn.active { box-shadow: 0 0 0 2px #0f172a; font-weight: 700; }
-
-/* --- Leyenda --- */
-#panel-leyenda {
- position: absolute; bottom: 55px; left: 15px; z-index: 1000;
- background-color: rgba(255, 255, 255, 0.95); padding: 10px 14px; border-radius: 8px;
- box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 11px; line-height: 1.5;
-}
-.leyenda-header-mobile { display: none; font-weight: 700; font-size: 11px; color: #64748b; cursor: pointer; justify-content: space-between; align-items: center; }
-.leyenda-titulo { display: block; font-weight: 700; font-size: 9px; color: #64748b; margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
-.leyenda-item { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; margin-bottom: 3px; }
-.leyenda-color { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.color-inicial { background-color: #f5ebe9; border: 1.5px solid #d4a39b; }
-.color-residual { background-color: #fce7f3; border: 1.5px solid #f472b6; }
-.color-liberado { background-color: #e0f2fe; border: 1.5px solid #38bdf8; }
-.color-culminada { background-color: #eaf2eb; border: 1.5px solid #315738; }
-
-#panel-acciones {
- position: absolute; bottom: 55px; right: 15px; z-index: 1000; display: flex; gap: 8px; align-items: flex-end;
-}
-.btn-accion {
- background-color: #0f172a; color: #ffffff; border: none; padding: 10px 16px; border-radius: 8px;
- font-weight: 600; font-size: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px; transition: all 0.3s ease;
-}
-.btn-consultor { background-color: #2563eb; }
-.btn-accion.copiado { background-color: #16a34a !important; color: #ffffff !important; }
-
-.ia-desplegable-arriba {
- display: none; position: absolute; bottom: 50px; right: 0; width: 320px;
- background: #ffffff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 12px; z-index: 2100;
-}
-.ia-desplegable-arriba.show { display: block; }
-.ia-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 12px; margin-bottom: 8px; }
-.ia-header button { background: none; border: none; font-size: 16px; cursor: pointer; }
-.ia-body input { width: 100%; padding: 6px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; margin-bottom: 6px; }
-.ia-body button { background: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; width: 100%; }
-#respuestaIA { font-size: 10px; color: #334155; margin-top: 6px; line-height: 1.4; background: #f8fafc; padding: 8px; border-radius: 4px; max-height: 140px; overflow-y: auto; }
-
-#marca-agua {
- position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 1000;
- font-size: 10px; font-weight: 600; color: rgba(100, 116, 139, 0.7); background-color: rgba(255, 255, 255, 0.6);
- padding: 2px 10px; border-radius: 4px; pointer-events: none; letter-spacing: 0.5px;
+function toggleLeyenda() {
+ const contenido = document.getElementById('leyendaContenido');
+ const icon = document.getElementById('leyenda-icon');
+ contenido.classList.toggle('show');
+ icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';
 }
 
-.id-tooltip {
- background-color: rgba(255, 255, 255, 0.95) !important; border: 1px solid #cbd5e1 !important;
- border-radius: 4px !important; padding: 2px 6px !important; font-weight: 700; color: #0f172a; font-size: 10px;
- z-index: 3000 !important;
+function toggleConsultorIA() {
+ document.getElementById('desplegableIA').classList.toggle('show');
 }
 
-/* --- ADAPTABILIDAD MOBILE (CELULAR: Leyenda abajo desplegable hacia arriba) --- */
-@media (max-width: 768px) {
- body, html { overflow: auto; }
+function ejecutarConsultaIA() {
+ let consulta = document.getElementById('inputConsultaIA').value.trim().toUpperCase();
+ let cajaResp = document.getElementById('respuestaIA');
  
- #header-flotante {
-   position: relative; flex-direction: column; align-items: stretch; gap: 6px; top: 8px; left: 8px; right: 8px; width: calc(100% - 16px); max-width: unset;
+ if(!consulta) { 
+   cajaResp.innerText = "Ingrese un ID de estructura válido."; 
+   return; 
  }
- #titulo-principal { text-align: center; width: 100%; box-sizing: border-box; font-size: 12px; padding: 8px; }
 
- #panel-kpis {
-   width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; box-sizing: border-box;
+ let idNorm = normalizarID(consulta);
+ let datosID = mapaDatosSheets[idNorm];
+
+ if (datosID) {
+   cajaResp.innerHTML = `<b>Datos para [${datosID.ID}]:</b><br>` +
+                        `- Nombre: ${datosID.Nombre || 'N/A'}<br>` +
+                        `- Tipo: ${datosID.Tipo_Cerramiento || 'N/A'}<br>` +
+                        `- Constatación: ${datosID.Fecha_Constatacion || 'N/A'}<br>` +
+                        `- Liberación: ${datosID.Fecha_Liberacion || 'N/A'}<br>` +
+                        `- Asiento: ${datosID.Asiento_Obra || 'N/A'}`;
+ } else {
+   cajaResp.innerText = `No se encontraron registros para el ID "${consulta}".`;
  }
- .kpi-card { min-width: unset; padding: 6px 2px; }
- .kpi-title { font-size: 6px; } .kpi-value { font-size: 12px; }
+}
 
- #panel-filtros {
-   position: relative; top: auto; right: auto; width: 100%; box-sizing: border-box; padding: 8px 12px; margin-top: 4px;
- }
- .filtro-header-mobile { display: flex; }
- .filtro-titulo-web { display: none; }
- .filtros-contenido { display: none; margin-top: 8px; }
- .filtros-contenido.show { display: flex; flex-wrap: wrap; gap: 5px; }
+// Botón de Reporte con feedback visual discreto estilo "Copiado"
+function copiarReporteTexto() {
+ let textoReporte = "=== REPORTE OPERATIVO LÍNEA 2 Y 4 ===\n";
+ textoReporte += "- Cerco Inicial: " + document.getElementById('kpi-inicial').innerText + "\n";
+ textoReporte += "- Área Residual: " + document.getElementById('kpi-residual').innerText + "\n";
+ textoReporte += "- Área Liberada: " + document.getElementById('kpi-liberado').innerText + "\n";
+ textoReporte += "- Culminadas: " + document.getElementById('kpi-culminada').innerText + "\n";
+ textoReporte += "Diseñado por Vladimir Casas.";
 
- /* Leyenda abajo en móvil (se despliega hacia arriba) */
- #panel-leyenda {
-   position: fixed; bottom: 65px; left: 10px; right: 10px; z-index: 1000;
-   background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
-   box-shadow: 0 -4px 15px rgba(0,0,0,0.15); font-size: 10px; box-sizing: border-box; width: auto;
- }
- .leyenda-header-mobile { display: flex; }
- .leyenda-titulo { display: none; }
- .leyenda-contenido { display: none; margin-bottom: 6px; }
- .leyenda-contenido.show { display: flex; flex-direction: column; gap: 3px; }
-
- #marca-agua { position: fixed; bottom: 112px; left: 50%; transform: translateX(-50%); z-index: 1000; font-size: 9px; padding: 2px 8px; }
-
- #panel-acciones { position: fixed; bottom: 12px; right: 10px; left: 10px; justify-content: center; z-index: 1000; }
- .btn-accion { flex: 1; justify-content: center; padding: 8px 6px; font-size: 11px; }
+ navigator.clipboard.writeText(textoReporte).then(() => {
+   let btn = document.getElementById('btnReporte');
+   let textoOriginal = btn.innerHTML;
+   btn.innerHTML = '✅ Copiado';
+   btn.classList.add('copiado');
+   setTimeout(() => {
+     btn.innerHTML = textoOriginal;
+     btn.classList.remove('copiado');
+   }, 2000);
+ }).catch(err => {
+   alert("Error al copiar: " + err);
+ });
 }
