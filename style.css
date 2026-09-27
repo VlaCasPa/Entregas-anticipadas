@@ -9,8 +9,11 @@ body, html {
 }
 
 #map {
+ position: absolute;
+ top: 0;
+ left: 0;
  height: 100vh;
- width: 100%;
+ width: 100vw;
  z-index: 1;
 }
 
@@ -19,7 +22,7 @@ body, html {
  filter: grayscale(100%) brightness(1.05) contrast(0.9);
 }
 
-/* --- Cabecera Superior: Título y Filtros --- */
+/* --- Cabecera Superior --- */
 #header-container {
  position: absolute;
  top: 15px;
@@ -27,9 +30,10 @@ body, html {
  right: 15px;
  z-index: 1000;
  display: flex;
- align-items: center;
+ align-items: flex-start;
  justify-content: space-between;
  pointer-events: none;
+ gap: 15px;
 }
 
 #header-container > * {
@@ -40,7 +44,7 @@ body, html {
  background-color: rgba(255, 255, 255, 0.95);
  padding: 10px 20px;
  border-radius: 8px;
- font-size: clamp(13px, 2.5vw, 16px);
+ font-size: clamp(13px, 2.2vw, 16px);
  font-weight: 700;
  color: #111827;
  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -54,7 +58,7 @@ body, html {
  padding: 10px 14px;
  border-radius: 8px;
  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
- min-width: 260px;
+ min-width: 280px;
 }
 
 .filtro-header-mobile {
@@ -79,7 +83,7 @@ body, html {
 .filtros-botones {
  display: flex;
  flex-wrap: wrap;
- gap: 6px;
+ gap: 5px;
 }
 
 .filtro-btn {
@@ -113,7 +117,7 @@ body, html {
  font-weight: 700;
 }
 
-/* --- Panel de Indicadores (KPIs en 1 sola fila simétrica) --- */
+/* --- Panel de Indicadores (KPIs) --- */
 #panel-kpis {
  position: absolute;
  top: 75px;
@@ -129,13 +133,13 @@ body, html {
  border-radius: 8px;
  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
  text-align: center;
- min-width: 90px;
+ min-width: 85px;
  border-top: 4px solid #94a3b8;
 }
 
 .kpi-title {
  display: block;
- font-size: 8.5px;
+ font-size: 8px;
  font-weight: 700;
  color: #64748b;
  text-transform: uppercase;
@@ -145,7 +149,7 @@ body, html {
 
 .kpi-value {
  display: block;
- font-size: 18px;
+ font-size: 17px;
  font-weight: 700;
 }
 
@@ -164,7 +168,7 @@ body, html {
 /* --- Leyenda --- */
 #panel-leyenda {
  position: absolute;
- bottom: 25px;
+ bottom: 40px;
  left: 15px;
  z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95);
@@ -205,10 +209,10 @@ body, html {
 .color-liberado { background-color: #e0f2fe; border: 1.5px solid #38bdf8; }
 .color-culminada { background-color: #e2e8f0; border: 1.5px solid #94a3b8; }
 
-/* --- Botones de Acciones (Consultor IA y Reporte) --- */
+/* --- Botones de Acciones --- */
 #panel-acciones {
  position: absolute;
- bottom: 25px;
+ bottom: 40px;
  right: 15px;
  z-index: 1000;
  display: flex;
@@ -231,23 +235,41 @@ body, html {
  gap: 6px;
 }
 
-.btn-accion:hover {
- background-color: #1e293b;
+.btn-accion:hover { background-color: #1e293b; }
+.btn-consultor { background-color: #2563eb; }
+.btn-consultor:hover { background-color: #1d4ed8; }
+
+/* --- Marca de Agua Discreta --- */
+#marca-agua {
+ position: absolute;
+ bottom: 8px;
+ left: 50%;
+ transform: translateX(-50%);
+ z-index: 1000;
+ font-size: 10px;
+ font-weight: 600;
+ color: rgba(100, 116, 139, 0.7);
+ background-color: rgba(255, 255, 255, 0.6);
+ padding: 2px 10px;
+ border-radius: 4px;
+ pointer-events: none;
+ letter-spacing: 0.5px;
 }
 
-.btn-consultor {
- background-color: #2563eb;
-}
-.btn-consultor:hover {
- background-color: #1d4ed8;
+/* --- Tooltips de IDs sobre el Mapa --- */
+.id-tooltip {
+ background-color: rgba(255, 255, 255, 0.9) !important;
+ border: 1px solid #cbd5e1 !important;
+ border-radius: 4px !important;
+ padding: 2px 6px !important;
+ font-weight: 700;
+ color: #0f172a;
+ font-size: 10px;
+ box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 /* --- Adaptabilidad Responsive (Celulares y Tablets) --- */
 @media (max-width: 768px) {
- body, html {
- overflow: auto;
- }
- 
  #header-container {
  flex-direction: column;
  align-items: stretch;
@@ -271,13 +293,8 @@ body, html {
  padding: 8px 12px;
  }
 
- .filtro-header-mobile {
- display: flex;
- }
-
- .filtro-titulo-web {
- display: none;
- }
+ .filtro-header-mobile { display: flex; }
+ .filtro-titulo-web { display: none; }
 
  .filtros-contenido {
  display: none;
@@ -298,30 +315,23 @@ body, html {
  margin: 8px 0;
  display: grid;
  grid-template-columns: repeat(4, 1fr);
- gap: 5px;
+ gap: 4px;
  padding: 0 10px;
  box-sizing: border-box;
  }
 
  .kpi-card {
  min-width: unset;
- padding: 6px 4px;
+ padding: 6px 2px;
  }
 
- .kpi-title {
- font-size: 7.5px;
- }
+ .kpi-title { font-size: 7px; }
+ .kpi-value { font-size: 13px; }
 
- .kpi-value {
- font-size: 14px;
- }
-
- #panel-leyenda {
- display: none; /* Ocultar leyenda en móvil para ganar espacio táctil */
- }
+ #panel-leyenda { display: none; }
 
  #panel-acciones {
- bottom: 15px;
+ bottom: 25px;
  right: 10px;
  left: 10px;
  justify-content: center;
@@ -330,7 +340,7 @@ body, html {
  .btn-accion {
  flex: 1;
  justify-content: center;
- padding: 8px 10px;
+ padding: 8px 6px;
  font-size: 11px;
  }
 }
