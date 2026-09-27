@@ -61,7 +61,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. PROCESAMIENTO ESTRICTAMENTE UNÍVOCO POR ID (Estructuras Únicas)
+ // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Evaluando el universo de 77 estructuras)
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -69,7 +69,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      let idNorm = normalizarID(item.ID);  
      mapaDatosSheets[idNorm] = item;  
 
-     // Consolidar de manera que cada ID único se procese una sola vez
      if (!estructurasUnicasMap.has(idNorm)) {
        let keys = Object.keys(item);
        let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
@@ -141,7 +140,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 3. CARGA DE MARCADORES E IDS (Color amarillo institucional #FACC15 permanente para todos)
+ // 3. CARGA DE MARCADORES E IDS (Garantizando presencia y zoom out en todos los estados filtrados)
  let boundsArray = [];
  estructurasUnicasMap.forEach((item, idNorm) => {  
    let cumpleFiltro = true;
@@ -158,7 +157,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (!isNaN(lat) && !isNaN(lon)) {  
        boundsArray.push([lat, lon]);
 
-       // Marcador con color amarillo institucional fijo (#FACC15)
+       // Marcador con color amarillo institucional fijo (#FACC15) visible siempre
        let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: "#FACC15", color: "#1E293B", weight: 2, opacity: 1, fillOpacity: 1 });  
        marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
        marker.bindPopup(generarHTMLPopup(item.ID, item));
@@ -167,7 +166,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // Zoom Out dinámico (fitBounds) garantizado para cualquier filtro seleccionado (incluyendo residual)
+ // Zoom Out dinámico (fitBounds) garantizado para cualquier filtro seleccionado (incluyendo residual y liberado)
  if (boundsArray.length > 0 && filtroEstado !== 'todos') {
    map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
  } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
