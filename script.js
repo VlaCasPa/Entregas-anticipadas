@@ -32,38 +32,13 @@ function estiloPoligono(feature) {
  let tipo = feature.properties.tipo ? feature.properties.tipo.toLowerCase() : "";  
    
  if (tipo === "residual") {  
-   return {  
-     color: "#f472b6",  
-     fillColor: "#fce7f3",  
-     weight: 2,  
-     opacity: 0.9,  
-     fillOpacity: 0.5  
-   };  
+   return { color: "#f472b6", fillColor: "#fce7f3", weight: 2, opacity: 0.9, fillOpacity: 0.5 };  
  } else if (tipo === "liberado") {  
-   return {  
-     color: "#38bdf8",  
-     fillColor: "#e0f2fe",  
-     weight: 2,  
-     opacity: 0.9,  
-     fillOpacity: 0.5  
-   };  
+   return { color: "#38bdf8", fillColor: "#e0f2fe", weight: 2, opacity: 0.9, fillOpacity: 0.5 };  
  } else if (tipo === "culminada") {  
-   return {  
-     color: "#94a3b8",  
-     fillColor: "#e2e8f0",  
-     weight: 2,  
-     opacity: 0.9,  
-     fillOpacity: 0.5  
-   };  
+   return { color: "#94a3b8", fillColor: "#e2e8f0", weight: 2, opacity: 0.9, fillOpacity: 0.5 };  
  } else {  
-   // Inicial por defecto  
-   return {  
-     color: "#d4a39b",  
-     fillColor: "#f5ebe9",  
-     weight: 2,  
-     opacity: 0.8,  
-     fillOpacity: 0.4  
-   };  
+   return { color: "#d4a39b", fillColor: "#f5ebe9", weight: 2, opacity: 0.8, fillOpacity: 0.4 };  
  }  
 }  
 
@@ -147,7 +122,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  });  
   
  // Inyectar contadores actualizados en los KPIs del DOM  
- if (document.getElementById('kpi-inicial')) document.getElementById('kpi-inicialofil') = countInicial; // Asegurado vía innerText abajo
  document.getElementById('kpi-inicial').innerText = countInicial;  
  document.getElementById('kpi-residual').innerText = countResidual;  
  document.getElementById('kpi-liberado').innerText = countLiberado;  
@@ -182,11 +156,13 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      layer.bindPopup(popupHtml);  
    }  
  }).addTo(grupoPoligonos);  
+  
+ // Forzar redibujado de Leaflet para evitar grises o pantallas blancas
+ setTimeout(() => { map.invalidateSize(); }, 200);
 }
 
 // Función que maneja la interacción de los botones de filtro por estado
 function filtrarEstado(tipo) {
- // Actualizar clases activas visuales en los botones
  document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
  event.target.classList.add('active');
 
