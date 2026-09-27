@@ -11,7 +11,8 @@
     <style>
         body { background-color: #f1f5f9; }
         #map { height: 100%; width: 100%; z-index: 1; border-radius: 0.5rem; border: 1px solid #e2e8f0; }
-        .mapa-google-gris { filter: grayscale(100%) brightness(1.00) contrast(1.00) opacity(0.75); z-index: 0 !important; }
+        /* Restaurado el filtro en escala de grises tal como lo tenías */
+        .mapa-google-gris { filter: grayscale(100%) brightness(1.15) contrast(0.85) opacity(0.85); z-index: 0 !important; }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -20,8 +21,12 @@
         @keyframes pulso-amarillo { 0% { filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4)); } 50% { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8)); } }
         @keyframes pulso-rojo { 0% { filter: drop-shadow(0 0 2px rgba(220, 38, 38, 0.4)); } 50% { filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.8)); } }
         
-        .btn-pill { background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        /* Botones adaptados: compactos en celular (2 filas de 3) y normales en PC */
+        .btn-pill { background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 4px 8px; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center; width: 100%; }
         .btn-pill.active { background: #1e293b; color: white; border-color: #1e293b; }
+        @media (min-width: 640px) {
+            .btn-pill { padding: 4px 10px; font-size: 0.75rem; width: auto; }
+        }
         
         .leaflet-popup-content-wrapper { border-radius: 8px; padding: 0; overflow: hidden; z-index: 1001; }
         .popup-container { font-family: 'Segoe UI', sans-serif; padding: 12px; }
@@ -81,7 +86,6 @@
                 <div class="flex flex-col items-center px-1 border-r lg:border-none border-gray-200 shrink-0"><span class="text-[0.55rem] md:text-[0.65rem] font-bold text-slate-500 uppercase">Culminadas</span><span id="kpi-verde" class="text-lg md:text-2xl font-black text-emerald-500">0</span></div>
             </div>
 
-            <!-- BOTONES NAVEGACIÓN (Dashboard PDF compacto arriba, TXT compacto abajo en móvil) -->
             <div class="absolute top-2.5 right-2.5 lg:static flex flex-col lg:flex-row gap-1 z-10 order-2 lg:order-3 items-end lg:items-center">
                 <a href="dashboard.html" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg shadow-sm font-bold text-[0.6rem] lg:text-xs flex items-center transition-colors order-1 lg:order-2">📊 Dashboard PDF</a>
                 <button id="btn-reporte-txt" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg shadow-sm font-bold text-[0.6rem] lg:text-xs transition-colors order-2 lg:order-1">
@@ -93,14 +97,15 @@
 
         <div class="flex flex-col lg:flex-row gap-4 flex-grow min-h-0 overflow-y-auto lg:overflow-y-hidden pb-16 lg:pb-0 w-full">
             <div class="w-full lg:w-2/3 relative flex flex-col bg-white p-1.5 md:p-2 rounded-xl shadow-sm border border-gray-200 h-[65vh] lg:h-full shrink-0">
-                <details open class="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 border border-slate-200 rounded-lg shadow-sm w-[85%] sm:w-auto max-w-sm">
-                    <summary class="text-[0.6rem] font-bold text-slate-500 uppercase cursor-pointer list-none flex justify-between items-center [&::-webkit-details-marker]:hidden">Aislamiento de Riesgo ▼</summary>
-                    <div class="flex flex-wrap gap-1 mt-2 filtro-seccion">
-                        <button class="btn-pill active" data-estado="Todos">Vista General</button>
+                <!-- VENTANA DESPLEGABLE EN 2 FILAS EXACTAS PARA CELULAR Y RESPONSIVA EN PC -->
+                <details open class="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 border border-slate-200 rounded-lg shadow-sm w-[260px] sm:w-auto max-w-sm">
+                    <summary class="text-[0.65rem] font-bold text-slate-500 uppercase cursor-pointer list-none flex justify-between items-center [&::-webkit-details-marker]:hidden">Aislamiento de Riesgo ▼</summary>
+                    <div class="grid grid-cols-3 gap-1.5 mt-2 filtro-seccion">
+                        <button class="btn-pill active" data-estado="Todos">Vista Gral</button>
                         <button class="btn-pill" data-estado="Criticos">🔴 Sin Acción</button>
                         <button class="btn-pill" data-estado="Tramite">🟣 En Trámite</button>
-                        <button class="btn-pill" data-estado="Menor4Meses">🟡 Alerta Preventiva</button>
-                        <button class="btn-pill" data-estado="Ley31955">🟠 Ley N° 31955</button>
+                        <button class="btn-pill" data-estado="Menor4Meses">🟡 Alerta</button>
+                        <button class="btn-pill" data-estado="Ley31955">🟠 Ley 31955</button>
                         <button class="btn-pill" data-estado="Culminado">🟢 Culminadas</button>
                     </div>
                 </details>
