@@ -10,7 +10,11 @@
  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
- <!-- Barra Superior / Título Principal y Filtros -->
+
+ <!-- Contenedor del Mapa (Debe ir primero para que Leaflet calcule bien el DOM) -->
+ <div id="map"></div>
+
+ <!-- Cabecera Superior: Título y Filtro por Estado -->
  <div id="header-container">
    <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
    
@@ -34,7 +38,7 @@
    </div>
  </div>
 
- <!-- Panel de Indicadores de Gestión (KPIs en 1 sola fila simétrica) -->
+ <!-- Panel de Indicadores de Gestión (KPIs) -->
  <div id="panel-kpis">
    <div class="kpi-card kpi-inicial">
      <span class="kpi-title">Cerco Inicial</span>
@@ -71,7 +75,7 @@
    </div>
  </div>
 
- <!-- Botones de Utilidad Inferior Derecha (Consultor IA y Reportes) -->
+ <!-- Botones de Acciones (Consultor IA y Reportes) -->
  <div id="panel-acciones">
    <button class="btn-accion btn-consultor" onclick="abrirConsultorIA()" title="Consultor IA">
      🤖 Consultar Datos
@@ -81,8 +85,8 @@
    </button>
  </div>
 
- <!-- Contenedor del Mapa -->
- <div id="map"></div>
+ <!-- Marca de Agua Discreta -->
+ <div id="marca-agua">Diseñado por Vladimir Casas</div>
 
  <!-- Librerías JS y Script -->
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
