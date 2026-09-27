@@ -8,11 +8,11 @@ L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
  className: 'mapa-google-gris'  
 }).addTo(map);  
 
-// URL directa del CSV publicado en Google Sheets
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
 
-let grupoMarcadores = L.featureGroup();  
-let grupoPoligonos = L.featureGroup();  
+// Grupus independientes para controlar la jerarquía de superposición
+let grupoPoligonos = L.featureGroup().addTo(map);  
+let grupoMarcadoresIDs = L.featureGroup().addTo(map);  
 
 let mapaDatosSheets = {};  
 let datosGlobalesCSV = [];
@@ -24,6 +24,7 @@ function normalizarID(texto) {
  return texto.toString().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();  
 }  
 
+// Estilos de polígonos ordenados por prioridad visual de abajo a arriba: Culminada -> Inicial -> Liberado -> Residual
 function estiloPoligono(feature) {  
  let tipo = feature.properties.tipo ? feature.properties.tipo.toLowerCase() : "";  
  if (tipo === "residual") return { color: "#f472b6", fillColor: "#fce7f3", weight: 2, opacity: 0.9, fillOpacity: 0.5 };  
@@ -46,63 +47,17 @@ Promise.all([
  datosGlobalesCSV = csvData;
 
  actualizarDashboardYMapa(csvData, geojsonData, 'todos');
- 
- map.on('zoomend', ajustarCapasPorZoom);
- ajustarCapasPorZoom();
 });
 
 function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  filtroActualGlobal = filtroEstado;
  let countInicial = 0, countResidual = 0, countLiberado = 0, countCulminada = 0;  
 
- grupoMarcadores.clearLayers();
  grupoPoligonos.clearLayers();
+ grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- csvData.forEach(item => {  
-   if (item.ID) {  
-     let idNorm = normalizarID(item.ID);  
-     mapaDatosSheets[idNorm] = item;  
-  
-     let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
-     let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
-     let estadoObra = item.Estado ? item.Estado.trim().toLowerCase() : "";  
-  
-     if (tieneLib === "SI") countLiberado++;  
-     if (tipoC === "residual") countResidual++;  
-     else if (tipoC === "inicial" || !tipoC) countInicial++;  
-     if (estadoObra === "culminada" || tipoC === "culminada") countCulminada++;
-  
-     let cumpleFiltro = true;
-     if (filtroEstado === 'inicial') cumpleFiltro = (tipoC === 'inicial' || !tipoC);
-     if (filtroEstado === 'residual') cumpleFiltro = (tipoC === 'residual');
-     if (filtroEstado === 'liberado') cumpleFiltro = (tieneLib === 'SI');
-     if (filtroEstado === 'culminada') cumpleFiltro = (tipoC === 'culminada' || estadoObra === 'culminada');
-
-     if (cumpleFiltro) {
-       let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
-       let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
-  
-       if (!isNaN(lat) && !isNaN(lon)) {  
-         let colorPunto = "#d4a39b";
-         if (tipoC === 'residual') colorPunto = "#f472b6";
-         else if (tieneLib === 'SI') colorPunto = "#38bdf8";
-         else if (tipoC === 'culminada') colorPunto = "#94a3b8";
-
-         let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: colorPunto, color: "#ffffff", weight: 2, opacity: 1, fillOpacity: 0.9 });  
-         marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
-         marker.bindPopup(generarHTMLPopup(item.ID, item));
-         marker.addTo(grupoMarcadores);  
-       }  
-     }
-   }  
- });  
-  
- document.getElementById('kpi-inicial').innerText = countInicial;  
- document.getElementById('kpi-residual').innerText = countResidual;  
- document.getElementById('kpi-liberado').innerText = countLiberado;  
- document.getElementById('kpi-culminada').innerText = countCulminada;  
-  
+ // 1. PRIMERO CARGAMOS LOS POLÍGONOS (Capa base inferior)
  L.geoJSON(geojsonData, {  
    filter: function(feature) {
      if (filtroEstado === 'todos') return true;
@@ -116,19 +71,73 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    style: estiloPoligono,  
    onEachFeature: function(feature, layer) {  
      let idGeo = normalizarID(feature.properties.id || feature.properties.ID);  
-     let datos = mapaDatosSheets[idGeo] || { ID: feature.properties.id || 'N/A', Nombre: 'Estructura Línea 2' };  
+     // Buscamos en las columnas del CSV, considerando la Columna D (índice 3 o nombre de clave dinámico)
+     let keys = Object.keys(csvData[0] || {});
+     let colDKey = keys[3] || 'Estado'; // Columna D corresponde al estado/culminada
+     
+     let datos = mapaDatosSheets[idGeo] || { ID: feature.properties.id || 'N/A', Nombre: 'Estructura Línea 2 y 4' };  
      layer.bindPopup(generarHTMLPopup(datos.ID || feature.properties.id, datos));   
    }  
  }).addTo(grupoPoligonos);  
+
+ // 2. LUEGO PROCESAMOS LOS DATOS Y LA CAPA SUPERIOR DE IDs Y MARCADORES
+ csvData.forEach(item => {  
+   if (item.ID) {  
+     let idNorm = normalizarID(item.ID);  
+     mapaDatosSheets[idNorm] = item;  
   
- ajustarCapasPorZoom();
+     let keys = Object.keys(item);
+     let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; // Lectura de la Columna D
+     let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
+     let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
+  
+     if (tieneLib === "SI") countLiberado++;  
+     if (tipoC === "residual") countResidual++;  
+     else if (tipoC === "inicial" || !tipoC) countInicial++;  
+     
+     // Conteo exacto de Culminada basado en la Columna D o tipo
+     if (valColD === "culminada" || tipoC === "culminada" || valColD === "si" || valColD === "culminado") {
+       countCulminada++;
+     }
+  
+     let cumpleFiltro = true;
+     if (filtroEstado === 'inicial') cumpleFiltro = (tipoC === 'inicial' || !tipoC);
+     if (filtroEstado === 'residual') cumpleFiltro = (tipoC === 'residual');
+     if (filtroEstado === 'liberado') cumpleFiltro = (tieneLib === 'SI');
+     if (filtroEstado === 'culminada') cumpleFiltro = (tipoC === 'culminada' || valColD === "culminada" || valColD === "culminado");
+
+     if (cumpleFiltro) {
+       let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
+       let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
+  
+       if (!isNaN(lat) && !isNaN(lon)) {  
+         let colorPunto = "#d4a39b";
+         if (tipoC === 'residual') colorPunto = "#f472b6";
+         else if (tieneLib === 'SI') colorPunto = "#38bdf8";
+         else if (tipoC === 'culminada' || valColD === "culminada") colorPunto = "#94a3b8";
+
+         // Marcador puntual con persistencia absoluta en cualquier nivel de zoom
+         let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: colorPunto, color: "#ffffff", weight: 2, opacity: 1, fillOpacity: 0.9 });  
+         marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
+         marker.bindPopup(generarHTMLPopup(item.ID, item));
+         marker.addTo(grupoMarcadoresIDs);  
+       }  
+     }
+   }  
+ });  
+  
+ document.getElementById('kpi-inicial').innerText = countInicial;  
+ document.getElementById('kpi-residual').innerText = countResidual;  
+ document.getElementById('kpi-liberado').innerText = countLiberado;  
+ document.getElementById('kpi-culminada').innerText = countCulminada;  
+  
  setTimeout(() => { map.invalidateSize(); }, 200);
 }
 
 function generarHTMLPopup(idEstructura, datos) {
   return `  
     <div style="min-width: 200px; font-size: 11px;">  
-      <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${idEstructura}: ${datos.Nombre || 'Estructura L2'}</h3>  
+      <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${idEstructura}: ${datos.Nombre || 'Estructura L2 y L4'}</h3>  
       <div style="color: #64748b; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Tipo: ${datos.Tipo_Cerramiento || 'Cerramiento'}</div>  
       <div>📅 <b>Constatación:</b> ${datos.Fecha_Constatacion || '-'}</div>  
       <div>🚧 <b>Liberación:</b> ${datos.Fecha_Liberacion || '-'}</div>  
@@ -136,17 +145,6 @@ function generarHTMLPopup(idEstructura, datos) {
       <div>📐 <b>Plano:</b> ${datos.Codigo_Plano || '-'}</div>  
     </div>  
   `;
-}
-
-function ajustarCapasPorZoom() {
-  let zoom = map.getZoom();
-  if (zoom >= 16) {
-    if (map.hasLayer(grupoMarcadores)) map.removeLayer(grupoMarcadores);
-    if (!map.hasLayer(grupoPoligonos)) map.addLayer(grupoPoligonos);
-  } else {
-    if (!map.hasLayer(grupoPoligonos)) map.removeLayer(grupoPoligonos);
-    if (!map.hasLayer(grupoMarcadores)) map.addLayer(grupoMarcadores);
-  }
 }
 
 function filtrarEstado(tipo) {
