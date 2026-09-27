@@ -38,7 +38,7 @@
      </div>
    </div>
 
-   <!-- Panel de Filtro por Estado (Colapsable en Móvil) -->
+   <!-- Panel de Filtro por Estado -->
    <div id="panel-filtros">
      <div class="filtro-header-mobile" onclick="toggleFiltros()">
        <span>🔍 FILTRAR POR ESTADO</span>
@@ -58,22 +58,22 @@
    </div>
  </div>
 
- <!-- 3. Leyenda de Cerramientos (Colapsable en móvil) -->
+ <!-- 3. Leyenda de Cerramientos (Inferior Izquierda en Web, Colapsable hacia arriba en Móvil) -->
  <div id="panel-leyenda">
    <div class="leyenda-header-mobile" onclick="toggleLeyenda()">
      <span>📋 LEYENDA DE CERRAMIENTOS</span>
-     <span id="leyenda-icon">▼</span>
+     <span id="leyenda-icon">▲</span>
    </div>
    <div class="leyenda-contenido" id="leyendaContenido">
      <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
-     <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)</div>
+     <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Cerramiento Inicial</div>
      <div class="leyenda-item"><span class="leyenda-color color-residual"></span> Área Residual</div>
      <div class="leyenda-item"><span class="leyenda-color color-liberado"></span> Área Liberada</div>
      <div class="leyenda-item"><span class="leyenda-color color-culminada"></span> Obra Culminada</div>
    </div>
  </div>
 
- <!-- 4. Botones de Acciones (Consultor IA y Reporte) -->
+ <!-- 4. Botones de Acciones (Consultor IA y Reporte con estado "Copiado" discreto) -->
  <div id="panel-acciones">
    <div id="desplegableIA" class="ia-desplegable-arriba">
      <div class="ia-header"><span>🤖 Asistente IA Contractual</span> <button onclick="toggleConsultorIA()">×</button></div>
@@ -87,7 +87,7 @@
    <button class="btn-accion btn-consultor" onclick="toggleConsultorIA()">
      🤖 Consultar Datos
    </button>
-   <button class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
+   <button id="btnReporte" class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
      📄 Reporte
    </button>
  </div>
