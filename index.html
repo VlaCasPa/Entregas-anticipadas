@@ -2,98 +2,164 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestión de Permisos L2L4</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <div id="pantalla-bloqueo">
-        <div class="tarjeta-login">
-            <h2>Línea 2 del Metro</h2>
-            <p>Sistema de Gestión de Cerramientos</p>
-            
-            <div class="grupo-input">
-                <input type="email" id="email-corp" placeholder="Correo (@ccmetrolima.com)">
-                <input type="password" id="pass-corp" placeholder="Contraseña">
-                <button id="btn-login-corp" class="btn-corporativo">Ingresar al Sistema</button>
-            </div>
-
-            <div class="divisor"><span>O</span></div>
-
-            <button id="btn-login-google" class="btn-google">
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-                Ingresar con Google
-            </button>
-            
-            <div id="mensaje-error"></div>
-        </div>
-    </div>
-
-    <div id="app-principal" style="display: none;">
-        <div id="panel-superior">
-            <div id="titulo-flotante">
-                Cerramientos de Obra y Áreas Liberadas<br>
-                <span class="subtitulo">Línea 2 y Ramal 4</span>
-            </div>
-            
-            <div id="panel-kpis">
-                <div class="kpi-box"><div class="kpi-header"><span class="kpi-marker inicial"></span><span class="kpi-title">CERRAMIENTOS</span></div><span class="kpi-value" id="kpi-inicial">0</span></div>
-                <div class="kpi-box"><div class="kpi-header"><span class="kpi-marker liberada"></span><span class="kpi-title">LIBERADAS</span></div><span class="kpi-value" id="kpi-liberado">0</span></div>
-                <div class="kpi-box"><div class="kpi-header"><span class="kpi-marker culminada"></span><span class="kpi-title">CULMINADAS</span></div><span class="kpi-value" id="kpi-culminado">0</span></div>
-            </div>
-        </div>
-
-        <div id="panel-filtros">
-            <div class="filtro-titulo">Filtro por Estado</div>
-            <div class="filtro-botones">
-                <button class="btn-filtro activo" data-filtro="todos">Todos</button>
-                <button class="btn-filtro" data-filtro="inicial">Cerramiento Inicial</button>
-                <button class="btn-filtro" data-filtro="liberada">Liberadas</button>
-                <button class="btn-filtro" data-filtro="culminada">Culminadas</button>
-                <button class="btn-filtro" data-filtro="recientes">&lt; 30 Días</button>
-            </div>
-        </div>
-
-        <div id="map-legend">
-            <h4>Leyenda de Cerramientos</h4>
-            <div class="legend-item"><span class="legend-color inicial"></span><span>Mantiene Cerramiento (Inicial)</span></div>
-            <div class="legend-item"><span class="legend-color residual"></span><span>Área Residual</span></div>
-            <div class="legend-item"><span class="legend-color liberada"></span><span>Área Liberada</span></div>
-            <div class="legend-item"><span class="legend-color culminada"></span><span>Obra Culminada</span></div>
-        </div>
-
-        <div id="map"></div>
-
-        <a href="#" id="btn-reporte" onclick="copiarReporte(event)">📋 Copiar Reporte <span>diseñado por Vladimir Casas</span></a>
-
-        <!-- Módulo Asistente IA Local -->
-        <div id="chatbot-wrapper">
-            <div id="chatbot-window" style="display: none;">
-                <div class="chat-header">
-                    Asistente de Base de Datos
-                    <button id="close-chat">×</button>
-                </div>
-                <div id="chat-messages">
-                    <div class="msg bot-msg">Hola, consulta aquí las fechas de constatación, liberación o los Asientos de Obra de las estaciones. Toda la búsqueda es segura y confidencial.</div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Ej: ¿Cuándo se liberó E12?">
-                    <button id="send-chat">➤</button>
-                </div>
-            </div>
-            <button id="chatbot-toggle">💬 Consultar Datos</button>
-        </div>
-    </div>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Operativo - Línea 2 y Ramal L4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { background-color: #f1f5f9; }
+        #map { height: 100%; width: 100%; z-index: 1; border-radius: 0.5rem; border: 1px solid #e2e8f0; }
+        .mapa-google-gris { filter: grayscale(100%) brightness(1.00) contrast(1.00) opacity(0.75); z-index: 0 !important; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .brillo-preventivo { animation: pulso-amarillo 2s infinite; stroke: #f59e0b !important; }
+        .brillo-tramite-vencido { animation: pulso-rojo 2s infinite; stroke: #dc2626 !important; }
+        @keyframes pulso-amarillo { 0% { filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4)); } 50% { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8)); } }
+        @keyframes pulso-rojo { 0% { filter: drop-shadow(0 0 2px rgba(220, 38, 38, 0.4)); } 50% { filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.8)); } }
+        
+        .btn-pill { background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .btn-pill.active { background: #1e293b; color: white; border-color: #1e293b; }
+        
+        .leaflet-popup-content-wrapper { border-radius: 8px; padding: 0; overflow: hidden; z-index: 1001; }
+        .popup-container { font-family: 'Segoe UI', sans-serif; padding: 12px; }
+        .auth-box { background-color: #f8fafc; border-left: 4px solid #cbd5e1; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 0.85rem;}
+        .estado-critico-sin-accion { border-left-color: #dc2626; background-color: #fef2f2; }
+        .estado-critico-en-tramite { border-left-color: #c026d3; background-color: #fdf4ff; }
+        .estado-alerta { border-left-color: #f59e0b; background-color: #fffbeb; }
+        .estado-tramite-plazo { border-left-color: #3b82f6; background-color: #eff6ff; }
+        .estado-exonerado { border-left-color: #f97316; background-color: #fff7ed; }
+        .estado-culminado { border-left-color: #10b981; background-color: #ecfdf5; }
+        
+        #panel-chat { position: fixed; bottom: 35px; left: 20px; width: calc(100% - 40px); max-width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1000; transition: height 0.3s ease; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e5e7eb;}
+        .chat-minimizada { height: 42px; }
+        .chat-abierta { height: 400px; }
+        #chat-header { background: #1e293b; color: white; padding: 10px 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;}
+        #chat-mensajes { flex-grow: 1; overflow-y: auto; padding: 14px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px;}
+        .msg-user { align-self: flex-end; background: #2563eb; color: white; padding: 8px 12px; border-radius: 12px 12px 0 12px; font-size: 0.85rem; max-width: 85%; }
+        .msg-bot { align-self: flex-start; background: white; color: #1e293b; padding: 8px 12px; border-radius: 12px 12px 12px 0; font-size: 0.85rem; border: 1px solid #e2e8f0; max-width: 85%; }
+        #chat-input-container { display: flex; padding: 10px; background: white; border-top: 1px solid #e2e8f0; }
+        #chat-input { flex-grow: 1; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; outline: none; font-size: 0.85rem; }
+        #btn-enviar-chat { background: #2563eb; color: white; border: none; padding: 6px 12px; margin-left: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;}
+        .tabla-scroll { max-height: 45vh; overflow-y: auto; overflow-x: auto; }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased relative h-screen flex flex-col overflow-hidden">
+
+    <div id="pantalla-bloqueo" class="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-[9999]">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-[90%] max-w-[400px] text-center border-t-4 border-blue-600">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Sistema de Control</h2>
+            <p class="text-sm text-slate-500 mb-6">Administración Contractual L2/L4</p>
+            <div class="space-y-4">
+                <input type="email" id="email-corp" placeholder="Correo Corporativo" class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                <input type="password" id="pass-corp" placeholder="Contraseña" class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                <button id="btn-login-corp" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors">Ingresar al Sistema</button>
+                <div class="relative flex items-center py-2"><div class="flex-grow border-t border-gray-300"></div><span class="flex-shrink-0 mx-4 text-gray-400 text-xs">Opciones Alternas</span><div class="flex-grow border-t border-gray-300"></div></div>
+                <button id="btn-login-google" class="w-full bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold py-3 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> 
+                    Ingresar con Google
+                </button>
+            </div>
+            <p id="mensaje-error" class="hidden mt-4 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200"></p>
+        </div>
+    </div>
+
+    <div id="app-principal" style="display: none;" class="flex-col w-full max-w-[1920px] mx-auto p-2 md:p-4 h-full overflow-hidden">
+        <header class="relative flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-2.5 lg:px-6 rounded-xl shadow-sm border border-gray-200 mb-3 shrink-0 gap-2.5 w-full">
+            <div class="shrink-0 w-full lg:w-auto pr-20 lg:pr-0 order-1">
+                <h1 class="text-base md:text-xl font-black text-slate-800 tracking-tight leading-tight">Autorizaciones Municipales</h1>
+                <p class="text-[0.6rem] md:text-xs text-slate-500 font-semibold mt-0.5">Línea 2 y Ramal L4 - Consorcio Constructor</p>
+            </div>
+            
+            <div class="flex w-full lg:w-auto overflow-x-auto no-scrollbar justify-between lg:justify-end gap-1 md:gap-4 items-center shrink-0 order-3 lg:order-2">
+                <div class="flex flex-col items-center px-1 border-r border-gray-200 shrink-0"><span class="text-[0.55rem] md:text-[0.65rem] font-bold text-slate-500 uppercase">Sin Acción</span><span id="kpi-rojo" class="text-lg md:text-2xl font-black text-red-600">0</span></div>
+                <div class="flex flex-col items-center px-1 border-r border-gray-200 shrink-0"><span class="text-[0.55rem] md:text-[0.65rem] font-bold text-slate-500 uppercase">En Trámite</span><span id="kpi-morado" class="text-lg md:text-2xl font-black text-fuchsia-600">0</span></div>
+                <div class="flex flex-col items-center px-1 border-r border-gray-200 shrink-0"><span class="text-[0.55rem] md:text-[0.65rem] font-bold text-slate-500 uppercase">&lt; 4 Meses</span><span id="kpi-amarillo" class="text-lg md:text-2xl font-black text-yellow-500">0</span></div>
+                <div class="flex flex-col items-center px-1 border-r border-gray-200 shrink-0"><span class="text-[0.55rem] md:text-[0.65rem] font-bold text-slate-500 uppercase">Ley 31955</span><span id="kpi-naranja" class="text-lg md:text-2xl font-black text-orange-500">0</span></div>
+                <div class="flex flex-col items-center px-1 border-r lg:border-none border-gray-200 shrink-0"><span class="text-[0.55rem] md:text-[0.65rem] font-bold text-slate-500 uppercase">Culminadas</span><span id="kpi-verde" class="text-lg md:text-2xl font-black text-emerald-500">0</span></div>
+            </div>
+
+            <!-- BOTONES NAVEGACIÓN (Dashboard PDF compacto arriba, TXT compacto abajo en móvil) -->
+            <div class="absolute top-2.5 right-2.5 lg:static flex flex-col lg:flex-row gap-1 z-10 order-2 lg:order-3 items-end lg:items-center">
+                <a href="dashboard.html" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg shadow-sm font-bold text-[0.6rem] lg:text-xs flex items-center transition-colors order-1 lg:order-2">📊 Dashboard PDF</a>
+                <button id="btn-reporte-txt" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg shadow-sm font-bold text-[0.6rem] lg:text-xs transition-colors order-2 lg:order-1">
+                    <span class="inline lg:hidden">📄 TXT</span>
+                    <span class="hidden lg:inline">📄 Copiar TXT</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-4 flex-grow min-h-0 overflow-y-auto lg:overflow-y-hidden pb-16 lg:pb-0 w-full">
+            <div class="w-full lg:w-2/3 relative flex flex-col bg-white p-1.5 md:p-2 rounded-xl shadow-sm border border-gray-200 h-[65vh] lg:h-full shrink-0">
+                <details open class="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 border border-slate-200 rounded-lg shadow-sm w-[85%] sm:w-auto max-w-sm">
+                    <summary class="text-[0.6rem] font-bold text-slate-500 uppercase cursor-pointer list-none flex justify-between items-center [&::-webkit-details-marker]:hidden">Aislamiento de Riesgo ▼</summary>
+                    <div class="flex flex-wrap gap-1 mt-2 filtro-seccion">
+                        <button class="btn-pill active" data-estado="Todos">Vista General</button>
+                        <button class="btn-pill" data-estado="Criticos">🔴 Sin Acción</button>
+                        <button class="btn-pill" data-estado="Tramite">🟣 En Trámite</button>
+                        <button class="btn-pill" data-estado="Menor4Meses">🟡 Alerta Preventiva</button>
+                        <button class="btn-pill" data-estado="Ley31955">🟠 Ley N° 31955</button>
+                        <button class="btn-pill" data-estado="Culminado">🟢 Culminadas</button>
+                    </div>
+                </details>
+                <div id="map" class="flex-grow z-0 rounded-lg"></div>
+            </div>
+
+            <div class="w-full lg:w-1/3 flex flex-col gap-4 shrink-0 lg:shrink lg:h-full lg:min-h-0 pb-6 lg:pb-0">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-[400px] lg:h-1/2 shrink-0 lg:shrink">
+                    <div class="p-3 border-b border-gray-200 bg-slate-50 rounded-t-xl">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Semáforo Global - Obras</h3>
+                    </div>
+                    <div class="tabla-scroll flex-grow relative bg-white rounded-b-xl">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-white text-slate-500 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th class="p-2.5 font-bold uppercase tracking-wider w-16">ID</th>
+                                    <th class="p-2.5 font-bold uppercase tracking-wider">Resolución Base</th>
+                                    <th class="p-2.5 font-bold uppercase tracking-wider text-center w-28">Contingencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-obras-global" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-[400px] lg:h-1/2 shrink-0 lg:shrink">
+                    <div class="p-3 border-b border-gray-200 bg-slate-50 rounded-t-xl">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Semáforo Global - Desvíos</h3>
+                    </div>
+                    <div class="tabla-scroll flex-grow relative bg-white rounded-b-xl">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-white text-slate-500 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th class="p-2.5 font-bold uppercase tracking-wider w-16">ID</th>
+                                    <th class="p-2.5 font-bold uppercase tracking-wider">Resolución Base</th>
+                                    <th class="p-2.5 font-bold uppercase tracking-wider text-center w-28">Contingencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-desvios-global" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-chat" class="chat-minimizada">
+            <div id="chat-header"><span class="flex items-center gap-2 text-sm font-bold">🤖 Consultor IA (beta)</span></div>
+            <div id="chat-mensajes"><div class="msg-bot">Hola. Consulta estados o vigencias (Ej: "¿Qué obras están por vencer?").</div></div>
+            <div id="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Pregunta aquí...">
+                <button id="btn-enviar-chat">Enviar</button>
+            </div>
+        </div>
+
+        <div class="fixed bottom-2 right-3 z-[9999] opacity-60 pointer-events-none">
+            <span class="text-[0.65rem] text-slate-500 font-medium uppercase bg-white/70 px-2 py-1 rounded shadow-sm">Diseñado por <b class="text-slate-800">Vladimir Casas</b></span>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
