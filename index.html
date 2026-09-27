@@ -11,12 +11,12 @@
 </head>
 <body>
 
- <!-- Contenedor del Mapa (Debe ir primero para que Leaflet calcule bien el DOM) -->
+ <!-- 1. Contenedor del Mapa (Debe cargar primero y ocupar 100% de la ventana) -->
  <div id="map"></div>
 
- <!-- Cabecera Superior: Título y Filtro por Estado -->
- <div id="header-container">
-   <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
+ <!-- 2. Cabecera Flotante Superior (Título + Filtros) -->
+ <div id="header-flotante">
+   <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
    
    <!-- Panel de Filtro por Estado (Colapsable en Móvil) -->
    <div id="panel-filtros">
@@ -38,7 +38,7 @@
    </div>
  </div>
 
- <!-- Panel de Indicadores de Gestión (KPIs) -->
+ <!-- 3. Panel de Indicadores de Gestión (KPIs en 1 sola fila simétrica) -->
  <div id="panel-kpis">
    <div class="kpi-card kpi-inicial">
      <span class="kpi-title">Cerco Inicial</span>
@@ -58,24 +58,16 @@
    </div>
  </div>
 
- <!-- Leyenda de Cerramientos -->
+ <!-- 4. Leyenda de Cerramientos (Inferior Izquierda) -->
  <div id="panel-leyenda">
    <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
-   <div class="leyenda-item">
-     <span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)
-   </div>
-   <div class="leyenda-item">
-     <span class="leyenda-color color-residual"></span> Área Residual
-   </div>
-   <div class="leyenda-item">
-     <span class="leyenda-color color-liberado"></span> Área Liberada
-   </div>
-   <div class="leyenda-item">
-     <span class="leyenda-color color-culminada"></span> Obra Culminada
-   </div>
+   <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)</div>
+   <div class="leyenda-item"><span class="leyenda-color color-residual"></span> Área Residual</div>
+   <div class="leyenda-item"><span class="leyenda-color color-liberado"></span> Área Liberada</div>
+   <div class="leyenda-item"><span class="leyenda-color color-culminada"></span> Obra Culminada</div>
  </div>
 
- <!-- Botones de Acciones (Consultor IA y Reportes) -->
+ <!-- 5. Botones de Acciones (Consultor IA y Reportes - Inferior Derecha) -->
  <div id="panel-acciones">
    <button class="btn-accion btn-consultor" onclick="abrirConsultorIA()" title="Consultor IA">
      🤖 Consultar Datos
@@ -85,7 +77,7 @@
    </button>
  </div>
 
- <!-- Marca de Agua Discreta -->
+ <!-- 6. Marca de Agua Discreta -->
  <div id="marca-agua">Diseñado por Vladimir Casas</div>
 
  <!-- Librerías JS y Script -->
