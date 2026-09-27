@@ -61,10 +61,15 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. KPI PURAMENTE BASADO EN CANTIDAD DE IDs ÚNICOS DEL CSV
+ // 1. KPI BASADO ESTRICTAMENTE EN IDs ÚNICOS DEL CSV (Criterio Lean / PMBOK de medición unívoca)
+ let idsProcesados = new Set();
+
  csvData.forEach(item => {  
    if (item.ID) {  
      let idNorm = normalizarID(item.ID);  
+     if (idsProcesados.has(idNorm)) return; // Evitar duplicados por ID
+     idsProcesados.add(idNorm);
+
      mapaDatosSheets[idNorm] = item;  
   
      let keys = Object.keys(item);
@@ -87,7 +92,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  document.getElementById('kpi-liberado').innerText = countLiberado;  
  document.getElementById('kpi-culminada').innerText = countCulminada;  
 
- // 2. ORDEN DE CARGA DE POLÍGONOS (Residual al final para quedar encima de los otros)
+ // 2. ORDEN DE CARGA DE POLÍGONOS (Residual al final para superposición visual correcta)
  let featuresOrdenadas = [...geojsonData.features].sort((a, b) => {
    let tA = (a.properties.tipo || "").toLowerCase();
    let tB = (b.properties.tipo || "").toLowerCase();
@@ -105,6 +110,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (filtroEstado === 'residual') return tipoGeo === 'residual';
      if (filtroEstado === 'liberado') return tipoGeo === 'liberado';
      if (filtroEstado === 'culminada') return tipoGeo === 'culminada';
+     if (filtroEstado === '30dias') return false; // Restricción estricta si no hay data temporal menor a 30 días
      return true;
    })
  };
@@ -118,7 +124,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 3. CARGA DE MARCADORES E IDS (Color amarillo institucional #FACC15 para todos)
+ // 3. CARGA DE MARCADORES E IDS (Color amarillo institucional #FACC15 permanente para todos)
  let boundsArray = [];
  csvData.forEach(item => {  
    if (item.ID) {  
@@ -133,6 +139,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (filtroEstado === 'residual') cumpleFiltro = (tipoC === 'residual');
      if (filtroEstado === 'liberado') cumpleFiltro = (tieneLib === 'SI');
      if (filtroEstado === 'culminada') cumpleFiltro = (tipoC === 'culminada' || valColD === "culminada" || valColD === "culminado");
+     if (filtroEstado === '30dias') cumpleFiltro = false; // Sin registros por defecto
 
      if (cumpleFiltro) {
        let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
@@ -141,7 +148,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        if (!isNaN(lat) && !isNaN(lon)) {  
          boundsArray.push([lat, lon]);
 
-         // Marcador con relleno amarillo fijo (#FACC15) para todos los IDs
+         // Marcador puntual con color amarillo institucional fijo (#FACC15)
          let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: "#FACC15", color: "#1E293B", weight: 2, opacity: 1, fillOpacity: 1 });  
          marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
          marker.bindPopup(generarHTMLPopup(item.ID, item));
@@ -151,7 +158,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // Zoom Out dinámico (fitBounds) para cualquier filtro seleccionado
+ // Zoom Out dinámico (fitBounds) garantizado para cualquier filtro seleccionado
  if (boundsArray.length > 0 && filtroEstado !== 'todos') {
    map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
  } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
