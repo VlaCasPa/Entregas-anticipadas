@@ -73,7 +73,6 @@ body, html {
 .color-liberado { background-color: #e0f2fe; border: 1.5px solid #38bdf8; }
 .color-culminada { background-color: #e2e8f0; border: 1.5px solid #94a3b8; }
 
-/* Botones de acción inferiores y Panel IA Desplegable hacia arriba */
 #panel-acciones {
  position: absolute; bottom: 45px; right: 15px; z-index: 1000; display: flex; gap: 8px; align-items: flex-end;
 }
