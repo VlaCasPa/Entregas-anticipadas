@@ -3,7 +3,7 @@
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Cerramientos de Obra y Áreas Liberadas - Línea 2</title>
+ <title>Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</title>
  <!-- Leaflet CSS -->
  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
  <link rel="stylesheet" href="style.css">
@@ -14,9 +14,9 @@
  <!-- 1. Contenedor del Mapa -->
  <div id="map"></div>
 
- <!-- 2. Cabecera Flotante Superior (Título y Filtros) -->
+ <!-- 2. Cabecera Flotante Superior (Título actualizado y Filtros) -->
  <div id="header-flotante">
-   <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
+   <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
    
    <!-- Panel de Filtro por Estado (Colapsable en Móvil) -->
    <div id="panel-filtros">
@@ -58,7 +58,7 @@
    </div>
  </div>
 
- <!-- 4. Leyenda de Cerramientos (Escritorio) -->
+ <!-- 4. Leyenda de Cerramientos (Visible en Web y Celular) -->
  <div id="panel-leyenda">
    <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
    <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)</div>
@@ -67,7 +67,7 @@
    <div class="leyenda-item"><span class="leyenda-color color-culminada"></span> Obra Culminada</div>
  </div>
 
- <!-- 5. Botones de Acciones (Consultor IA y Reporte) -->
+ <!-- 5. Botones de Acciones -->
  <div id="panel-acciones">
    <button class="btn-accion btn-consultor" onclick="abrirConsultorIA()" title="Consultor IA">
      🤖 Consultar Datos
@@ -80,17 +80,17 @@
  <!-- 6. Marca de Agua Discreta -->
  <div id="marca-agua">Diseñado por Vladimir Casas</div>
 
- <!-- 7. Ventana Modal para el Consultor IA -->
+ <!-- 7. Ventana Modal del Consultor IA -->
  <div id="modalConsultor" class="modal-overlay">
    <div class="modal-card">
      <div class="modal-header">
-       <h3>🤖 Asistente IA - Línea 2</h3>
+       <h3>🤖 Asistente IA - Línea 2 y 4</h3>
        <button class="modal-close" onclick="cerrarConsultorIA()">×</button>
      </div>
      <div class="modal-body">
        <p><b>Estado del Sistema:</b> Conectado a la base de datos de interferencias y permisos de obra.</p>
        <p>Ingrese su consulta técnica o normativa contractual:</p>
-       <textarea id="inputConsultaIA" placeholder="Ej: ¿Cuál es el estado de liberación de los frentes en Ate?"></textarea>
+       <textarea id="inputConsultaIA" placeholder="Ej: ¿Cuál es el estado de liberación de los frentes?"></textarea>
        <div id="respuestaIA" class="respuesta-ia-box">Listo para procesar su consulta técnica...</div>
      </div>
      <div class="modal-footer">
