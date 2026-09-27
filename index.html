@@ -1,99 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestión de Permisos L2L4</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="stylesheet" href="style.css">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Cerramientos de Obra y Áreas Liberadas - Línea 2</title>
+ <!-- Leaflet CSS -->
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+ <link rel="stylesheet" href="style.css">
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+ <!-- Título Principal -->
+ <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
+ 
+ <!-- Panel de Filtro por Estado (Versión Web y Celular) -->
+ <div id="panel-filtros">
+   <div class="filtro-titulo">FILTRO POR ESTADO</div>
+   <div class="filtros-botones">
+     <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+     <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+     <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+     <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+     <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+     <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+   </div>
+ </div>
 
-    <div id="pantalla-bloqueo">
-        <div class="tarjeta-login">
-            <h2>Línea 2 del Metro</h2>
-            <p>Sistema de Gestión de Cerramientos</p>
-            
-            <div class="grupo-input">
-                <input type="email" id="email-corp" placeholder="Correo (@ccmetrolima.com)">
-                <input type="password" id="pass-corp" placeholder="Contraseña">
-                <button id="btn-login-corp" class="btn-corporativo">Ingresar al Sistema</button>
-            </div>
+ <!-- Panel de Indicadores de Gestión (KPIs) -->
+ <div id="panel-kpis">
+ <div class="kpi-card kpi-inicial">
+ <span class="kpi-title">Cerco Inicial</span>
+ <span class="kpi-value" id="kpi-inicial">0</span>
+ </div>
+ <div class="kpi-card kpi-residual">
+ <span class="kpi-title">Área Residual</span>
+ <span class="kpi-value" id="kpi-residual">0</span>
+ </div>
+ <div class="kpi-card kpi-liberado">
+ <span class="kpi-title">Área Liberada</span>
+ <span class="kpi-value" id="kpi-liberado">0</span>
+ </div>
+ </div>
 
-            <div class="divisor"><span>O</span></div>
+ <!-- Leyenda de Cerramientos -->
+ <div id="panel-leyenda">
+ <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
+ <div class="leyenda-item">
+ <span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)
+ </div>
+ <div class="leyenda-item">
+ <span class="leyenda-color color-residual"></span> Área Residual
+ </div>
+ <div class="leyenda-item">
+ <span class="leyenda-color color-liberado"></span> Área Liberada
+ </div>
+ <div class="leyenda-item">
+ <span class="leyenda-color color-culminada"></span> Obra Culminada
+ </div>
+ </div>
 
-            <button id="btn-login-google" class="btn-google">
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-                Ingresar con Google
-            </button>
-            
-            <div id="mensaje-error"></div>
-        </div>
-    </div>
+ <!-- Contenedor del Mapa -->
+ <div id="map"></div>
 
-    <div id="app-principal" style="display: none;">
-        <div id="panel-superior">
-            <div id="titulo-flotante">
-                Cerramientos de Obra y Áreas Liberadas<br>
-                <span class="subtitulo">Línea 2 y Ramal 4</span>
-            </div>
-            
-            <div id="panel-kpis">
-                <div class="kpi-box"><div class="kpi-header"><span class="kpi-marker inicial"></span><span class="kpi-title">CERRAMIENTOS</span></div><span class="kpi-value" id="kpi-inicial">0</span></div>
-                <div class="kpi-box"><div class="kpi-header"><span class="kpi-marker liberada"></span><span class="kpi-title">LIBERADAS</span></div><span class="kpi-value" id="kpi-liberado">0</span></div>
-                <div class="kpi-box"><div class="kpi-header"><span class="kpi-marker culminada"></span><span class="kpi-title">CULMINADAS</span></div><span class="kpi-value" id="kpi-culminado">0</span></div>
-            </div>
-        </div>
-
-        <div id="panel-filtros">
-            <div class="filtro-titulo">Filtro por Estado</div>
-            <div class="filtro-botones">
-                <button class="btn-filtro activo" data-filtro="todos">Todos</button>
-                <button class="btn-filtro" data-filtro="inicial">Cerramiento Inicial</button>
-                <button class="btn-filtro" data-filtro="liberada">Liberadas</button>
-                <button class="btn-filtro" data-filtro="culminada">Culminadas</button>
-                <button class="btn-filtro" data-filtro="recientes">&lt; 30 Días</button>
-            </div>
-        </div>
-
-        <div id="map-legend">
-            <h4>Leyenda de Cerramientos</h4>
-            <div class="legend-item"><span class="legend-color inicial"></span><span>Mantiene Cerramiento (Inicial)</span></div>
-            <div class="legend-item"><span class="legend-color residual"></span><span>Área Residual</span></div>
-            <div class="legend-item"><span class="legend-color liberada"></span><span>Área Liberada</span></div>
-            <div class="legend-item"><span class="legend-color culminada"></span><span>Obra Culminada</span></div>
-        </div>
-
-        <div id="map"></div>
-
-        <a href="#" id="btn-reporte" onclick="copiarReporte(event)">📋 Reporte <span>diseñado por Vladimir Casas</span></a>
-
-        <!-- Módulo Asistente IA Local -->
-        <div id="chatbot-wrapper">
-            <div id="chatbot-window" style="display: none;">
-                <div class="chat-header">
-                    Asistente de Base de Datos
-                    <button id="close-chat">×</button>
-                </div>
-                <div id="chat-messages">
-                    <div class="msg bot-msg">Hola, consulta aquí las fechas de constatación, liberación o los Asientos de Obra de las estaciones. Toda la búsqueda es segura y confidencial.</div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Ej: ¿Cuándo se liberó E12?">
-                    <button id="send-chat">➤</button>
-                </div>
-            </div>
-            <button id="chatbot-toggle">💬 Consultar Datos</button>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script type="module" src="script.js"></script>
+ <!-- Librerías JS y Script -->
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+ <script src="script.js"></script>
 </body>
 </html>
