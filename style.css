@@ -2,13 +2,16 @@ body, html {
  margin: 0;
  padding: 0;
  height: 100%;
+ width: 100%;
  font-family: 'Inter', sans-serif;
  background-color: #f3f4f6;
+ overflow: hidden;
 }
 
 #map {
- height: 100dvh;
+ height: 100vh;
  width: 100%;
+ z-index: 1;
 }
 
 /* Filtro base Google Maps tenue */
@@ -16,17 +19,28 @@ body, html {
  filter: grayscale(100%) brightness(1.05) contrast(0.9);
 }
 
-/* --- Título Flotante --- */
-#titulo-flotante {
+/* --- Cabecera Superior: Título y Filtros --- */
+#header-container {
  position: absolute;
  top: 15px;
- left: 50%;
- transform: translateX(-50%);
+ left: 15px;
+ right: 15px;
  z-index: 1000;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ pointer-events: none;
+}
+
+#header-container > * {
+ pointer-events: auto;
+}
+
+#titulo-flotante {
  background-color: rgba(255, 255, 255, 0.95);
- padding: 10px 25px;
+ padding: 10px 20px;
  border-radius: 8px;
- font-size: clamp(14px, 3.5vw, 18px);
+ font-size: clamp(13px, 2.5vw, 16px);
  font-weight: 700;
  color: #111827;
  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -36,23 +50,28 @@ body, html {
 
 /* --- Panel de Filtro por Estado --- */
 #panel-filtros {
- position: absolute;
- top: 75px;
- left: 15px;
- z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95);
- padding: 12px 16px;
+ padding: 10px 14px;
  border-radius: 8px;
  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
- max-width: 320px;
+ min-width: 260px;
 }
 
-.filtro-titulo {
- display: block;
+.filtro-header-mobile {
+ display: none;
  font-weight: 700;
- font-size: 10px;
+ font-size: 11px;
  color: #64748b;
- margin-bottom: 8px;
+ cursor: pointer;
+ justify-content: space-between;
+ align-items: center;
+}
+
+.filtro-titulo-web {
+ font-weight: 700;
+ font-size: 9px;
+ color: #64748b;
+ margin-bottom: 6px;
  letter-spacing: 0.5px;
  text-transform: uppercase;
 }
@@ -67,7 +86,7 @@ body, html {
  font-family: 'Inter', sans-serif;
  font-size: 11px;
  font-weight: 600;
- padding: 6px 12px;
+ padding: 5px 10px;
  border-radius: 6px;
  border: 1px solid #cbd5e1;
  cursor: pointer;
@@ -82,53 +101,23 @@ body, html {
 }
 
 /* Colores de botones según la Leyenda */
-.filtro-btn.btn-todos {
- background-color: #334155;
- color: #ffffff;
- border-color: #1e293b;
-}
+.filtro-btn.btn-todos { background-color: #334155; color: #ffffff; border-color: #1e293b; }
+.filtro-btn.btn-inicial { background-color: #f5ebe9; color: #7f1d1d; border-color: #d4a39b; }
+.filtro-btn.btn-residual { background-color: #fce7f3; color: #831843; border-color: #f472b6; }
+.filtro-btn.btn-liberado { background-color: #e0f2fe; color: #0369a1; border-color: #38bdf8; }
+.filtro-btn.btn-culminada { background-color: #e2e8f0; color: #334155; border-color: #94a3b8; }
+.filtro-btn.btn-temporal { background-color: #ffffff; color: #475569; border-color: #cbd5e1; }
 
-.filtro-btn.btn-inicial {
- background-color: #f5ebe9; /* Tono Salmón Leyenda */
- color: #7f1d1d;
- border-color: #d4a39b;
-}
-
-.filtro-btn.btn-residual {
- background-color: #fce7f3; /* Tono Magenta Leyenda */
- color: #831843;
- border-color: #f472b6;
-}
-
-.filtro-btn.btn-liberado {
- background-color: #e0f2fe; /* Tono Celeste Leyenda */
- color: #0369a1;
- border-color: #38bdf8;
-}
-
-.filtro-btn.btn-culminada {
- background-color: #e2e8f0; /* Tono Gris Verdoso Leyenda */
- color: #334155;
- border-color: #94a3b8;
-}
-
-.filtro-btn.btn-temporal {
- background-color: #ffffff;
- color: #475569;
- border-color: #cbd5e1;
-}
-
-/* Estado Activo del Botón */
 .filtro-btn.active {
  box-shadow: 0 0 0 2px #0f172a;
  font-weight: 700;
 }
 
-/* --- Panel de KPIs Superiores --- */
+/* --- Panel de Indicadores (KPIs en 1 sola fila simétrica) --- */
 #panel-kpis {
  position: absolute;
- top: 15px;
- right: 15px;
+ top: 75px;
+ left: 15px;
  z-index: 1000;
  display: flex;
  gap: 8px;
@@ -136,17 +125,17 @@ body, html {
 
 .kpi-card {
  background-color: rgba(255, 255, 255, 0.95);
- padding: 8px 14px;
+ padding: 8px 12px;
  border-radius: 8px;
  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
  text-align: center;
- min-width: 80px;
+ min-width: 90px;
  border-top: 4px solid #94a3b8;
 }
 
 .kpi-title {
  display: block;
- font-size: 9px;
+ font-size: 8.5px;
  font-weight: 700;
  color: #64748b;
  text-transform: uppercase;
@@ -156,7 +145,7 @@ body, html {
 
 .kpi-value {
  display: block;
- font-size: 20px;
+ font-size: 18px;
  font-weight: 700;
 }
 
@@ -169,6 +158,9 @@ body, html {
 .kpi-liberado { border-top-color: #38bdf8; }
 .kpi-liberado .kpi-value { color: #0369a1; }
 
+.kpi-culminada { border-top-color: #94a3b8; }
+.kpi-culminada .kpi-value { color: #334155; }
+
 /* --- Leyenda --- */
 #panel-leyenda {
  position: absolute;
@@ -176,11 +168,11 @@ body, html {
  left: 15px;
  z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95);
- padding: 12px 16px;
+ padding: 10px 14px;
  border-radius: 8px;
  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
  font-size: 11px;
- line-height: 1.6;
+ line-height: 1.5;
 }
 
 .leyenda-titulo {
@@ -188,7 +180,7 @@ body, html {
  font-weight: 700;
  font-size: 9px;
  color: #64748b;
- margin-bottom: 6px;
+ margin-bottom: 5px;
  letter-spacing: 0.5px;
 }
 
@@ -198,11 +190,12 @@ body, html {
  gap: 8px;
  font-weight: 600;
  color: #334155;
+ margin-bottom: 3px;
 }
 
 .leyenda-color {
- width: 14px;
- height: 14px;
+ width: 12px;
+ height: 12px;
  border-radius: 3px;
  display: inline-block;
 }
@@ -212,110 +205,132 @@ body, html {
 .color-liberado { background-color: #e0f2fe; border: 1.5px solid #38bdf8; }
 .color-culminada { background-color: #e2e8f0; border: 1.5px solid #94a3b8; }
 
-/* --- Tooltips y Ventanas Emergentes --- */
-.id-tooltip {
- background-color: transparent !important;
- border: none !important;
- box-shadow: none !important;
- font-weight: 700;
- color: #1e293b;
- font-size: 11px;
- text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
+/* --- Botones de Acciones (Consultor IA y Reporte) --- */
+#panel-acciones {
+ position: absolute;
+ bottom: 25px;
+ right: 15px;
+ z-index: 1000;
+ display: flex;
+ gap: 8px;
 }
 
-.leaflet-popup-content-wrapper {
- border-radius: 10px;
- box-shadow: 0 10px 25px rgba(0,0,0,0.15);
- padding: 6px;
+.btn-accion {
+ background-color: #0f172a;
+ color: #ffffff;
+ border: none;
+ padding: 10px 16px;
+ border-radius: 8px;
+ font-weight: 600;
+ font-size: 12px;
+ cursor: pointer;
+ box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+ transition: background-color 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 6px;
 }
 
-.popup-container {
- min-width: 250px;
+.btn-accion:hover {
+ background-color: #1e293b;
 }
 
-.popup-title {
- font-size: 14px;
- font-weight: 700;
- color: #0f172a;
- margin: 0 0 2px 0;
+.btn-consultor {
+ background-color: #2563eb;
 }
-
-.popup-subtitle {
- font-size: 11px;
- color: #64748b;
- margin-bottom: 8px;
- padding-bottom: 6px;
- border-bottom: 1px solid #e2e8f0;
-}
-
-.popup-dato {
- font-size: 11px;
- color: #334155;
- margin-bottom: 4px;
- line-height: 1.35;
-}
-
-.popup-dato b {
- color: #0f172a;
+.btn-consultor:hover {
+ background-color: #1d4ed8;
 }
 
 /* --- Adaptabilidad Responsive (Celulares y Tablets) --- */
 @media (max-width: 768px) {
- #titulo-flotante {
- position: static;
- transform: none;
- margin: 10px auto;
- text-align: center;
- width: fit-content;
- font-size: 13px;
- padding: 8px 15px;
+ body, html {
+ overflow: auto;
  }
  
- #panel-filtros {
- position: relative;
- top: auto;
- left: auto;
- width: 92%;
- margin: 8px auto;
+ #header-container {
+ flex-direction: column;
+ align-items: stretch;
+ gap: 8px;
+ top: 10px;
+ left: 10px;
+ right: 10px;
+ }
+ 
+ #titulo-flotante {
+ text-align: center;
+ width: 100%;
  box-sizing: border-box;
- }
-
- .filtros-botones {
- display: flex;
- overflow-x: auto;
- gap: 6px;
- padding-bottom: 4px;
- }
-
- .filtro-btn {
- white-space: nowrap;
  font-size: 12px;
- padding: 6px 10px;
+ padding: 8px;
+ }
+
+ #panel-filtros {
+ width: 100%;
+ box-sizing: border-box;
+ padding: 8px 12px;
+ }
+
+ .filtro-header-mobile {
+ display: flex;
+ }
+
+ .filtro-titulo-web {
+ display: none;
+ }
+
+ .filtros-contenido {
+ display: none;
+ margin-top: 8px;
+ }
+
+ .filtros-contenido.show {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 5px;
  }
 
  #panel-kpis {
  position: relative;
  top: auto;
- right: auto;
- justify-content: center;
- margin: 8px auto;
- width: 92%;
+ left: auto;
+ width: 100%;
+ margin: 8px 0;
+ display: grid;
+ grid-template-columns: repeat(4, 1fr);
+ gap: 5px;
+ padding: 0 10px;
+ box-sizing: border-box;
  }
 
  .kpi-card {
- padding: 6px 8px;
- min-width: 70px;
- flex: 1;
+ min-width: unset;
+ padding: 6px 4px;
+ }
+
+ .kpi-title {
+ font-size: 7.5px;
  }
 
  .kpi-value {
- font-size: 16px;
+ font-size: 14px;
  }
 
  #panel-leyenda {
- position: static;
- width: 92%;
- margin: 8px auto 20px auto;
- box-sizing: border-box;
+ display: none; /* Ocultar leyenda en móvil para ganar espacio táctil */
+ }
+
+ #panel-acciones {
+ bottom: 15px;
+ right: 10px;
+ left: 10px;
+ justify-content: center;
+ }
+
+ .btn-accion {
+ flex: 1;
+ justify-content: center;
+ padding: 8px 10px;
+ font-size: 11px;
  }
 }
