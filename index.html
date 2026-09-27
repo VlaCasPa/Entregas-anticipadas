@@ -10,53 +10,75 @@
  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
- <!-- Título Principal -->
- <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
- 
- <!-- Panel de Filtro por Estado (Versión Web y Celular) -->
- <div id="panel-filtros">
-   <div class="filtro-titulo">FILTRO POR ESTADO</div>
-   <div class="filtros-botones">
-     <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
-     <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
-     <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
-     <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
-     <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
-     <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+ <!-- Barra Superior / Título Principal y Filtros -->
+ <div id="header-container">
+   <div id="titulo-flotante">Cerramientos de Obra y Áreas Liberadas - Línea 2</div>
+   
+   <!-- Panel de Filtro por Estado (Colapsable en Móvil) -->
+   <div id="panel-filtros">
+     <div class="filtro-header-mobile" onclick="toggleFiltros()">
+       <span>🔍 FILTRAR POR ESTADO</span>
+       <span id="filtro-icon">▼</span>
+     </div>
+     <div class="filtros-contenido" id="filtrosContenido">
+       <div class="filtro-titulo-web">FILTRO POR ESTADO</div>
+       <div class="filtros-botones">
+         <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+         <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+         <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+         <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+         <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+         <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+       </div>
+     </div>
    </div>
  </div>
 
- <!-- Panel de Indicadores de Gestión (KPIs) -->
+ <!-- Panel de Indicadores de Gestión (KPIs en 1 sola fila simétrica) -->
  <div id="panel-kpis">
- <div class="kpi-card kpi-inicial">
- <span class="kpi-title">Cerco Inicial</span>
- <span class="kpi-value" id="kpi-inicial">0</span>
- </div>
- <div class="kpi-card kpi-residual">
- <span class="kpi-title">Área Residual</span>
- <span class="kpi-value" id="kpi-residual">0</span>
- </div>
- <div class="kpi-card kpi-liberado">
- <span class="kpi-title">Área Liberada</span>
- <span class="kpi-value" id="kpi-liberado">0</span>
- </div>
+   <div class="kpi-card kpi-inicial">
+     <span class="kpi-title">Cerco Inicial</span>
+     <span class="kpi-value" id="kpi-inicial">0</span>
+   </div>
+   <div class="kpi-card kpi-residual">
+     <span class="kpi-title">Área Residual</span>
+     <span class="kpi-value" id="kpi-residual">0</span>
+   </div>
+   <div class="kpi-card kpi-liberado">
+     <span class="kpi-title">Área Liberada</span>
+     <span class="kpi-value" id="kpi-liberado">0</span>
+   </div>
+   <div class="kpi-card kpi-culminada">
+     <span class="kpi-title">Culminadas</span>
+     <span class="kpi-value" id="kpi-culminada">0</span>
+   </div>
  </div>
 
  <!-- Leyenda de Cerramientos -->
  <div id="panel-leyenda">
- <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
- <div class="leyenda-item">
- <span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)
+   <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
+   <div class="leyenda-item">
+     <span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)
+   </div>
+   <div class="leyenda-item">
+     <span class="leyenda-color color-residual"></span> Área Residual
+   </div>
+   <div class="leyenda-item">
+     <span class="leyenda-color color-liberado"></span> Área Liberada
+   </div>
+   <div class="leyenda-item">
+     <span class="leyenda-color color-culminada"></span> Obra Culminada
+   </div>
  </div>
- <div class="leyenda-item">
- <span class="leyenda-color color-residual"></span> Área Residual
- </div>
- <div class="leyenda-item">
- <span class="leyenda-color color-liberado"></span> Área Liberada
- </div>
- <div class="leyenda-item">
- <span class="leyenda-color color-culminada"></span> Obra Culminada
- </div>
+
+ <!-- Botones de Utilidad Inferior Derecha (Consultor IA y Reportes) -->
+ <div id="panel-acciones">
+   <button class="btn-accion btn-consultor" onclick="abrirConsultorIA()" title="Consultor IA">
+     🤖 Consultar Datos
+   </button>
+   <button class="btn-accion btn-reporte" onclick="generarReporteTXT()" title="Reporte TXT">
+     📄 Reporte
+   </button>
  </div>
 
  <!-- Contenedor del Mapa -->
