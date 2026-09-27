@@ -10,7 +10,6 @@ L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
 
-// Dos capas independientes: Polígonos de fondo y Marcadores/IDs al frente absoluto
 let grupoPoligonos = L.featureGroup().addTo(map);  
 let grupoMarcadoresIDs = L.featureGroup().addTo(map);  
 
@@ -24,7 +23,6 @@ function normalizarID(texto) {
  return texto.toString().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();  
 }  
 
-// Estilos de polígonos: Residual se renderiza con mayor énfasis visual
 function estiloPoligono(feature) {  
  let tipo = feature.properties.tipo ? feature.properties.tipo.toLowerCase() : "";  
  if (tipo === "residual") {
@@ -63,14 +61,14 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. INDEXACIÓN DE DATOS CSV Y CONTEO COLUMNA D
+ // 1. KPI PURAMENTE BASADO EN CANTIDAD DE IDs ÚNICOS DEL CSV
  csvData.forEach(item => {  
    if (item.ID) {  
      let idNorm = normalizarID(item.ID);  
      mapaDatosSheets[idNorm] = item;  
   
      let keys = Object.keys(item);
-     let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; // Columna D (Culminadas)
+     let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
      let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
      let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
   
@@ -89,11 +87,11 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  document.getElementById('kpi-liberado').innerText = countLiberado;  
  document.getElementById('kpi-culminada').innerText = countCulminada;  
 
- // 2. ORDEN DE CARGA DE POLÍGONOS (Asegurando que Residual se cargue al final para quedar encima de los demás)
+ // 2. ORDEN DE CARGA DE POLÍGONOS (Residual al final para quedar encima de los otros)
  let featuresOrdenadas = [...geojsonData.features].sort((a, b) => {
    let tA = (a.properties.tipo || "").toLowerCase();
    let tB = (b.properties.tipo || "").toLowerCase();
-   if (tA === "residual") return 1;  // Residual al final (encima)
+   if (tA === "residual") return 1;  
    if (tB === "residual") return -1;
    return 0;
  });
@@ -111,7 +109,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    })
  };
 
- let capaGeoJSON = L.geoJSON(geojsonFiltrado, {  
+ L.geoJSON(geojsonFiltrado, {  
    style: estiloPoligono,  
    onEachFeature: function(feature, layer) {  
      let idGeo = normalizarID(feature.properties.id || feature.properties.ID);  
@@ -120,7 +118,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 3. CARGA DE MARCADORES E IDS (Capa superior absoluta)
+ // 3. CARGA DE MARCADORES E IDS (Color amarillo institucional #FACC15 para todos)
  let boundsArray = [];
  csvData.forEach(item => {  
    if (item.ID) {  
@@ -142,12 +140,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
   
        if (!isNaN(lat) && !isNaN(lon)) {  
          boundsArray.push([lat, lon]);
-         let colorPunto = "#d4a39b";
-         if (tipoC === 'residual') colorPunto = "#f472b6";
-         else if (tieneLib === 'SI') colorPunto = "#38bdf8";
-         else if (tipoC === 'culminada' || valColD === "culminada") colorPunto = "#315738";
 
-         let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: colorPunto, color: "#ffffff", weight: 2, opacity: 1, fillOpacity: 0.9 });  
+         // Marcador con relleno amarillo fijo (#FACC15) para todos los IDs
+         let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: "#FACC15", color: "#1E293B", weight: 2, opacity: 1, fillOpacity: 1 });  
          marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
          marker.bindPopup(generarHTMLPopup(item.ID, item));
          marker.addTo(grupoMarcadoresIDs);  
@@ -156,7 +151,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // Hacer Zoom Out / Ajuste automático (fitBounds) de los elementos seleccionados al filtrar
+ // Zoom Out dinámico (fitBounds) para cualquier filtro seleccionado
  if (boundsArray.length > 0 && filtroEstado !== 'todos') {
    map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
  } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
@@ -192,17 +187,23 @@ function toggleFiltros() {
  icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';  
 }  
 
+function toggleLeyenda() {
+ const contenido = document.getElementById('leyendaContenido');
+ const icon = document.getElementById('leyenda-icon');
+ contenido.classList.toggle('show');
+ icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';
+}
+
 function toggleConsultorIA() {
  document.getElementById('desplegableIA').classList.toggle('show');
 }
 
-// Consultor de Datos Inteligente que responde por ID específico
 function ejecutarConsultaIA() {
  let consulta = document.getElementById('inputConsultaIA').value.trim().toUpperCase();
  let cajaResp = document.getElementById('respuestaIA');
  
  if(!consulta) { 
-   cajaResp.innerText = "Por favor, ingrese un ID de estructura (Ej: E04, PV02)."; 
+   cajaResp.innerText = "Ingrese un ID de estructura válido."; 
    return; 
  }
 
@@ -217,7 +218,7 @@ function ejecutarConsultaIA() {
                         `- Liberación: ${datosID.Fecha_Liberacion || 'N/A'}<br>` +
                         `- Asiento: ${datosID.Asiento_Obra || 'N/A'}`;
  } else {
-   cajaResp.innerText = `No se encontraron registros exactos para el ID "${consulta}". Verifique la nomenclatura.`;
+   cajaResp.innerText = `No se encontraron registros para el ID "${consulta}".`;
  }
 }
 
