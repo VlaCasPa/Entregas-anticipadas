@@ -61,7 +61,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Evaluando el universo de 77 estructuras)
+ // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Universo de 77 estructuras)
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -140,7 +140,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 3. CARGA DE MARCADORES E IDS (Garantizando presencia y zoom out en todos los estados filtrados)
+ // 3. CARGA DE MARCADORES E IDS (Color amarillo institucional #FACC15 permanente para todos)
  let boundsArray = [];
  estructurasUnicasMap.forEach((item, idNorm) => {  
    let cumpleFiltro = true;
