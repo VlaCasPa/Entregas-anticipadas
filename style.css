@@ -11,10 +11,10 @@ body, html {
  filter: grayscale(100%) brightness(1.05) contrast(0.9);
 }
 
-/* --- Cabecera Web --- */
+/* --- Cabecera Web (Desplazada a la derecha para no tapar los botones + y - de Leaflet) --- */
 #header-flotante {
- position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000;
- display: flex; flex-direction: column; gap: 10px; pointer-events: none; max-width: 420px;
+ position: absolute; top: 15px; left: 55px; right: 15px; z-index: 1000;
+ display: flex; flex-direction: column; gap: 10px; pointer-events: none; max-width: 450px;
 }
 #header-flotante > * { pointer-events: auto; }
 
@@ -111,12 +111,12 @@ body, html {
  z-index: 3000 !important;
 }
 
-/* --- ADAPTABILIDAD MOBILE (CELULAR ORDENADO SIN SUPERPOSICIÓN) --- */
+/* --- ADAPTABILIDAD MOBILE (CELULAR: Filtros y Leyenda separados y debajo de los KPIs) --- */
 @media (max-width: 768px) {
  body, html { overflow: auto; }
  
  #header-flotante {
-   position: relative; flex-direction: column; align-items: stretch; gap: 6px; top: 10px; left: 10px; right: 10px; width: calc(100% - 20px); max-width: unset;
+   position: relative; flex-direction: column; align-items: stretch; gap: 8px; top: 10px; left: 10px; right: 10px; width: calc(100% - 20px); max-width: unset;
  }
  #titulo-principal { text-align: center; width: 100%; box-sizing: border-box; font-size: 12px; padding: 8px; }
 
@@ -126,17 +126,18 @@ body, html {
  .kpi-card { min-width: unset; padding: 6px 2px; }
  .kpi-title { font-size: 6px; } .kpi-value { font-size: 12px; }
 
+ /* Filtros móviles debidamente espaciados para no tapar los KPIs */
  #panel-filtros {
-   position: relative; top: auto; right: auto; width: 100%; box-sizing: border-box; padding: 8px 12px;
+   position: relative; top: auto; right: auto; width: 100%; margin-top: 4px; box-sizing: border-box; padding: 8px 12px;
  }
  .filtro-header-mobile { display: flex; }
  .filtro-titulo-web { display: none; }
  .filtros-contenido { display: none; margin-top: 8px; }
  .filtros-contenido.show { display: flex; flex-wrap: wrap; gap: 5px; }
 
- /* Leyenda colapsable en móvil */
+ /* Leyenda colapsable en móvil separada holgadamente de los filtros */
  #panel-leyenda {
-   position: relative; top: auto; left: 10px; width: calc(100% - 20px); margin: 6px 0; box-sizing: border-box; padding: 8px 12px; font-size: 10px;
+   position: relative; top: auto; left: 10px; width: calc(100% - 20px); margin: 10px 0; box-sizing: border-box; padding: 8px 12px; font-size: 10px;
  }
  .leyenda-header-mobile { display: flex; }
  .leyenda-titulo { display: none; }
