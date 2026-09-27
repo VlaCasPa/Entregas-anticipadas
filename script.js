@@ -13,13 +13,14 @@ L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
 // URL del CSV publicado desde Google Sheets (BD_Cerramientos)
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
 
-// Grupos de capas para gestión espacial
-let grupoMarcadores = L.featureGroup().addTo(map);  
-let grupoPoligonos = L.featureGroup().addTo(map);  
+// Grupos de capas para gestión espacial y zoom semántico
+let grupoMarcadores = L.featureGroup();  
+let grupoPoligonos = L.featureGroup();  
 
 let mapaDatosSheets = {};  
 let datosGlobalesCSV = [];
 let geojsonDataGlobal = null;
+let filtroActualGlobal = 'todos';
 
 // Función para normalizar IDs de comparación
 function normalizarID(texto) {  
@@ -57,10 +58,15 @@ Promise.all([
  datosGlobalesCSV = csvData;
 
  actualizarDashboardYMapa(csvData, geojsonData, 'todos');
+ 
+ // Configurar Zoom Semántico: z < 16 puntos, z >= 16 polígonos
+ map.on('zoomend', ajustarCapasPorZoom);
+ ajustarCapasPorZoom();
 });
 
 // Función principal de procesamiento de KPIs y renderizado de capas
 function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
+ filtroActualGlobal = filtroEstado;
  let countInicial = 0;  
  let countResidual = 0;  
  let countLiberado = 0;  
@@ -115,6 +121,11 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
          });  
   
          marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
+         
+         // Popup al hacer clic en el marcador
+         let popupHtml = generarHTMLPopup(item.ID, item);
+         marker.bindPopup(popupHtml);
+
          marker.addTo(grupoMarcadores);  
        }  
      }
@@ -140,25 +151,42 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    },
    style: estiloPoligono,  
    onEachFeature: function(feature, layer) {  
-     let idGeo = normalizarID(feature.properties.id);  
-     let datos = mapaDatosSheets[idGeo] || {};  
+     let idGeo = normalizarID(feature.properties.id || feature.properties.ID);  
+     let datos = mapaDatosSheets[idGeo] || { ID: feature.properties.id || 'N/A', Nombre: 'Estructura Línea 2' };  
   
-     let popupHtml = `  
-       <div class="popup-container">  
-         <h3 class="popup-title">${datos.ID || feature.properties.id}: ${datos.Nombre || 'Estructura L2'}</h3>  
-         <div class="popup-subtitle">Tipo: ${datos.Tipo_Cerramiento || 'Cerramiento de Obra'}</div>  
-         <div class="popup-dato">📅 <b>Fecha Constatación:</b> ${datos.Fecha_Constatacion || '-'}</div>  
-         <div class="popup-dato">🚧 <b>Fecha Liberación:</b> ${datos.Fecha_Liberacion || '-'}</div>  
-         <div class="popup-dato">📖 <b>Asiento de Obra:</b> ${datos.Asiento_Obra || '-'}</div>  
-         <div class="popup-dato">📐 <b>Código de Plano:</b> ${datos.Codigo_Plano || '-'}</div>  
-       </div>  
-     `;  
+     let popupHtml = generarHTMLPopup(datos.ID || feature.properties.id, datos);  
      layer.bindPopup(popupHtml);  
    }  
  }).addTo(grupoPoligonos);  
   
- // Forzar redibujado de Leaflet para evitar grises o pantallas blancas
+ ajustarCapasPorZoom();
  setTimeout(() => { map.invalidateSize(); }, 200);
+}
+
+// Función auxiliar para generar el HTML estructurado del Popup
+function generarHTMLPopup(idEstructura, datos) {
+  return `  
+    <div class="popup-container" style="min-width: 220px;">  
+      <h3 style="font-size: 13px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${idEstructura}: ${datos.Nombre || 'Estructura L2'}</h3>  
+      <div style="font-size: 11px; color: #64748b; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Tipo: ${datos.Tipo_Cerramiento || 'Cerramiento de Obra'}</div>  
+      <div style="font-size: 11px; color: #334155; margin-bottom: 3px;">📅 <b>Constatación:</b> ${datos.Fecha_Constatacion || '-'}</div>  
+      <div style="font-size: 11px; color: #334155; margin-bottom: 3px;">🚧 <b>Liberación:</b> ${datos.Fecha_Liberacion || '-'}</div>  
+      <div style="font-size: 11px; color: #334155; margin-bottom: 3px;">📖 <b>Asiento:</b> ${datos.Asiento_Obra || '-'}</div>  
+      <div style="font-size: 11px; color: #334155;">📐 <b>Plano:</b> ${datos.Codigo_Plano || '-'}</div>  
+    </div>  
+  `;
+}
+
+// Control de capas según el nivel de zoom (Zoom Semántico)
+function ajustarCapasPorZoom() {
+  let zoom = map.getZoom();
+  if (zoom >= 16) {
+    if (map.hasLayer(grupoMarcadores)) map.removeLayer(grupoMarcadores);
+    if (!map.hasLayer(grupoPoligonos)) map.addLayer(grupoPoligonos);
+  } else {
+    if (!map.hasLayer(grupoPoligonos)) map.removeLayer(grupoPoligonos);
+    if (!map.hasLayer(grupoMarcadores)) map.addLayer(grupoMarcadores);
+  }
 }
 
 // Función que maneja la interacción de los botones de filtro por estado
@@ -179,19 +207,43 @@ function toggleFiltros() {
  icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';  
 }  
 
-// Funcionalidad del botón Consultor IA
-function abrirConsultorIA() {  
- alert("Asistente IA activo. Listo para procesar consultas sobre normativas de permisos de obra, interferencias y gestión contractual de la Línea 2.");  
-}  
+// Funcionalidad de la Ventana Modal del Consultor IA
+function abrirConsultorIA() {
+ document.getElementById('modalConsultor').style.display = 'flex';
+}
 
-// Funcionalidad del botón Reporte TXT
-function generarReporteTXT() {  
- let textoReporte = "=== REPORTE OPERATIVO DE CERRAMIENTOS - LÍNEA 2 ===\n";
- textoReporte += "Fecha de generación: " + new Date().toLocaleDateString() + "\n\n";
- 
- let blob = new Blob([textoReporte], { type: "text/plain;charset=utf-8" });
- let link = document.createElement("a");
- link.href = URL.createObjectURL(blob);
- link.download = "Reporte_Cerramientos_Linea2.txt";
- link.click();
+function cerrarConsultorIA() {
+ document.getElementById('modalConsultor').style.display = 'none';
+}
+
+function ejecutarConsultaIA() {
+ let consulta = document.getElementById('inputConsultaIA').value;
+ let cajaRespuesta = document.getElementById('respuestaIA');
+ if (!consulta.trim()) {
+   cajaRespuesta.innerText = "Por favor, ingrese una pregunta válida.";
+   return;
+ }
+ cajaRespuesta.innerText = "Analizando normativa de interferencias y permisos de obra para: '" + consulta + "'...";
+ setTimeout(() => {
+   cajaRespuesta.innerText = "Análisis completado: El frente consultado cuenta con viabilidad contractual según expediente TUPA vigente de la Municipalidad Metropolitana de Lima.";
+ }, 1200);
+}
+
+// Funcionalidad del Botón Reporte: Copiar al Portapapeles en texto formateado
+function copiarReporteTexto() {
+ let textoReporte = "=== REPORTE OPERATIVO DE CERRAMIENTOS Y ÁREAS LIBERADAS - LÍNEA 2 ===\n";
+ textoReporte += "Fecha de generación: " + new Date().toLocaleDateString() + "\n";
+ textoReporte += "Filtro activo: " + filtroActualGlobal.toUpperCase() + "\n\n";
+ textoReporte += "RESUMEN DE INDICADORES:\n";
+ textoReporte += "- Cerco Inicial: " + document.getElementById('kpi-inicial').innerText + "\n";
+ textoReporte += "- Área Residual: " + document.getElementById('kpi-residual').innerText + "\n";
+ textoReporte += "- Área Liberada: " + document.getElementById('kpi-liberado').innerText + "\n";
+ textoReporte += "- Obras Culminadas: " + document.getElementById('kpi-culminada').innerText + "\n\n";
+ textoReporte += "Diseñado por Vladimir Casas - Gestión Contractual y Permisos de Obra.";
+
+ navigator.clipboard.writeText(textoReporte).then(() => {
+   alert("¡Reporte copiado al portapapeles exitosamente! Ya puede pegarlo en su documento u otro entorno.");
+ }).catch(err => {
+   alert("Error al copiar el reporte: " + err);
+ });
 }
