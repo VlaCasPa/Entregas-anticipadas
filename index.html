@@ -14,10 +14,30 @@
  <!-- 1. Contenedor del Mapa -->
  <div id="map"></div>
 
- <!-- 2. Cabecera Flotante Superior (Título y Filtros) -->
+ <!-- 2. Cabecera Flotante Superior (Título, KPIs y Filtros organizados) -->
  <div id="header-flotante">
    <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
    
+   <!-- Panel de Indicadores de Gestión (KPIs) -->
+   <div id="panel-kpis">
+     <div class="kpi-card kpi-inicial">
+       <span class="kpi-title">Cerco Inicial</span>
+       <span class="kpi-value" id="kpi-inicial">0</span>
+     </div>
+     <div class="kpi-card kpi-residual">
+       <span class="kpi-title">Área Residual</span>
+       <span class="kpi-value" id="kpi-residual">0</span>
+     </div>
+     <div class="kpi-card kpi-liberado">
+       <span class="kpi-title">Área Liberada</span>
+       <span class="kpi-value" id="kpi-liberado">0</span>
+     </div>
+     <div class="kpi-card kpi-culminada">
+       <span class="kpi-title">Culminadas</span>
+       <span class="kpi-value" id="kpi-culminada">0</span>
+     </div>
+   </div>
+
    <!-- Panel de Filtro por Estado (Colapsable en Móvil) -->
    <div id="panel-filtros">
      <div class="filtro-header-mobile" onclick="toggleFiltros()">
@@ -38,27 +58,7 @@
    </div>
  </div>
 
- <!-- 3. Panel de Indicadores de Gestión (KPIs) -->
- <div id="panel-kpis">
-   <div class="kpi-card kpi-inicial">
-     <span class="kpi-title">Cerco Inicial</span>
-     <span class="kpi-value" id="kpi-inicial">0</span>
-   </div>
-   <div class="kpi-card kpi-residual">
-     <span class="kpi-title">Área Residual</span>
-     <span class="kpi-value" id="kpi-residual">0</span>
-   </div>
-   <div class="kpi-card kpi-liberado">
-     <span class="kpi-title">Área Liberada</span>
-     <span class="kpi-value" id="kpi-liberado">0</span>
-   </div>
-   <div class="kpi-card kpi-culminada">
-     <span class="kpi-title">Culminadas</span>
-     <span class="kpi-value" id="kpi-culminada">0</span>
-   </div>
- </div>
-
- <!-- 4. Leyenda de Cerramientos (Colapsable en móvil) -->
+ <!-- 3. Leyenda de Cerramientos (Colapsable en móvil) -->
  <div id="panel-leyenda">
    <div class="leyenda-header-mobile" onclick="toggleLeyenda()">
      <span>📋 LEYENDA DE CERRAMIENTOS</span>
@@ -73,7 +73,7 @@
    </div>
  </div>
 
- <!-- 5. Botones de Acciones (Consultor IA y Reporte) -->
+ <!-- 4. Botones de Acciones (Consultor IA y Reporte) -->
  <div id="panel-acciones">
    <div id="desplegableIA" class="ia-desplegable-arriba">
      <div class="ia-header"><span>🤖 Asistente IA Contractual</span> <button onclick="toggleConsultorIA()">×</button></div>
@@ -92,7 +92,7 @@
    </button>
  </div>
 
- <!-- 6. Marca de Agua Discreta -->
+ <!-- 5. Marca de Agua Discreta -->
  <div id="marca-agua">Diseñado por Vladimir Casas</div>
 
  <!-- Librerías JS y Script -->
