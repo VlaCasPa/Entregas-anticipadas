@@ -65,7 +65,8 @@ body, html {
  background-color: rgba(255, 255, 255, 0.95); padding: 10px 14px; border-radius: 8px;
  box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 11px; line-height: 1.5;
 }
-.leyenda-titulo { display: block; font-weight: 700; font-size: 9px; color: #64748b; margin-bottom: 5px; letter-spacing: 0.5px; }
+.leyenda-header-mobile { display: none; font-weight: 700; font-size: 11px; color: #64748b; cursor: pointer; justify-content: space-between; align-items: center; }
+.leyenda-titulo { display: block; font-weight: 700; font-size: 9px; color: #64748b; margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
 .leyenda-item { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; margin-bottom: 3px; }
 .leyenda-color { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 .color-inicial { background-color: #f5ebe9; border: 1.5px solid #d4a39b; }
@@ -99,7 +100,6 @@ body, html {
  padding: 2px 10px; border-radius: 4px; pointer-events: none; letter-spacing: 0.5px;
 }
 
-/* El ID y Tooltip se ubican siempre por encima de cualquier polígono (z-index superior) */
 .id-tooltip {
  background-color: rgba(255, 255, 255, 0.95) !important; border: 1px solid #cbd5e1 !important;
  border-radius: 4px !important; padding: 2px 6px !important; font-weight: 700; color: #0f172a; font-size: 10px;
@@ -130,9 +130,14 @@ body, html {
  .filtros-contenido { display: none; margin-top: 8px; }
  .filtros-contenido.show { display: flex; flex-wrap: wrap; gap: 5px; }
 
+ /* Leyenda colapsable en móvil */
  #panel-leyenda {
    position: relative; top: auto; left: 10px; width: calc(100% - 20px); margin: 6px 0; box-sizing: border-box; padding: 8px 12px; font-size: 10px;
  }
+ .leyenda-header-mobile { display: flex; }
+ .leyenda-titulo { display: none; }
+ .leyenda-contenido { display: none; margin-top: 6px; }
+ .leyenda-contenido.show { display: flex; flex-direction: column; gap: 3px; }
 
  #marca-agua { position: fixed; bottom: 58px; left: 50%; transform: translateX(-50%); z-index: 1000; font-size: 9px; padding: 2px 8px; }
 
