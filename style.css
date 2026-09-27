@@ -1,4 +1,3 @@
-/* Reseteo general y estructuración de pantalla completa */
 body, html {
  margin: 0;
  padding: 0;
@@ -9,7 +8,6 @@ body, html {
  overflow: hidden;
 }
 
-/* El mapa cubre exactamente el 100% de la ventana de fondo */
 #map {
  position: absolute;
  top: 0;
@@ -19,12 +17,11 @@ body, html {
  z-index: 1;
 }
 
-/* Filtro base Google Maps en tonos grises profesionales */
 .mapa-google-gris {
  filter: grayscale(100%) brightness(1.05) contrast(0.9);
 }
 
-/* --- Cabecera Flotante Superior --- */
+/* --- Cabecera Web --- */
 #header-flotante {
  position: absolute;
  top: 15px;
@@ -54,7 +51,7 @@ body, html {
  border-left: 5px solid #2563EB;
 }
 
-/* --- Panel de Filtro por Estado --- */
+/* --- Filtros --- */
 #panel-filtros {
  background-color: rgba(255, 255, 255, 0.95);
  padding: 10px 14px;
@@ -106,7 +103,6 @@ body, html {
  transform: translateY(-1px);
 }
 
-/* Colores de botones según la Leyenda Institucional */
 .filtro-btn.btn-todos { background-color: #334155; color: #ffffff; border-color: #1e293b; }
 .filtro-btn.btn-inicial { background-color: #f5ebe9; color: #7f1d1d; border-color: #d4a39b; }
 .filtro-btn.btn-residual { background-color: #fce7f3; color: #831843; border-color: #f472b6; }
@@ -119,7 +115,7 @@ body, html {
  font-weight: 700;
 }
 
-/* --- Panel de Indicadores (KPIs en una sola fila simétrica) --- */
+/* --- KPIs Escritorio --- */
 #panel-kpis {
  position: absolute;
  top: 75px;
@@ -211,7 +207,7 @@ body, html {
 .color-liberado { background-color: #e0f2fe; border: 1.5px solid #38bdf8; }
 .color-culminada { background-color: #e2e8f0; border: 1.5px solid #94a3b8; }
 
-/* --- Botones de Acciones Inferior Derecha --- */
+/* --- Botones Acción --- */
 #panel-acciones {
  position: absolute;
  bottom: 45px;
@@ -241,7 +237,7 @@ body, html {
 .btn-consultor { background-color: #2563eb; }
 .btn-consultor:hover { background-color: #1d4ed8; }
 
-/* --- Marca de Agua Discreta --- */
+/* --- Marca de Agua Escritorio --- */
 #marca-agua {
  position: absolute;
  bottom: 8px;
@@ -258,7 +254,7 @@ body, html {
  letter-spacing: 0.5px;
 }
 
-/* --- Tooltips de IDs visibles sobre el mapa --- */
+/* --- Tooltips IDs --- */
 .id-tooltip {
  background-color: rgba(255, 255, 255, 0.95) !important;
  border: 1px solid #cbd5e1 !important;
@@ -270,88 +266,137 @@ body, html {
  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
-/* --- Adaptabilidad Responsive (Celulares y Tablets) --- */
+/* --- Ventana Modal IA --- */
+.modal-overlay {
+ display: none;
+ position: fixed;
+ top: 0; left: 0; width: 100%; height: 100%;
+ background-color: rgba(0,0,0,0.5);
+ z-index: 2000;
+ justify-content: center;
+ align-items: center;
+}
+.modal-card {
+ background: #ffffff;
+ width: 90%;
+ max-width: 500px;
+ border-radius: 10px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+ overflow: hidden;
+}
+.modal-header {
+ background: #0f172a;
+ color: white;
+ padding: 12px 16px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+}
+.modal-header h3 { margin: 0; font-size: 15px; }
+.modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+.modal-body { padding: 16px; font-size: 12px; color: #334155; }
+.modal-body textarea {
+ width: 100%; height: 80px; margin-top: 8px; padding: 8px;
+ border: 1px solid #cbd5e1; border-radius: 6px; font-family: 'Inter', sans-serif; box-sizing: border-box;
+}
+.respuesta-ia-box {
+ margin-top: 10px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0;
+ border-radius: 6px; max-height: 120px; overflow-y: auto; font-style: italic; color: #475569;
+}
+.modal-footer {
+ padding: 10px 16px; background: #f1f5f9; display: flex; justify-content: flex-end; gap: 8px;
+}
+.btn-enviar-ia { background: #2563eb; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-cerrar-ia { background: #64748b; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+/* --- ADAPTABILIDAD MOBILE (SOLO CELULAR) --- */
 @media (max-width: 768px) {
- body, html {
- overflow: auto;
- }
+ body, html { overflow: auto; }
  
  #header-flotante {
- position: relative;
- flex-direction: column;
- align-items: stretch;
- gap: 8px;
- top: 10px;
- left: 10px;
- right: 10px;
- width: calc(100% - 20px);
- z-index: 1000;
+   position: relative;
+   flex-direction: column;
+   align-items: stretch;
+   gap: 6px;
+   top: 10px;
+   left: 10px;
+   right: 10px;
+   width: calc(100% - 20px);
+   z-index: 1000;
  }
  
  #titulo-principal {
- text-align: center;
- width: 100%;
- box-sizing: border-box;
- font-size: 12px;
- padding: 8px;
+   text-align: center;
+   width: 100%;
+   box-sizing: border-box;
+   font-size: 12px;
+   padding: 8px;
  }
 
+ /* En celular: KPIs debajo del título */
+ #panel-kpis {
+   position: relative;
+   top: auto;
+   left: 10px;
+   width: calc(100% - 20px);
+   margin: 4px 0;
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 4px;
+   box-sizing: border-box;
+   z-index: 1000;
+ }
+
+ .kpi-card {
+   min-width: unset;
+   padding: 6px 2px;
+ }
+ .kpi-title { font-size: 6.5px; }
+ .kpi-value { font-size: 13px; }
+
+ /* En celular: Filtros debajo de los KPIs */
  #panel-filtros {
- width: 100%;
- box-sizing: border-box;
- padding: 8px 12px;
+   position: relative;
+   top: auto;
+   left: auto;
+   width: 100%;
+   margin: 4px 0;
+   box-sizing: border-box;
+   padding: 8px 12px;
+   z-index: 1000;
  }
 
  .filtro-header-mobile { display: flex; }
  .filtro-titulo-web { display: none; }
+ .filtros-contenido { display: none; margin-top: 8px; }
+ .filtros-contenido.show { display: flex; flex-wrap: wrap; gap: 5px; }
 
- .filtros-contenido {
- display: none;
- margin-top: 8px;
+ #panel-leyenda { display: none; }
+
+ /* Marca de agua encima de los botones en móvil para evitar superposición */
+ #marca-agua {
+   position: fixed;
+   bottom: 58px;
+   left: 50%;
+   transform: translateX(-50%);
+   z-index: 1000;
+   font-size: 9px;
+   padding: 2px 8px;
  }
-
- .filtros-contenido.show {
- display: flex;
- flex-wrap: wrap;
- gap: 5px;
- }
-
- #panel-kpis {
- position: relative;
- top: auto;
- left: 10px;
- width: calc(100% - 20px);
- margin: 8px 0;
- display: grid;
- grid-template-columns: repeat(4, 1fr);
- gap: 4px;
- box-sizing: border-box;
- z-index: 1000;
- }
-
- .kpi-card {
- min-width: unset;
- padding: 6px 2px;
- }
-
- .kpi-title { font-size: 6.5px; }
- .kpi-value { font-size: 13px; }
-
- #panel-leyenda { display: none; } /* Oculto en móvil para ganar espacio táctil */
 
  #panel-acciones {
- position: fixed;
- bottom: 15px;
- right: 10px;
- left: 10px;
- justify-content: center;
- z-index: 1000;
+   position: fixed;
+   bottom: 12px;
+   right: 10px;
+   left: 10px;
+   justify-content: center;
+   z-index: 1000;
  }
 
  .btn-accion {
- flex: 1;
- justify-content: center;
- padding: 8px 6px;
- font-size: 11px;
+   flex: 1;
+   justify-content: center;
+   padding: 8px 6px;
+   font-size: 11px;
  }
 }
