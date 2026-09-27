@@ -61,32 +61,44 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. KPI BASADO ESTRICTAMENTE EN IDs ÚNICOS DEL CSV (Criterio Lean / PMBOK de medición unívoca)
- let idsProcesados = new Set();
+ // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Evaluando las 77 estructuras de la base de datos)
+ let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
    if (item.ID) {  
      let idNorm = normalizarID(item.ID);  
-     if (idsProcesados.has(idNorm)) return; // Evitar duplicados por ID
-     idsProcesados.add(idNorm);
-
      mapaDatosSheets[idNorm] = item;  
-  
-     let keys = Object.keys(item);
-     let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
-     let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
-     let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
-  
-     if (tieneLib === "SI") countLiberado++;  
-     if (tipoC === "residual") countResidual++;  
-     else if (tipoC === "inicial" || !tipoC) countInicial++;  
-     
-     if (valColD === "culminada" || tipoC === "culminada" || valColD === "si" || valColD === "culminado") {
-       countCulminada++;
+
+     if (!estructurasUnicasMap.has(idNorm)) {
+       let keys = Object.keys(item);
+       let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
+       let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
+       let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
+
+       let esCulminada = (valColD === "culminada" || tipoC === "culminada" || valColD === "si" || valColD === "culminado");
+       let esResidual = (tipoC.includes("residual") || tipoC === "residual");
+       let esLiberado = (tieneLib === "SI" || tipoC.includes("liberado"));
+       let esInicial = (!tipoC || tipoC.includes("inicial") || tipoC.includes("cerco"));
+
+       if (esCulminada) {
+         countCulminada++;
+       } else if (esResidual) {
+         countResidual++;
+       } else if (esLiberado) {
+         countLiberado++;
+       } else {
+         countInicial++;
+       }
+
+       estructurasUnicasMap.set(idNorm, {
+         ...item,
+         estadoCalculado: esCulminada ? 'culminada' : (esResidual ? 'residual' : (esLiberado ? 'liberado' : 'inicial'))
+       });
      }
    }  
  });  
 
+ // Actualizar los KPIs basándose estrictamente en las estructuras únicas
  document.getElementById('kpi-inicial').innerText = countInicial;  
  document.getElementById('kpi-residual').innerText = countResidual;  
  document.getElementById('kpi-liberado').innerText = countLiberado;  
@@ -110,7 +122,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (filtroEstado === 'residual') return tipoGeo === 'residual';
      if (filtroEstado === 'liberado') return tipoGeo === 'liberado';
      if (filtroEstado === 'culminada') return tipoGeo === 'culminada';
-     if (filtroEstado === '30dias') return false; // Restricción estricta si no hay data temporal menor a 30 días
+     if (filtroEstado === '30dias') return false; 
      return true;
    })
  };
@@ -126,39 +138,31 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
  // 3. CARGA DE MARCADORES E IDS (Color amarillo institucional #FACC15 permanente para todos)
  let boundsArray = [];
- csvData.forEach(item => {  
-   if (item.ID) {  
-     let idNorm = normalizarID(item.ID);  
-     let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
-     let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
-     let keys = Object.keys(item);
-     let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : "";
+ estructurasUnicasMap.forEach((item, idNorm) => {  
+   let cumpleFiltro = true;
+   if (filtroEstado === 'inicial') cumpleFiltro = (item.estadoCalculado === 'inicial');
+   if (filtroEstado === 'residual') cumpleFiltro = (item.estadoCalculado === 'residual');
+   if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado');
+   if (filtroEstado === 'culminada') cumpleFiltro = (item.estadoCalculado === 'culminada');
+   if (filtroEstado === '30dias') cumpleFiltro = false;
 
-     let cumpleFiltro = true;
-     if (filtroEstado === 'inicial') cumpleFiltro = (tipoC === 'inicial' || !tipoC);
-     if (filtroEstado === 'residual') cumpleFiltro = (tipoC === 'residual');
-     if (filtroEstado === 'liberado') cumpleFiltro = (tieneLib === 'SI');
-     if (filtroEstado === 'culminada') cumpleFiltro = (tipoC === 'culminada' || valColD === "culminada" || valColD === "culminado");
-     if (filtroEstado === '30dias') cumpleFiltro = false; // Sin registros por defecto
+   if (cumpleFiltro) {
+     let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
+     let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
 
-     if (cumpleFiltro) {
-       let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
-       let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
-  
-       if (!isNaN(lat) && !isNaN(lon)) {  
-         boundsArray.push([lat, lon]);
+     if (!isNaN(lat) && !isNaN(lon)) {  
+       boundsArray.push([lat, lon]);
 
-         // Marcador puntual con color amarillo institucional fijo (#FACC15)
-         let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: "#FACC15", color: "#1E293B", weight: 2, opacity: 1, fillOpacity: 1 });  
-         marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
-         marker.bindPopup(generarHTMLPopup(item.ID, item));
-         marker.addTo(grupoMarcadoresIDs);  
-       }  
-     }
+       // Marcador con color amarillo institucional fijo (#FACC15)
+       let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: "#FACC15", color: "#1E293B", weight: 2, opacity: 1, fillOpacity: 1 });  
+       marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
+       marker.bindPopup(generarHTMLPopup(item.ID, item));
+       marker.addTo(grupoMarcadoresIDs);  
+     }  
    }  
  });  
 
- // Zoom Out dinámico (fitBounds) garantizado para cualquier filtro seleccionado
+ // Zoom Out dinámico (fitBounds) garantizado para cualquier filtro seleccionado (incluyendo residual)
  if (boundsArray.length > 0 && filtroEstado !== 'todos') {
    map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
  } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
