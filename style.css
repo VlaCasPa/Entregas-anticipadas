@@ -11,9 +11,9 @@ body, html {
  filter: grayscale(100%) brightness(1.05) contrast(0.9);
 }
 
-/* --- Cabecera Web (Desplazada para no tapar los controles de zoom) --- */
+/* --- Cabecera Web (Desplazada para no tapar el zoom del mapa) --- */
 #header-flotante {
- position: absolute; top: 15px; left: 55px; z-index: 1000;
+ position: absolute; top: 15px; left: 60px; z-index: 1000;
  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
 }
 #header-flotante > * { pointer-events: auto; }
