@@ -11,7 +11,7 @@
 </head>
 <body>
 
- <!-- 1. Contenedor del Mapa (Fondo absoluto) -->
+ <!-- 1. Contenedor del Mapa -->
  <div id="map"></div>
 
  <!-- 2. Cabecera Web Superior Izquierda (Título y KPIs) -->
@@ -72,14 +72,22 @@
    </div>
  </div>
 
- <!-- 5. Botones de Acciones (Inferior Derecha) -->
+ <!-- 5. Botones de Acciones y Consultor IA Colapsable estilo moderno -->
  <div id="panel-acciones">
    <div id="desplegableIA" class="ia-desplegable-arriba">
-     <div class="ia-header"><span>🤖 Asistente IA Contractual</span> <button onclick="toggleConsultorIA()">×</button></div>
+     <div class="ia-header">
+       <span>🤖 Consultor IA (beta)</span> 
+       <button onclick="toggleConsultorIA()">×</button>
+     </div>
      <div class="ia-body">
-       <input type="text" id="inputConsultaIA" placeholder="Ingrese ID (Ej: E04, PV02)...">
-       <button onclick="ejecutarConsultaIA()">Consultar ID</button>
-       <div id="respuestaIA">Ingrese un ID para consultar su estado en la BD.</div>
+       <div class="ia-chat-bubble">
+         Hola. Consulta estados o vigencias (Ej: "¿Qué obras están por vencer?").
+       </div>
+       <div class="ia-input-container">
+         <input type="text" id="inputConsultaIA" placeholder="Pregunta aquí...">
+         <button onclick="ejecutarConsultaIA()">Enviar</button>
+       </div>
+       <div id="respuestaIA" style="margin-top:8px; font-size:11px; color:#334155;"></div>
      </div>
    </div>
    
