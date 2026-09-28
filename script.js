@@ -61,7 +61,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Evaluación exacta de las estructuras únicas de la BD)
+ // 1. PROCESAMIENTO ESTRICTAMENTE UNÍVOCO POR ID (Estructuras Únicas)
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -71,7 +71,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
      if (!estructurasUnicasMap.has(idNorm)) {
        let keys = Object.keys(item);
-       // Evaluación precisa de la Columna D o estado de culminación
        let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
        let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
        let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
