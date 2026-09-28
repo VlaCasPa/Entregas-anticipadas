@@ -62,7 +62,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Conteo exacto unívoco de las 77 estructuras)
+ // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Universo de estructuras de la BD)
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -108,7 +108,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  document.getElementById('kpi-liberado').innerText = countLiberado;  
  document.getElementById('kpi-culminada').innerText = countCulminada;  
 
- // 2. ORDEN DE CARGA DE POLÍGONOS (Residual al final)
+ // 2. FILTRADO Y CARGA DE POLÍGONOS CON Z-INDEX CORRECTO (Residual al final)
  let featuresOrdenadas = [...geojsonData.features].sort((a, b) => {
    let tA = (a.properties.tipo || "").toLowerCase();
    let tB = (b.properties.tipo || "").toLowerCase();
@@ -117,17 +117,30 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    return 0;
  });
 
+ let idsPoligonosFiltrados = new Set();
+
  let geojsonFiltrado = {
    type: "FeatureCollection",
    features: featuresOrdenadas.filter(feature => {
-     if (filtroEstado === 'todos') return true;
      let tipoGeo = feature.properties.tipo ? feature.properties.tipo.toLowerCase() : "";
-     if (filtroEstado === 'inicial') return tipoGeo === 'inicial' || !tipoGeo;
-     if (filtroEstado === 'residual') return tipoGeo === 'residual';
-     if (filtroEstado === 'liberado') return tipoGeo === 'liberado';
-     if (filtroEstado === 'culminada') return tipoGeo === 'culminada';
-     if (filtroEstado === '30dias') return false; 
-     return true;
+     let idGeo = normalizarID(feature.properties.id || feature.properties.ID);
+     
+     if (filtroEstado === 'todos') {
+       idsPoligonosFiltrados.add(idGeo);
+       return true;
+     }
+
+     let coincide = false;
+     if (filtroEstado === 'inicial') coincide = (tipoGeo === 'inicial' || !tipoGeo);
+     if (filtroEstado === 'residual') coincide = (tipoGeo === 'residual');
+     if (filtroEstado === 'liberado') coincide = (tipoGeo === 'liberado');
+     if (filtroEstado === 'culminada') coincide = (tipoGeo === 'culminada');
+     if (filtroEstado === '30dias') coincide = false; 
+
+     if (coincide) {
+       idsPoligonosFiltrados.add(idGeo);
+     }
+     return coincide;
    })
  };
 
@@ -140,19 +153,31 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 3. CARGA DE MARCADORES E IDS (Garantizando círculo amarillo y tooltips en TODOS los filtros, incluidos residual y liberado)
+ // 3. CARGA DE MARCADORES E IDS (Sincronizado con los polígonos filtrados y coordenadas del CSV/GeoJSON)
  let boundsArray = [];
+ 
  estructurasUnicasMap.forEach((item, idNorm) => {  
    let cumpleFiltro = true;
    if (filtroEstado === 'inicial') cumpleFiltro = (item.estadoCalculado === 'inicial');
-   if (filtroEstado === 'residual') cumpleFiltro = (item.estadoCalculado === 'residual');
-   if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado');
+   if (filtroEstado === 'residual') cumpleFiltro = (item.estadoCalculado === 'residual' || idsPoligonosFiltrados.has(idNorm));
+   if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado' || idsPoligonosFiltrados.has(idNorm));
    if (filtroEstado === 'culminada') cumpleFiltro = (item.estadoCalculado === 'culminada');
    if (filtroEstado === '30dias') cumpleFiltro = false;
 
    if (cumpleFiltro) {
      let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
      let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
+
+     // Si no hay coordenada en el CSV pero existe en el GeoJSON filtrado, extraer centroide geométrico como respaldo
+     if (isNaN(lat) || isNaN(lon)) {
+       let featMatch = geojsonFiltrado.features.find(f => normalizarID(f.properties.id || f.properties.ID) === idNorm);
+       if (featMatch && featMatch.geometry) {
+         // Coordenadas aproximadas del bbox o geometría
+         let coords = featMatch.geometry.coordinates[0][0];
+         lon = coords[0];
+         lat = coords[1];
+       }
+     }
 
      if (!isNaN(lat) && !isNaN(lon)) {  
        boundsArray.push([lat, lon]);
