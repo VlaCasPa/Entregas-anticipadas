@@ -11,7 +11,7 @@
 </head>
 <body>
 
- <!-- 1. Contenedor del Mapa (Debe estar al inicio para renderizar el fondo Leaflet) -->
+ <!-- 1. Contenedor del Mapa (Fondo absoluto) -->
  <div id="map"></div>
 
  <!-- 2. Cabecera Web Superior Izquierda (Título y KPIs) -->
@@ -38,7 +38,7 @@
    </div>
  </div>
 
- <!-- 3. Panel de Filtro por Estado (Esquina Superior Derecha en Web) -->
+ <!-- 3. Panel de Filtro por Estado (Esquina Superior Derecha) -->
  <div id="panel-filtros">
    <div class="filtro-header-mobile" onclick="toggleFiltros()">
      <span>🔍 FILTRAR POR ESTADO</span>
@@ -65,7 +65,7 @@
    </div>
    <div class="leyenda-contenido" id="leyendaContenido">
      <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
-     <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Cerramiento Inicial</div>
+     <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Mantiene Cerramiento (Inicial)</div>
      <div class="leyenda-item"><span class="leyenda-color color-residual"></span> Área Residual</div>
      <div class="leyenda-item"><span class="leyenda-color color-liberado"></span> Área Liberada</div>
      <div class="leyenda-item"><span class="leyenda-color color-culminada"></span> Obra Culminada</div>
@@ -75,7 +75,7 @@
  <!-- 5. Botones de Acciones (Inferior Derecha) -->
  <div id="panel-acciones">
    <div id="desplegableIA" class="ia-desplegable-arriba">
-     <div class="ia-header"><span> Asistente IA </span> <button onclick="toggleConsultorIA()">×</button></div>
+     <div class="ia-header"><span>🤖 Asistente IA Contractual</span> <button onclick="toggleConsultorIA()">×</button></div>
      <div class="ia-body">
        <input type="text" id="inputConsultaIA" placeholder="Ingrese ID (Ej: E04, PV02)...">
        <button onclick="ejecutarConsultaIA()">Consultar ID</button>
@@ -84,7 +84,7 @@
    </div>
    
    <button class="btn-accion btn-consultor" onclick="toggleConsultorIA()">
-     Consultar Datos
+     🤖 Consultar Datos
    </button>
    <button id="btnReporte" class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
      📄 Reporte
