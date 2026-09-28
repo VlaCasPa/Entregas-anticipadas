@@ -1,4 +1,5 @@
-const map = L.map('map').setView([-12.055, -77.050], 13);  
+// Inicialización con Zoom Out general para apreciar toda la macrozona
+const map = L.map('map').setView([-12.055, -77.050], 12);  
 
 L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
  maxZoom: 20,  
@@ -61,7 +62,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. PROCESAMIENTO ESTRICTAMENTE UNÍVOCO POR ID (Estructuras Únicas)
+ // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Conteo exacto unívoco de las 77 estructuras)
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -139,7 +140,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 3. CARGA DE MARCADORES E IDS (Garantizando presencia y zoom out en todos los estados)
+ // 3. CARGA DE MARCADORES E IDS (Garantizando círculo amarillo y tooltips en TODOS los filtros, incluidos residual y liberado)
  let boundsArray = [];
  estructurasUnicasMap.forEach((item, idNorm) => {  
    let cumpleFiltro = true;
@@ -164,11 +165,11 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // Zoom Out dinámico (fitBounds) garantizado para cualquier filtro
+ // Zoom Out dinámico (fitBounds) garantizado para cualquier estado filtrado
  if (boundsArray.length > 0 && filtroEstado !== 'todos') {
    map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
  } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
-   map.setView([-12.055, -77.050], 13);
+   map.setView([-12.055, -77.050], 12);
  }
 
  setTimeout(() => { map.invalidateSize(); }, 200);
