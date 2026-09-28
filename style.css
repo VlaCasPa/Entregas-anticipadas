@@ -11,7 +11,7 @@ body, html {
  filter: grayscale(100%) brightness(1.05) contrast(0.9);
 }
 
-/* --- Cabecera Web (Desplazada para no tapar el zoom del mapa) --- */
+/* --- Cabecera Web --- */
 #header-flotante {
  position: absolute; top: 15px; left: 60px; z-index: 1000;
  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
@@ -39,7 +39,7 @@ body, html {
 .kpi-liberado { border-top-color: #38bdf8; } .kpi-liberado .kpi-value { color: #0369a1; }
 .kpi-culminada { border-top-color: #315738; } .kpi-culminada .kpi-value { color: #315738; }
 
-/* --- Filtros Web (Esquina Superior Derecha) --- */
+/* --- Filtros Web --- */
 #panel-filtros {
  position: absolute; top: 15px; right: 15px; z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95); padding: 10px 14px; border-radius: 8px;
@@ -66,7 +66,7 @@ body, html {
 
 /* --- Leyenda --- */
 #panel-leyenda {
- position: absolute; bottom: 45px; left: 15px; z-index: 1000;
+ position: absolute; bottom: 50px; left: 15px; z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95); padding: 10px 14px; border-radius: 8px;
  box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 11px; line-height: 1.5;
 }
@@ -80,7 +80,7 @@ body, html {
 .color-culminada { background-color: #eaf2eb; border: 1.5px solid #315738; }
 
 #panel-acciones {
- position: absolute; bottom: 45px; right: 15px; z-index: 1000; display: flex; gap: 8px; align-items: flex-end;
+ position: absolute; bottom: 50px; right: 15px; z-index: 1000; display: flex; gap: 8px; align-items: flex-end;
 }
 .btn-accion {
  background-color: #0f172a; color: #ffffff; border: none; padding: 10px 16px; border-radius: 8px;
@@ -89,16 +89,19 @@ body, html {
 .btn-consultor { background-color: #2563eb; }
 .btn-accion.copiado { background-color: #16a34a !important; color: #ffffff !important; }
 
+/* --- Consultor IA Colapsable Estilo Moderno --- */
 .ia-desplegable-arriba {
- display: none; position: absolute; bottom: 50px; right: 0; width: 320px;
- background: #ffffff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 12px; z-index: 2100;
+ display: none; position: absolute; bottom: 55px; right: 0; width: 320px;
+ background: #ffffff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 16px; z-index: 2100;
+ border: 1px solid #e2e8f0;
 }
 .ia-desplegable-arriba.show { display: block; }
-.ia-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 12px; margin-bottom: 8px; }
-.ia-header button { background: none; border: none; font-size: 16px; cursor: pointer; }
-.ia-body input { width: 100%; padding: 6px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; margin-bottom: 6px; }
-.ia-body button { background: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; width: 100%; }
-#respuestaIA { font-size: 10px; color: #334155; margin-top: 6px; line-height: 1.4; background: #f8fafc; padding: 8px; border-radius: 4px; max-height: 140px; overflow-y: auto; }
+.ia-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 13px; color: #0f172a; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+.ia-header button { background: none; border: none; font-size: 18px; cursor: pointer; color: #64748b; }
+.ia-chat-bubble { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 11px; color: #334155; margin-bottom: 12px; line-height: 1.4; }
+.ia-input-container { display: flex; gap: 6px; }
+.ia-input-container input { flex: 1; padding: 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+.ia-input-container button { background: #2563eb; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
 
 #marca-agua {
  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 1000;
@@ -127,15 +130,16 @@ body, html {
  .kpi-card { min-width: unset; padding: 6px 2px; }
  .kpi-title { font-size: 6px; } .kpi-value { font-size: 12px; }
 
+ /* Filtros móviles debajo de los KPIs con margen seguro */
  #panel-filtros {
-   position: relative; top: auto; right: auto; width: 100%; box-sizing: border-box; padding: 8px 12px; margin-top: 4px;
+   position: relative; top: auto; right: auto; width: 100%; box-sizing: border-box; padding: 8px 12px; margin-top: 6px;
  }
  .filtro-header-mobile { display: flex; }
  .filtro-titulo-web { display: none; }
  .filtros-contenido { display: none; margin-top: 8px; }
  .filtros-contenido.show { display: flex; flex-wrap: wrap; gap: 5px; }
 
- /* Leyenda abajo en móvil */
+ /* Leyenda abajo en móvil (encima del botón de reporte, con espacio para marca de agua) */
  #panel-leyenda {
    position: fixed; bottom: 65px; left: 10px; right: 10px; z-index: 1000;
    background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
@@ -150,4 +154,6 @@ body, html {
 
  #panel-acciones { position: fixed; bottom: 12px; right: 10px; left: 10px; justify-content: center; z-index: 1000; }
  .btn-accion { flex: 1; justify-content: center; padding: 8px 6px; font-size: 11px; }
+
+ .ia-desplegable-arriba { bottom: 60px; right: 10px; left: 10px; width: auto; }
 }
