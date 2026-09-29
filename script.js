@@ -1,4 +1,4 @@
-// Inicialización con Zoom Out general para apreciar toda la macrozona
+// Inicialización con Zoom Dinámico (FitBounds) optimizado para celulares y web
 const map = L.map('map').setView([-12.055, -77.050], 12);  
 
 L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
@@ -18,7 +18,7 @@ let mapaDatosSheets = {};
 let datosGlobalesCSV = [];
 let geojsonDataGlobal = null;
 let filtroActualGlobal = 'todos';
-let estructurasUnicasMap = new Map(); // Variable global para usar en el reporte
+let estructurasUnicasMap = new Map(); 
 
 function normalizarID(texto) {  
  if (!texto) return "";  
@@ -63,7 +63,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  mapaDatosSheets = {};
  estructurasUnicasMap.clear();
 
- // 1. MAPEO Y CONSOLIDACIÓN ESTRICTA POR ID ÚNICO (Basado en Columna D)
  csvData.forEach(item => {  
    if (item.ID) {  
      let idNorm = normalizarID(item.ID);  
@@ -71,7 +70,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
      if (!estructurasUnicasMap.has(idNorm)) {
        let keys = Object.keys(item);
-       // Columna D (la 4ta columna, índice 3) es "Tiene_Liberacion"
        let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
 
        let esCulminada = (valColD.includes("culminada") || valColD.includes("culminado"));
@@ -100,7 +98,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // 2. CONTEO DE KPIS BASADO EXCLUSIVAMENTE EN COLUMNA D POR ID ÚNICO
  let countInicial = 0, countResidual = 0, countLiberado = 0, countCulminada = 0;
  
  estructurasUnicasMap.forEach((data) => {
@@ -108,7 +105,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      countCulminada++;
    } else if (data.esSi) {
      countLiberado++;
-     countResidual++; // Alimenta ambos contadores
+     countResidual++; 
    } else {
      countInicial++; 
    }
@@ -119,7 +116,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  document.getElementById('kpi-liberado').innerText = countLiberado;  
  document.getElementById('kpi-culminada').innerText = countCulminada;  
 
- // 3. FILTRADO Y RENDERIZADO DE POLÍGONOS EN EL MAPA
  let featuresOrdenadas = [...geojsonData.features].sort((a, b) => {
    let tA = (a.properties.tipo || "").toLowerCase();
    let tB = (b.properties.tipo || "").toLowerCase();
@@ -165,7 +161,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 4. CARGA DE MARCADORES Y CONTEO REAL DE IDs SELECCIONADOS EN EL FILTRO
  let boundsArray = [];
  
  estructurasUnicasMap.forEach((item, idNorm) => {  
@@ -202,13 +197,13 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // Actualizar texto del filtro con la cantidad exacta de IDs únicos filtrados
  actualizarTextoFiltroUI(filtroEstado, contadorIDsFiltrados);
 
- if (boundsArray.length > 0 && filtroEstado !== 'todos') {
-   map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
- } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
-   map.setView([-12.055, -77.050], 12);
+ // Zoom dinámico (FitBounds) garantizado para ajustar la macrozona al abrir en celular o web
+ if (boundsArray.length > 0) {
+   map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 13 });
+ } else {
+   map.setView([-12.055, -77.050], 11);
  }
 
  setTimeout(() => { map.invalidateSize(); }, 200);
@@ -292,7 +287,6 @@ function ejecutarConsultaIA() {
  }
 }
 
-// Botón de Reporte con diseño estructurado por títulos y listados debajo
 function copiarReporteTexto() {
     let idsCercoInicial = [];
     let idsResidual = [];
@@ -331,7 +325,6 @@ function copiarReporteTexto() {
 
     let textoReporte = "=== REPORTE OPERATIVO LÍNEA 2 Y 4 ===\n\n";
     
-    // Bloques estructurados con el título arriba y las IDs debajo
     textoReporte += `🚧 Cerco Inicial (${idsCercoInicial.length}):\n`;
     textoReporte += `${idsCercoInicial.join(', ')}\n\n`;
 
