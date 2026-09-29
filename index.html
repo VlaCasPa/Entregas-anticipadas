@@ -38,14 +38,14 @@
    </div>
  </div>
 
- <!-- 3. Panel de Filtro por Estado (Desplazado para no interferir con KPIs) -->
+ <!-- 3. Panel de Filtro por Estado (Con contadores dinámicos por ID) -->
  <div id="panel-filtros">
    <div class="filtro-header-mobile" onclick="toggleFiltros()">
-     <span>🔍 FILTRAR POR ESTADO</span>
+     <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
      <span id="filtro-icon">▼</span>
    </div>
    <div class="filtros-contenido" id="filtrosContenido">
-     <div class="filtro-titulo-web">FILTRO POR ESTADO</div>
+     <div class="filtro-titulo-web" id="label-filtro-web">FILTRO POR ESTADO</div>
      <div class="filtros-botones">
        <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
        <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
@@ -57,7 +57,7 @@
    </div>
  </div>
 
- <!-- 4. Marca de Agua (Diseñado por Vladimir Casas - Colocada de forma armónica encima de la leyenda) -->
+ <!-- 4. Marca de Agua (Diseñado por Vladimir Casas - Posicionado armónicamente) -->
  <div id="marca-agua">Diseñado por Vladimir Casas</div>
 
  <!-- 5. Leyenda de Cerramientos (Situada justo encima de los botones de acción) -->
