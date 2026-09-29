@@ -132,7 +132,7 @@ body, html {
 
  /* Filtro móvil desplazado adecuadamente debajo de los KPIs */
  #panel-filtros {
-   position: relative; top: auto; right: auto; width: calc(100% - 16px); box-sizing: border-box; padding: 8px 12px; margin: 9px 8px 0 8px;
+   position: relative; top: auto; right: auto; width: calc(100% - 16px); box-sizing: border-box; padding: 8px 12px; margin: 14px 8px 0 8px;
  }
  .filtro-header-mobile { display: flex; }
  .filtro-titulo-web { display: none; }
