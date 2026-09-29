@@ -56,13 +56,12 @@ Promise.all([
 
 function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  filtroActualGlobal = filtroEstado;
- let countInicial = 0, countResidual = 0, countLiberado = 0, countCulminada = 0;  
-
+ 
  grupoPoligonos.clearLayers();
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. PROCESAMIENTO ÚNICO POR ESTRUCTURA (Universo de estructuras de la BD)
+ // 1. CONSOLIDACIÓN RIGUROSA POR ID ÚNICO (Evita duplicados por múltiples polígonos/filas)
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -82,16 +81,12 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
        let estadoCalculado = 'inicial';
        if (esCulminada) {
-         countCulminada++;
          estadoCalculado = 'culminada';
        } else if (esResidual) {
-         countResidual++;
          estadoCalculado = 'residual';
        } else if (esLiberado) {
-         countLiberado++;
          estadoCalculado = 'liberado';
        } else {
-         countInicial++;
          estadoCalculado = 'inicial';
        }
 
@@ -103,12 +98,21 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
+ // 2. CONTEO EXACTO DE KPIs BASADO EN IDs ÚNICOS
+ let countInicial = 0, countResidual = 0, countLiberado = 0, countCulminada = 0;
+ estructurasUnicasMap.forEach((data) => {
+   if (data.estadoCalculado === 'inicial') countInicial++;
+   else if (data.estadoCalculado === 'residual') countResidual++;
+   else if (data.estadoCalculado === 'liberado') countLiberado++;
+   else if (data.estadoCalculado === 'culminada') countCulminada++;
+ });
+
  document.getElementById('kpi-inicial').innerText = countInicial;  
  document.getElementById('kpi-residual').innerText = countResidual;  
  document.getElementById('kpi-liberado').innerText = countLiberado;  
  document.getElementById('kpi-culminada').innerText = countCulminada;  
 
- // 2. FILTRADO Y CARGA DE POLÍGONOS CON Z-INDEX CORRECTO (Residual al final)
+ // 3. FILTRADO Y RENDERIZADO DE POLÍGONOS
  let featuresOrdenadas = [...geojsonData.features].sort((a, b) => {
    let tA = (a.properties.tipo || "").toLowerCase();
    let tB = (b.properties.tipo || "").toLowerCase();
@@ -118,6 +122,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  });
 
  let idsPoligonosFiltrados = new Set();
+ let contadorIDsFiltrados = 0;
 
  let geojsonFiltrado = {
    type: "FeatureCollection",
@@ -153,8 +158,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 3. CARGA DE MARCADORES E IDS (Sincronizado con los polígonos filtrados y coordenadas del CSV/GeoJSON)
+ // 4. CARGA DE MARCADORES E IDS Y CONTEO REAL DE IDs SELECCIONADOS
  let boundsArray = [];
+ let idsProcesadosEnFiltro = new Set();
  
  estructurasUnicasMap.forEach((item, idNorm) => {  
    let cumpleFiltro = true;
@@ -165,14 +171,15 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    if (filtroEstado === '30dias') cumpleFiltro = false;
 
    if (cumpleFiltro) {
+     idsProcesadosEnFiltro.add(idNorm);
+     contadorIDsFiltrados++;
+
      let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
      let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
 
-     // Si no hay coordenada en el CSV pero existe en el GeoJSON filtrado, extraer centroide geométrico como respaldo
      if (isNaN(lat) || isNaN(lon)) {
        let featMatch = geojsonFiltrado.features.find(f => normalizarID(f.properties.id || f.properties.ID) === idNorm);
        if (featMatch && featMatch.geometry) {
-         // Coordenadas aproximadas del bbox o geometría
          let coords = featMatch.geometry.coordinates[0][0];
          lon = coords[0];
          lat = coords[1];
@@ -190,7 +197,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // Zoom Out dinámico (fitBounds) garantizado para cualquier estado filtrado
+ // Actualizar dinámicamente el texto del filtro con la cantidad exacta de IDs
+ actualizarTextoFiltroUI(filtroEstado, contadorIDsFiltrados);
+
  if (boundsArray.length > 0 && filtroEstado !== 'todos') {
    map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 15 });
  } else if (filtroEstado === 'todos' && boundsArray.length > 0) {
@@ -200,10 +209,28 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  setTimeout(() => { map.invalidateSize(); }, 200);
 }
 
+function actualizarTextoFiltroUI(filtro, cantidad) {
+ let textoEstado = "TODOS";
+ if (filtro === 'inicial') textoEstado = "CERRAMIENTO INICIAL";
+ if (filtro === 'residual') textoEstado = "ÁREA RESIDUAL";
+ if (filtro === 'liberado') textoEstado = "ÁREA LIBERADA";
+ if (filtro === 'culminada') textoEstado = "OBRA CULMINADA";
+ if (filtro === '30dias') textoEstado = "< 30 DÍAS";
+
+ // Actualiza tanto la versión web como la móvil con el número exacto de IDs
+ let labelMobile = document.getElementById('label-filtro-mobile');
+ let labelWeb = document.getElementById('label-filtro-web');
+ 
+ let contenidoStr = `🔍 FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
+ 
+ if(labelMobile) labelMobile.innerText = contenidoStr;
+ if(labelWeb) labelWeb.innerText = `FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
+}
+
 function generarHTMLPopup(idEstructura, datos) {
   return `  
     <div style="min-width: 200px; font-size: 11px;">  
-      <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${idEstructura}: ${datos.Nombre || 'Estructura L2 y L4'}</h3>  
+      <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${idEstructura}: ${datos.Nombre || 'Estructura Línea 2 y 4'}</h3>  
       <div style="color: #64748b; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Tipo: ${datos.Tipo_Cerramiento || 'Cerramiento'}</div>  
       <div>📅 <b>Constatación:</b> ${datos.Fecha_Constatacion || '-'}</div>  
       <div>🚧 <b>Liberación:</b> ${datos.Fecha_Liberacion || '-'}</div>  
@@ -261,7 +288,6 @@ function ejecutarConsultaIA() {
  }
 }
 
-// Botón de Reporte con feedback visual discreto estilo "Copiado"
 function copiarReporteTexto() {
  let textoReporte = "=== REPORTE OPERATIVO LÍNEA 2 Y 4 ===\n";
  textoReporte += "- Cerco Inicial: " + document.getElementById('kpi-inicial').innerText + "\n";
