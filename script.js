@@ -61,7 +61,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
 
- // 1. CONSOLIDACIÓN RIGUROSA POR ID ÚNICO (Evita duplicados por múltiples polígonos/filas)
+ // 1. MAPEO Y CONSOLIDACIÓN ESTRICTA POR ID ÚNICO
  let estructurasUnicasMap = new Map();
 
  csvData.forEach(item => {  
@@ -71,40 +71,48 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
      if (!estructurasUnicasMap.has(idNorm)) {
        let keys = Object.keys(item);
+       // Columna D (la 4ta columna, índice 3) es "Tiene_Liberacion" o equivalente
        let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
-       let tipoC = item.Tipo_Cerramiento ? item.Tipo_Cerramiento.trim().toLowerCase() : "";  
-       let tieneLib = item.Tiene_Liberacion ? item.Tiene_Liberacion.trim().toUpperCase() : "";  
 
-       let esCulminada = (valColD === "culminada" || tipoC === "culminada" || valColD === "culminado" || valColD === "si");
-       let esResidual = (tipoC.includes("residual") || tipoC === "residual");
-       let esLiberado = (tieneLib === "SI" || tipoC.includes("liberado"));
+       let esCulminada = (valColD.includes("culminada") || valColD.includes("culminado"));
+       let esSi = (valColD === "si");
+       let esNo = (valColD === "no");
 
        let estadoCalculado = 'inicial';
        if (esCulminada) {
          estadoCalculado = 'culminada';
-       } else if (esResidual) {
-         estadoCalculado = 'residual';
-       } else if (esLiberado) {
-         estadoCalculado = 'liberado';
+       } else if (esSi) {
+         // Si dice "SI", alimenta tanto a liberado como a residual según la regla solicitada
+         estadoCalculado = 'liberado_residual'; 
+       } else if (esNo) {
+         estadoCalculado = 'inicial';
        } else {
          estadoCalculado = 'inicial';
        }
 
        estructurasUnicasMap.set(idNorm, {
          ...item,
-         estadoCalculado: estadoCalculado
+         estadoCalculado: estadoCalculado,
+         esSi: esSi,
+         esCulminada: esCulminada,
+         esNo: esNo
        });
      }
    }  
  });  
 
- // 2. CONTEO EXACTO DE KPIs BASADO EN IDs ÚNICOS
+ // 2. CONTEO DE KPIS BASADO EXCLUSIVAMENTE EN COLUMNA D POR ID ÚNICO
  let countInicial = 0, countResidual = 0, countLiberado = 0, countCulminada = 0;
+ 
  estructurasUnicasMap.forEach((data) => {
-   if (data.estadoCalculado === 'inicial') countInicial++;
-   else if (data.estadoCalculado === 'residual') countResidual++;
-   else if (data.estadoCalculado === 'liberado') countLiberado++;
-   else if (data.estadoCalculado === 'culminada') countCulminada++;
+   if (data.esCulminada) {
+     countCulminada++;
+   } else if (data.esSi) {
+     countLiberado++;
+     countResidual++; // Alimenta a ambos contadores
+   } else {
+     countInicial++; // Por defecto "NO" o vacío inicial
+   }
  });
 
  document.getElementById('kpi-inicial').innerText = countInicial;  
@@ -112,7 +120,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  document.getElementById('kpi-liberado').innerText = countLiberado;  
  document.getElementById('kpi-culminada').innerText = countCulminada;  
 
- // 3. FILTRADO Y RENDERIZADO DE POLÍGONOS
+ // 3. FILTRADO Y RENDERIZADO DE POLÍGONOS EN EL MAPA
  let featuresOrdenadas = [...geojsonData.features].sort((a, b) => {
    let tA = (a.properties.tipo || "").toLowerCase();
    let tB = (b.properties.tipo || "").toLowerCase();
@@ -158,20 +166,18 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  }).addTo(grupoPoligonos);  
 
- // 4. CARGA DE MARCADORES E IDS Y CONTEO REAL DE IDs SELECCIONADOS
+ // 4. CARGA DE MARCADORES Y CONTEO REAL DE IDs SELECCIONADOS EN EL FILTRO
  let boundsArray = [];
- let idsProcesadosEnFiltro = new Set();
  
  estructurasUnicasMap.forEach((item, idNorm) => {  
    let cumpleFiltro = true;
    if (filtroEstado === 'inicial') cumpleFiltro = (item.estadoCalculado === 'inicial');
-   if (filtroEstado === 'residual') cumpleFiltro = (item.estadoCalculado === 'residual' || idsPoligonosFiltrados.has(idNorm));
-   if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado' || idsPoligonosFiltrados.has(idNorm));
+   if (filtroEstado === 'residual') cumpleFiltro = (item.estadoCalculado === 'liberado_residual' || idsPoligonosFiltrados.has(idNorm));
+   if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado_residual' || idsPoligonosFiltrados.has(idNorm));
    if (filtroEstado === 'culminada') cumpleFiltro = (item.estadoCalculado === 'culminada');
    if (filtroEstado === '30dias') cumpleFiltro = false;
 
    if (cumpleFiltro) {
-     idsProcesadosEnFiltro.add(idNorm);
      contadorIDsFiltrados++;
 
      let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
@@ -197,7 +203,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    }  
  });  
 
- // Actualizar dinámicamente el texto del filtro con la cantidad exacta de IDs
+ // Actualizar texto del filtro con la cantidad exacta de IDs únicos filtrados
  actualizarTextoFiltroUI(filtroEstado, contadorIDsFiltrados);
 
  if (boundsArray.length > 0 && filtroEstado !== 'todos') {
@@ -217,7 +223,6 @@ function actualizarTextoFiltroUI(filtro, cantidad) {
  if (filtro === 'culminada') textoEstado = "OBRA CULMINADA";
  if (filtro === '30dias') textoEstado = "< 30 DÍAS";
 
- // Actualiza tanto la versión web como la móvil con el número exacto de IDs
  let labelMobile = document.getElementById('label-filtro-mobile');
  let labelWeb = document.getElementById('label-filtro-web');
  
