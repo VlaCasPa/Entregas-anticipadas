@@ -18,6 +18,7 @@ let mapaDatosSheets = {};
 let datosGlobalesCSV = [];
 let geojsonDataGlobal = null;
 let filtroActualGlobal = 'todos';
+let estructurasUnicasMap = new Map(); // Variable global para usar en el reporte
 
 function normalizarID(texto) {  
  if (!texto) return "";  
@@ -60,10 +61,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoPoligonos.clearLayers();
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
+ estructurasUnicasMap.clear();
 
- // 1. MAPEO Y CONSOLIDACIÓN ESTRICTA POR ID ÚNICO
- let estructurasUnicasMap = new Map();
-
+ // 1. MAPEO Y CONSOLIDACIÓN ESTRICTA POR ID ÚNICO (Basado en Columna D)
  csvData.forEach(item => {  
    if (item.ID) {  
      let idNorm = normalizarID(item.ID);  
@@ -71,7 +71,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
      if (!estructurasUnicasMap.has(idNorm)) {
        let keys = Object.keys(item);
-       // Columna D (la 4ta columna, índice 3) es "Tiene_Liberacion" o equivalente
+       // Columna D (la 4ta columna, índice 3) es "Tiene_Liberacion"
        let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
 
        let esCulminada = (valColD.includes("culminada") || valColD.includes("culminado"));
@@ -82,7 +82,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        if (esCulminada) {
          estadoCalculado = 'culminada';
        } else if (esSi) {
-         // Si dice "SI", alimenta tanto a liberado como a residual según la regla solicitada
          estadoCalculado = 'liberado_residual'; 
        } else if (esNo) {
          estadoCalculado = 'inicial';
@@ -109,9 +108,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      countCulminada++;
    } else if (data.esSi) {
      countLiberado++;
-     countResidual++; // Alimenta a ambos contadores
+     countResidual++; // Alimenta ambos contadores
    } else {
-     countInicial++; // Por defecto "NO" o vacío inicial
+     countInicial++; 
    }
  });
 
@@ -293,24 +292,66 @@ function ejecutarConsultaIA() {
  }
 }
 
+// Botón de Reporte con íconos representativos, listados detallados de IDs y fecha actual
 function copiarReporteTexto() {
- let textoReporte = "=== REPORTE OPERATIVO LÍNEA 2 Y 4 ===\n";
- textoReporte += "- Cerco Inicial: " + document.getElementById('kpi-inicial').innerText + "\n";
- textoReporte += "- Área Residual: " + document.getElementById('kpi-residual').innerText + "\n";
- textoReporte += "- Área Liberada: " + document.getElementById('kpi-liberado').innerText + "\n";
- textoReporte += "- Culminadas: " + document.getElementById('kpi-culminada').innerText + "\n";
- textoReporte += "Diseñado por Vladimir Casas.";
+    let idsCercoInicial = [];
+    let idsResidual = [];
+    let idsLiberado = [];
+    let idsCulminada = [];
+    let idsMenores30Días = [];
 
- navigator.clipboard.writeText(textoReporte).then(() => {
-   let btn = document.getElementById('btnReporte');
-   let textoOriginal = btn.innerHTML;
-   btn.innerHTML = '✅ Copiado';
-   btn.classList.add('copiado');
-   setTimeout(() => {
-     btn.innerHTML = textoOriginal;
-     btn.classList.remove('copiado');
-   }, 2000);
- }).catch(err => {
-   alert("Error al copiar: " + err);
- });
+    let fechaHoy = new Date("2026-09-29"); 
+
+    if (estructurasUnicasMap.size > 0) {
+        estructurasUnicasMap.forEach((data, idNorm) => {
+            let idOriginal = data.ID || idNorm;
+            
+            if (data.esCulminada) {
+                idsCulminada.push(idOriginal);
+            } else if (data.esSi) {
+                idsLiberado.push(idOriginal);
+                idsResidual.push(idOriginal); 
+            } else {
+                idsCercoInicial.push(idOriginal);
+            }
+
+            let fechaStr = data.Fecha_Liberacion || data.Fecha_Constatacion;
+            if (fechaStr && fechaStr.includes('/')) {
+                let partes = fechaStr.split('/');
+                if (partes.length === 3) {
+                    let fechaItem = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+                    let diferenciaDias = (fechaHoy - fechaItem) / (1000 * 60 * 60 * 24);
+                    if (diferenciaDias >= 0 && diferenciaDias <= 30) {
+                        idsMenores30Días.push(`${idOriginal} (${fechaStr})`);
+                    }
+                }
+            }
+        });
+    }
+
+    let textoReporte = "=== REPORTE OPERATIVO LÍNEA 2 Y 4 ===\n\n";
+    
+    textoReporte += `🚧 Cerco Inicial (${idsCercoInicial.length}): ${idsCercoInicial.join(', ')}\n`;
+    textoReporte += `📐 Área Residual (${idsResidual.length}): ${idsResidual.join(', ')}\n`;
+    textoReporte += `🔓 Área Liberada (${idsLiberado.length}): ${idsLiberado.join(', ')}\n`;
+    textoReporte += `✅ Culminadas (${idsCulminada.length}): ${idsCulminada.join(', ')}\n\n`;
+    
+    textoReporte += `📅 Registros con área residual o liberada en los últimos 30 días:\n`;
+    textoReporte += idsMenores30Días.length > 0 ? `${idsMenores30Días.join(', ')}\n\n` : `Ninguno registrado en el periodo.\n\n`;
+    
+    textoReporte += `Fecha del reporte: 29/09/2026\n`;
+    textoReporte += `Diseñado por Vladimir Casas.`;
+
+    navigator.clipboard.writeText(textoReporte).then(() => {
+        let btn = document.getElementById('btnReporte');
+        let textoOriginal = btn.innerHTML;
+        btn.innerHTML = '✅ Copiado';
+        btn.classList.add('copiado');
+        setTimeout(() => {
+            btn.innerHTML = textoOriginal;
+            btn.classList.remove('copiado');
+        }, 2000);
+    }).catch(err => {
+        alert("Error al copiar el reporte: " + err);
+    });
 }
