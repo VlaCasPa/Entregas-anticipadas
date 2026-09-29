@@ -64,7 +64,7 @@ body, html {
 .filtro-btn.btn-temporal { background-color: #ffffff; color: #475569; border-color: #cbd5e1; }
 .filtro-btn.active { box-shadow: 0 0 0 2px #0f172a; font-weight: 700; }
 
-/* --- Leyenda --- */
+/* --- Leyenda Web --- */
 #panel-leyenda {
  position: absolute; bottom: 50px; left: 15px; z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95); padding: 10px 14px; border-radius: 8px;
@@ -89,7 +89,7 @@ body, html {
 .btn-consultor { background-color: #2563eb; }
 .btn-accion.copiado { background-color: #16a34a !important; color: #ffffff !important; }
 
-/* --- Consultor IA Colapsable Estilo Moderno --- */
+/* --- Consultor IA Colapsable --- */
 .ia-desplegable-arriba {
  display: none; position: absolute; bottom: 55px; right: 0; width: 320px;
  background: #ffffff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 16px; z-index: 2100;
@@ -115,7 +115,7 @@ body, html {
  z-index: 3000 !important;
 }
 
-/* --- ADAPTABILIDAD MOBILE (CELULAR) --- */
+/* --- ADAPTABILIDAD MOBILE (CELULAR) OPTIMIZADA --- */
 @media (max-width: 768px) {
  body, html { overflow: auto; }
  
@@ -130,30 +130,39 @@ body, html {
  .kpi-card { min-width: unset; padding: 6px 2px; }
  .kpi-title { font-size: 6px; } .kpi-value { font-size: 12px; }
 
- /* Filtros móviles debajo de los KPIs con margen seguro */
+ /* Filtro móvil desplazado adecuadamente debajo de los KPIs */
  #panel-filtros {
-   position: relative; top: auto; right: auto; width: 100%; box-sizing: border-box; padding: 8px 12px; margin-top: 6px;
+   position: relative; top: auto; right: auto; width: calc(100% - 16px); box-sizing: border-box; padding: 8px 12px; margin: 6px 8px 0 8px;
  }
  .filtro-header-mobile { display: flex; }
  .filtro-titulo-web { display: none; }
  .filtros-contenido { display: none; margin-top: 8px; }
  .filtros-contenido.show { display: flex; flex-wrap: wrap; gap: 5px; }
 
- /* Leyenda abajo en móvil (encima del botón de reporte, con espacio para marca de agua) */
+ /* Contenedores inferiores fijos ordenados secuencialmente sin solapamiento */
+ #panel-acciones { 
+   position: fixed; bottom: 8px; right: 8px; left: 8px; justify-content: center; z-index: 1000; margin: 0;
+ }
+ .btn-accion { flex: 1; justify-content: center; padding: 10px 6px; font-size: 11px; }
+
+ /* Leyenda situada estáticamente justo encima de los botones de acción */
  #panel-leyenda {
-   position: fixed; bottom: 65px; left: 10px; right: 10px; z-index: 1000;
+   position: fixed; bottom: 52px; left: 8px; right: 8px; z-index: 1000;
    background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
-   box-shadow: 0 -4px 15px rgba(0,0,0,0.15); font-size: 10px; box-sizing: border-box; width: auto;
+   box-shadow: 0 -2px 10px rgba(0,0,0,0.1); font-size: 10px; box-sizing: border-box; width: auto;
+   margin: 0;
  }
  .leyenda-header-mobile { display: flex; }
  .leyenda-titulo { display: none; }
- .leyenda-contenido { display: none; margin-bottom: 6px; }
+ .leyenda-contenido { display: none; margin-bottom: 4px; }
  .leyenda-contenido.show { display: flex; flex-direction: column; gap: 3px; }
 
- #marca-agua { position: fixed; bottom: 112px; left: 50%; transform: translateX(-50%); z-index: 1000; font-size: 9px; padding: 2px 8px; }
+ /* Texto "Diseñado por Vladimir Casas" posicionado encima de la leyenda de forma estética */
+ #marca-agua { 
+   position: fixed; bottom: 93px; left: 50%; transform: translateX(-50%); z-index: 1000; 
+   font-size: 9px; padding: 2px 10px; background-color: rgba(255, 255, 255, 0.9); border-radius: 4px;
+   box-shadow: 0 1px 3px rgba(0,0,0,0.08); white-space: nowrap;
+ }
 
- #panel-acciones { position: fixed; bottom: 12px; right: 10px; left: 10px; justify-content: center; z-index: 1000; }
- .btn-accion { flex: 1; justify-content: center; padding: 8px 6px; font-size: 11px; }
-
- .ia-desplegable-arriba { bottom: 60px; right: 10px; left: 10px; width: auto; }
+ .ia-desplegable-arriba { bottom: 55px; right: 8px; left: 8px; width: auto; }
 }
