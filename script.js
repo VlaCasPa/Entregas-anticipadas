@@ -292,7 +292,7 @@ function ejecutarConsultaIA() {
  }
 }
 
-// Botón de Reporte con íconos representativos, listados detallados de IDs y fecha actual
+// Botón de Reporte con diseño estructurado por títulos y listados debajo
 function copiarReporteTexto() {
     let idsCercoInicial = [];
     let idsResidual = [];
@@ -331,10 +331,18 @@ function copiarReporteTexto() {
 
     let textoReporte = "=== REPORTE OPERATIVO LÍNEA 2 Y 4 ===\n\n";
     
-    textoReporte += `🚧 Cerco Inicial (${idsCercoInicial.length}): ${idsCercoInicial.join(', ')}\n`;
-    textoReporte += `📐 Área Residual (${idsResidual.length}): ${idsResidual.join(', ')}\n`;
-    textoReporte += `🔓 Área Liberada (${idsLiberado.length}): ${idsLiberado.join(', ')}\n`;
-    textoReporte += `✅ Culminadas (${idsCulminada.length}): ${idsCulminada.join(', ')}\n\n`;
+    // Bloques estructurados con el título arriba y las IDs debajo
+    textoReporte += `🚧 Cerco Inicial (${idsCercoInicial.length}):\n`;
+    textoReporte += `${idsCercoInicial.join(', ')}\n\n`;
+
+    textoReporte += `📐 Área Residual (${idsResidual.length}):\n`;
+    textoReporte += `${idsResidual.join(', ')}\n\n`;
+
+    textoReporte += `🔓 Área Liberada (${idsLiberado.length}):\n`;
+    textoReporte += `${idsLiberado.join(', ')}\n\n`;
+
+    textoReporte += `✅ Culminadas (${idsCulminada.length}):\n`;
+    textoReporte += `${idsCulminada.join(', ')}\n\n`;
     
     textoReporte += `📅 Registros con área residual o liberada en los últimos 30 días:\n`;
     textoReporte += idsMenores30Días.length > 0 ? `${idsMenores30Días.join(', ')}\n\n` : `Ninguno registrado en el periodo.\n\n`;
