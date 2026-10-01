@@ -14,32 +14,32 @@
  <!-- Contenedor General de Pantalla Dividida -->
  <div id="app-container">
 
-   <!-- ================= SECCIÓN MAPA (2/3 IZQUIERDA EN WEB) ================= -->
-   <div id="seccion-mapa">
-     <div id="map"></div>
+   <!-- Título Principal (Se adapta automáticamente en Escritorio y Móvil) -->
+   <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
 
-     <!-- Título Superior Izquierdo -->
-     <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
-
-     <!-- Panel de Filtros (Debajo del Título) -->
-     <div id="panel-filtros">
-       <div class="filtro-header-mobile" onclick="toggleFiltros()">
-         <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
-         <span id="filtro-icon">▼</span>
-       </div>
-       <div class="filtros-contenido" id="filtrosContenido">
-         <div class="filtro-titulo-web" id="label-filtro-web">FILTRO POR ESTADO</div>
-         <div class="filtros-botones">
-           <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
-           <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
-           <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
-           <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
-           <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
-           <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
-           <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
-         </div>
+   <!-- Panel de Filtros -->
+   <div id="panel-filtros">
+     <div class="filtro-header-mobile" onclick="toggleFiltros()">
+       <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
+       <span id="filtro-icon">▼</span>
+     </div>
+     <div class="filtros-contenido" id="filtrosContenido">
+       <div class="filtro-titulo-web" id="label-filtro-web">FILTRO POR ESTADO</div>
+       <div class="filtros-botones">
+         <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+         <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+         <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+         <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+         <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+         <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+         <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
        </div>
      </div>
+   </div>
+
+   <!-- ================= SECCIÓN MAPA ================= -->
+   <div id="seccion-mapa">
+     <div id="map"></div>
 
      <!-- Contenedor Inferior Izquierdo: Marca de agua sobre los botones -->
      <div id="panel-acciones-izquierda">
@@ -87,7 +87,7 @@
      </div>
    </div>
 
-   <!-- ================= SECCIÓN PANEL ANALÍTICO (1/3 DERECHA EN WEB) ================= -->
+   <!-- ================= SECCIÓN PANEL ANALÍTICO (KPIs y Tabla) ================= -->
    <div id="seccion-panel-derecho">
      <!-- KPIs del Sistema -->
      <div id="panel-kpis">
