@@ -74,6 +74,7 @@ body, html {
 .filtro-btn.btn-liberado { background-color: #e0f2fe; color: #0369a1; border-color: #38bdf8; }
 .filtro-btn.btn-culminada { background-color: #eaf2eb; color: #315738; border-color: #94a3b8; }
 .filtro-btn.btn-temporal { background-color: #ffffff; color: #475569; border-color: #cbd5e1; }
+.filtro-btn.btn-proximas { background-color: #fef3c7; color: #92400e; border-color: #f59e0b; }
 .filtro-btn.active { box-shadow: 0 0 0 2px #0f172a; font-weight: 700; }
 
 /* --- Leyenda Web --- */
