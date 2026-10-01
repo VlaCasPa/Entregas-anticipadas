@@ -7,7 +7,7 @@ L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
  attribution: '&copy; Google',  
  opacity: 0.65,  
  className: 'mapa-google-gris'  
-end = '').addTo(map);  
+}).addTo(map);  
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
 
@@ -19,7 +19,7 @@ let datosGlobalesCSV = [];
 let geojsonDataGlobal = null;
 let filtroActualGlobal = 'todos';
 let estructurasUnicasMap = new Map(); 
-let marcadoresMapIndex = {}; // Almacena referencias a los marcadores para hover cruzado
+let marcadoresMapIndex = {}; 
 
 function normalizarID(texto) {  
  if (!texto) return "";  
@@ -123,7 +123,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        let cumple30Dias = esMenorA30Dias(item);
        let cumpleProxima = esProximaLiberacion(item);
 
-       // Jerarquía de ordenamiento para la tabla solicitada:
+       // Jerarquía de ordenamiento para la tabla:
        // 1. Próximos a liberar, 2. Liberados recientemente (<30d), 3. El resto
        let prioridad = 3;
        let tipoFila = 'resto';
@@ -262,7 +262,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
  actualizarTextoFiltroUI(filtroEstado, contadorIDsFiltrados);
 
- // Zoom out general y centrado automático garantizado al iniciar o filtrar
+ // Zoom out general y centrado automático al iniciar o filtrar
  if (boundsArray.length > 0) {
    map.fitBounds(boundsArray, { padding: [40, 40], maxZoom: 12 });
  } else {
@@ -272,7 +272,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  setTimeout(() => { map.invalidateSize(); }, 200);
 }
 
-// Renderizado de tabla con colores de fondo y sincronización de eventos de mouse (Hover bidireccional)
+// Renderizado de tabla con colores de fondo y sincronización de eventos de mouse
 function construirTablaHTML(elementos) {
     let tbody = document.getElementById('tabla-tbody');
     tbody.innerHTML = "";
@@ -297,7 +297,7 @@ function construirTablaHTML(elementos) {
             <td>${item.Codigo_Plano || '-'}</td>
         `;
 
-        // Evento Hover Tabla -> Mapa (Centra y destaca el marcador en el mapa)
+        // Evento Hover Tabla -> Mapa
         tr.addEventListener('mouseenter', () => {
             tr.classList.add('fila-hover');
             let marker = marcadoresMapIndex[idNorm];
@@ -316,7 +316,7 @@ function construirTablaHTML(elementos) {
             }
         });
 
-        // Click en la fila para centrar el mapa en la estructura
+        // Click en la fila para centrar el mapa
         tr.addEventListener('click', () => {
             let marker = marcadoresMapIndex[idNorm];
             if (marker) {
