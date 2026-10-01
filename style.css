@@ -105,13 +105,13 @@ body, html {
  padding: 5px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 500;
 }
 
-/* Colores condicionales para las filas de la tabla */
+/* Colores condicionales y resaltados de la tabla */
 tr.fila-proxima { background-color: #FAF2D2 !important; }
 tr.fila-reciente { background-color: #D6E8C3 !important; }
 tr.fila-resto { background-color: #F2F7F7 !important; }
 
-/* Efecto hover interactivo */
 tr.fila-hover { background-color: #cbd5e1 !important; cursor: pointer; transition: background 0.15s; }
+tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !important; }
 
 /* --- Leyenda (Esquina Inferior Derecha del Mapa) --- */
 #panel-leyenda {
