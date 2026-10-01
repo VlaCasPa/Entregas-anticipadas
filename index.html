@@ -14,33 +14,34 @@
  <!-- Contenedor General de Pantalla Dividida -->
  <div id="app-container">
 
-   <!-- Título Principal Centrado Superior (Versión Web) -->
+   <!-- Título Principal Superior Izquierdo (Versión Web) / Superior (Móvil) -->
    <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
+
+   <!-- Panel de Filtros (Versión Móvil) -->
+   <div id="panel-filtros">
+     <div class="filtro-header-mobile" onclick="toggleFiltros()">
+       <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
+       <span id="filtro-icon">▼</span>
+     </div>
+     <div class="filtros-contenido" id="filtrosContenido">
+       <div class="filtro-titulo-web" id="label-filtro-web">FILTRO POR ESTADO</div>
+       <div class="filtros-botones">
+         <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+         <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+         <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+         <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+         <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+         <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+         <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
+       </div>
+     </div>
+   </div>
 
    <!-- ================= SECCIÓN MAPA ================= -->
    <div id="seccion-mapa">
      <div id="map"></div>
 
-     <!-- Panel de Filtros Móvil (Preservado para celular) -->
-     <div id="panel-filtros-mobile" class="filtro-mobile-container">
-       <div class="filtro-header-mobile" onclick="toggleFiltros()">
-         <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
-         <span id="filtro-icon">▼</span>
-       </div>
-       <div class="filtros-contenido" id="filtrosContenido">
-         <div class="filtros-botones">
-           <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
-           <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
-           <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
-           <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
-           <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
-           <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
-           <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
-         </div>
-       </div>
-     </div>
-
-     <!-- Contenedor Inferior Izquierdo: Marca de agua y botones de acción -->
+     <!-- Contenedor Inferior Izquierdo: Marca de agua y botones -->
      <div id="panel-acciones-izquierda">
        <div id="marca-agua">Diseñado por Vladimir Casas</div>
        <div style="display: flex; gap: 8px; align-items: flex-end; position: relative;">
@@ -117,9 +118,9 @@
 
      <div class="panel-separador-estetico"></div>
 
-     <!-- CUERPO 2: Filtros por Estado (Simétricos y proporcionales) -->
+     <!-- CUERPO 2: Filtros por Estado (Simétricos y proporcionales en Web) -->
      <div class="panel-seccion-bloque">
-       <div class="bloque-titulo-gerencial" id="label-filtro-web">Filtros Operativos por Estado</div>
+       <div class="bloque-titulo-gerencial" id="label-filtro-web-titulo">Filtros Operativos por Estado</div>
        <div class="filtros-botones-web-grid">
          <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
          <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
@@ -133,7 +134,7 @@
 
      <div class="panel-separador-estetico"></div>
 
-     <!-- CUERPO 3: Tabla de Registros (Ocupa la mayor parte del espacio) -->
+     <!-- CUERPO 3: Tabla de Registros -->
      <div class="panel-seccion-bloque table-flex-grow">
        <div class="tabla-header-titulo">Registro de Estructuras y Vigencias</div>
        <div id="contenedor-tabla">
