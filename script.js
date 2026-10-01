@@ -358,7 +358,7 @@ function actualizarTextoFiltroUI(filtro, cantidad) {
  let contenidoStr = `🔍 FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
  
  if(labelMobile) labelMobile.innerText = contenidoStr;
- if(labelWeb) labelWeb.innerText = `FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
+ if(labelWeb) labelWeb.innerText = `Filtros Operativos por Estado (${cantidad} registros)`;
 }
 
 function generarHTMLPopup(idEstructura, datos) {
@@ -398,28 +398,53 @@ function toggleConsultorIA() {
  document.getElementById('desplegableIA').classList.toggle('show');
 }
 
+function manejarEnterIA(event) {
+    if (event.key === 'Enter') {
+        ejecutarConsultaIA();
+    }
+}
+
 function ejecutarConsultaIA() {
- let consulta = document.getElementById('inputConsultaIA').value.trim().toUpperCase();
- let cajaResp = document.getElementById('respuestaIA');
+ let inputElem = document.getElementById('inputConsultaIA');
+ let consulta = inputElem.value.trim();
+ if(!consulta) return;
+
+ let chatContainer = document.getElementById('iaChatContainer');
  
- if(!consulta) { 
-   cajaResp.innerText = "Ingrese un ID de estructura válido."; 
-   return; 
- }
+ // Añadir mensaje del usuario al chat
+ let userBubble = document.createElement('div');
+ userBubble.className = 'ia-chat-bubble user';
+ userBubble.innerText = consulta;
+ chatContainer.appendChild(userBubble);
 
  let idNorm = normalizarID(consulta);
  let datosID = mapaDatosSheets[idNorm];
 
+ let botBubble = document.createElement('div');
+ botBubble.className = 'ia-chat-bubble bot';
+
  if (datosID) {
-   cajaResp.innerHTML = `<b>Datos para [${datosID.ID}]:</b><br>` +
-                        `- Nombre: ${datosID.Nombre || 'N/A'}<br>` +
-                        `- Constatación: ${datosID.Fecha_Constatacion || 'N/A'}<br>` +
-                        `- Acta: ${datosID.Fecha_Acta || 'N/A'}<br>` +
-                        `- Liberación: ${datosID.Fecha_Liberacion || 'N/A'}<br>` +
-                        `- Asiento: ${datosID.Asiento_Obra || 'N/A'}`;
+   botBubble.innerHTML = `<b>✔ Datos para [${datosID.ID}]:</b><br>` +
+                        `• Nombre: ${datosID.Nombre || 'N/A'}<br>` +
+                        `• Constatación: ${datosID.Fecha_Constatacion || 'N/A'}<br>` +
+                        `• Acta: ${datosID.Fecha_Acta || 'N/A'}<br>` +
+                        `• Liberación: ${datosID.Fecha_Liberacion || 'N/A'}<br>` +
+                        `• Asiento: ${datosID.Asiento_Obra || 'N/A'}`;
+   
+   // Si el marcador existe, centrar mapa automáticamente
+   let marker = marcadoresMapIndex[idNorm];
+   if (marker) {
+       map.setView(marker.getLatLng(), 15, { animate: true });
+       marker.openPopup();
+       resaltarFilaEnTabla(idNorm);
+   }
  } else {
-   cajaResp.innerText = `No se encontraron registros para el ID "${consulta}".`;
+   botBubble.innerHTML = `❌ No se encontraron registros para el ID "${consulta}". Verifique e intente nuevamente.`;
  }
+
+ chatContainer.appendChild(botBubble);
+ chatContainer.scrollTop = chatContainer.scrollHeight;
+ inputElem.value = "";
 }
 
 function copiarReporteTexto() {
