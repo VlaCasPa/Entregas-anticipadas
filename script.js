@@ -55,10 +55,9 @@ Promise.all([
  actualizarDashboardYMapa(csvData, geojsonData, 'todos');
 });
 
-// Función auxiliar para evaluar si una fecha de la estructura está dentro de los últimos 30 días
+// Función para evaluar si una fecha está en los últimos 30 días
 function esMenorA30Dias(data) {
-    let fechaHoy = new Date("2026-10-01"); // Fecha actual del sistema
-    // Jerarquía de fechas a evaluar: Liberación -> Acta -> Constatación
+    let fechaHoy = new Date("2026-10-01"); 
     let fechaStr = data.Fecha_Liberacion || data.Fecha_Acta || data.Fecha_Constatacion;
     
     if (fechaStr && fechaStr.includes('/')) {
@@ -67,6 +66,22 @@ function esMenorA30Dias(data) {
             let fechaItem = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
             let diferenciaDias = (fechaHoy - fechaItem) / (1000 * 60 * 60 * 24);
             return (diferenciaDias >= 0 && diferenciaDias <= 30);
+        }
+    }
+    return false;
+}
+
+// Función para evaluar si la Fecha_Liberacion es una fecha a futuro (Próximas Liberaciones)
+function esProximaLiberacion(data) {
+    let fechaHoy = new Date("2026-10-01"); 
+    let fechaStr = data.Fecha_Liberacion;
+    
+    if (fechaStr && fechaStr.includes('/')) {
+        let partes = fechaStr.split('/');
+        if (partes.length === 3) {
+            let fechaItem = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+            // Si la fecha de liberación es estrictamente posterior a hoy
+            return (fechaItem > fechaHoy);
         }
     }
     return false;
@@ -105,6 +120,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        }
 
        let cumple30Dias = esMenorA30Dias(item);
+       let cumpleProxima = esProximaLiberacion(item);
 
        estructurasUnicasMap.set(idNorm, {
          ...item,
@@ -112,7 +128,8 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
          esSi: esSi,
          esCulminada: esCulminada,
          esNo: esNo,
-         cumple30Dias: cumple30Dias
+         cumple30Dias: cumple30Dias,
+         cumpleProxima: cumpleProxima
        });
      }
    }  
@@ -167,6 +184,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (filtroEstado === '30dias') {
          coincide = datosItem && datosItem.cumple30Dias;
      }
+     if (filtroEstado === 'proximas') {
+         coincide = datosItem && datosItem.cumpleProxima;
+     }
 
      if (coincide) {
        idsPoligonosFiltrados.add(idGeo);
@@ -193,6 +213,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado_residual' || idsPoligonosFiltrados.has(idNorm));
    if (filtroEstado === 'culminada') cumpleFiltro = (item.estadoCalculado === 'culminada');
    if (filtroEstado === '30dias') cumpleFiltro = item.cumple30Dias;
+   if (filtroEstado === 'proximas') cumpleFiltro = item.cumpleProxima;
 
    if (cumpleFiltro) {
      contadorIDsFiltrados++;
@@ -238,6 +259,7 @@ function actualizarTextoFiltroUI(filtro, cantidad) {
  if (filtro === 'liberado') textoEstado = "ÁREA LIBERADA";
  if (filtro === 'culminada') textoEstado = "OBRA CULMINADA";
  if (filtro === '30dias') textoEstado = "< 30 DÍAS";
+ if (filtro === 'proximas') textoEstado = "PRÓXIMAS LIBERACIONES";
 
  let labelMobile = document.getElementById('label-filtro-mobile');
  let labelWeb = document.getElementById('label-filtro-web');
@@ -315,6 +337,7 @@ function copiarReporteTexto() {
     let idsLiberado = [];
     let idsCulminada = [];
     let idsMenores30Días = [];
+    let idsProximasLiberaciones = [];
 
     if (estructurasUnicasMap.size > 0) {
         estructurasUnicasMap.forEach((data, idNorm) => {
@@ -332,6 +355,10 @@ function copiarReporteTexto() {
             if (data.cumple30Dias) {
                 let fechaRef = data.Fecha_Liberacion || data.Fecha_Acta || data.Fecha_Constatacion;
                 idsMenores30Días.push(`${idOriginal} (${fechaRef})`);
+            }
+
+            if (data.cumpleProxima) {
+                idsProximasLiberaciones.push(`${idOriginal} (${data.Fecha_Liberacion})`);
             }
         });
     }
@@ -352,6 +379,9 @@ function copiarReporteTexto() {
     
     textoReporte += `📅 Registros con fecha de liberación, acta o constatación en los últimos 30 días:\n`;
     textoReporte += idsMenores30Días.length > 0 ? `${idsMenores30Días.join(', ')}\n\n` : `Ninguno registrado en el periodo.\n\n`;
+
+    textoReporte += `⏳ Próximas Liberaciones (Fechas Estimadas):\n`;
+    textoReporte += idsProximasLiberaciones.length > 0 ? `${idsProximasLiberaciones.join(', ')}\n\n` : `Ninguna próxima liberación programada.\n\n`;
     
     textoReporte += `Fecha del reporte: 01/10/2026\n`;
     textoReporte += `Diseñado por Vladimir Casas.`;
