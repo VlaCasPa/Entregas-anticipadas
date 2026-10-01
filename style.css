@@ -206,7 +206,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
- /* Panel de filtros móvil: Colapsable y forzado estrictamente en 3 columnas (2 a 3 hileras) */
+ /* Panel de filtros móvil: Colapsable y forzado estrictamente en grid de 3 columnas compactas */
  #panel-filtros {
    position: static !important;
    order: 3;
@@ -239,6 +239,12 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    overflow: hidden !important;
    text-overflow: ellipsis !important;
    border-radius: 4px !important;
+   display: inline-block !important;
+ }
+
+ /* Forzar contenedor interno de botones móviles a no usar flex vertical */
+ .filtros-botones {
+   display: contents !important;
  }
 
  /* Mapa: exactamente 55% de la altura con scroll natural, orden 4 */
