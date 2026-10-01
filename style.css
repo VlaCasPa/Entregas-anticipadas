@@ -166,7 +166,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 
 /* ==========================================================
    ADAPTABILIDAD MÓVIL (CELULAR) OPTIMIZADA
-   - Título arriba, KPIs debajo, Filtros colapsables en 2 hileras estéticas
+   - Título arriba, KPIs debajo, Filtros colapsables en 2-3 hileras compactas
    - Mapa exactamente 55% de la altura permitiendo scroll vertical natural
    - Tabla con dimensiones de columnas y textos ajustados
    ========================================================== */
@@ -210,36 +210,39 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
- /* Panel de filtros colapsable orden 3, adaptado en 2 hileras para ocupar simétricamente la pantalla */
+ /* Panel de filtros colapsable orden 3: compacto en grid de 3 columnas para ocupar solo 2-3 hileras */
  #panel-filtros {
    position: static !important;
    order: 3;
    width: 100%;
    box-sizing: border-box;
    border-radius: 0;
-   padding: 6px 10px;
+   padding: 4px 8px;
    background: #ffffff;
    border-top: 1px solid #e2e8f0;
    border-bottom: 1px solid #e2e8f0;
    max-width: unset;
+   box-shadow: none;
  }
- .filtro-header-mobile { display: flex; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; }
+ .filtro-header-mobile { display: flex; font-size: 9px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; }
  .filtro-titulo-web { display: none; }
- .filtros-contenido { display: none; margin-top: 6px; }
+ .filtros-contenido { display: none; margin-top: 4px; }
  .filtros-contenido.show {
    display: grid;
-   grid-template-columns: repeat(4, 1fr);
+   grid-template-columns: repeat(3, 1fr);
    gap: 3px;
+   padding-bottom: 2px;
  }
  .filtro-btn {
    font-size: 8px;
-   padding: 4px 2px;
+   padding: 3px 2px;
    text-align: center;
    width: 100%;
    box-sizing: border-box;
    white-space: nowrap;
    overflow: hidden;
    text-overflow: ellipsis;
+   border-radius: 4px;
  }
 
  /* Mapa: exactamente 55% de la altura de la pantalla con scroll natural, orden 4 */
