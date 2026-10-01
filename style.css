@@ -105,11 +105,9 @@ body, html {
  padding: 5px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 500;
 }
 
-/* Colores condicionales y resaltados de la tabla */
 tr.fila-proxima { background-color: #FAF2D2 !important; }
 tr.fila-reciente { background-color: #D6E8C3 !important; }
 tr.fila-resto { background-color: #F2F7F7 !important; }
-
 tr.fila-hover { background-color: #cbd5e1 !important; cursor: pointer; transition: background 0.15s; }
 tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !important; }
 
@@ -128,10 +126,17 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 .color-liberado { background-color: #e0f2fe; border: 1.5px solid #38bdf8; }
 .color-culminada { background-color: #eaf2eb; border: 1.5px solid #315738; }
 
-/* --- Botones de Acciones (Esquina Inferior Izquierda del Mapa) --- */
+/* --- Botones de Acciones y Marca de Agua (Esquina Inferior Izquierda del Mapa) --- */
 #panel-acciones-izquierda {
- position: absolute; bottom: 15px; left: 15px; z-index: 1000; display: flex; gap: 8px; align-items: flex-end;
+ position: absolute; bottom: 15px; left: 15px; z-index: 1000;
+ display: flex; flex-direction: column; gap: 5px; align-items: flex-start;
 }
+#marca-agua {
+ font-size: 9px; font-weight: 700; color: #334155; background-color: rgba(255, 255, 255, 0.95);
+ padding: 3px 8px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); letter-spacing: 0.5px;
+ width: fit-content; border: 1px solid #cbd5e1;
+}
+
 .btn-accion {
  background-color: #0f172a; color: #ffffff; border: none; padding: 8px 14px; border-radius: 8px;
  font-weight: 600; font-size: 11px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 5px; transition: all 0.3s ease;
@@ -153,12 +158,6 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 .ia-input-container input { flex: 1; padding: 6px; font-size: 10px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; }
 .ia-input-container button { background: #2563eb; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; }
 
-#marca-agua {
- position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); z-index: 1000;
- font-size: 9px; font-weight: 600; color: rgba(100, 116, 139, 0.7); background-color: rgba(255, 255, 255, 0.6);
- padding: 1px 8px; border-radius: 4px; pointer-events: none; letter-spacing: 0.5px;
-}
-
 .id-tooltip {
  background-color: rgba(255, 255, 255, 0.95) !important; border: 1px solid #cbd5e1 !important;
  border-radius: 4px !important; padding: 2px 5px !important; font-weight: 700; color: #0f172a; font-size: 9px;
@@ -167,10 +166,9 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 
 /* ==========================================================
    ADAPTABILIDAD MÓVIL (CELULAR)
-   - Título arriba
-   - Indicadores debajo
-   - Filtros colapsables (2 filas)
-   - Mapa 60vh pero permitiendo scroll natural hacia la tabla
+   - Título arriba, KPIs debajo, Filtros colapsables
+   - Mapa exactamente 55% de la altura
+   - Tabla con scroll vertical fluido hacia abajo
    ========================================================== */
 @media (max-width: 900px) {
  body, html { overflow: auto !important; height: auto !important; }
@@ -236,9 +234,9 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    box-sizing: border-box;
  }
 
- /* Mapa: 60% de la altura de la pantalla, NO estático (permite hacer scroll vertical) */
+ /* Mapa: 55% de la altura de la pantalla, con scroll natural */
  #seccion-mapa {
-   height: 60vh !important;
+   height: 55vh !important;
    width: 100%;
    position: relative;
    flex: unset !important;
@@ -252,7 +250,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  /* Panel derecho / Tabla: debajo del mapa, permitiendo desplazamiento completo con scroll */
  #seccion-panel-derecho {
    height: auto !important;
-   min-height: 40vh;
+   min-height: 45vh;
    width: 100%;
    border-left: none;
    border-top: 2px solid #cbd5e1;
@@ -266,7 +264,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    flex: unset !important;
  }
  #contenedor-tabla {
-   height: 350px; /* Altura controlada con scroll interno en celular */
+   height: 350px;
    overflow: hidden;
    display: flex;
    flex-direction: column;
@@ -286,5 +284,4 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    position: absolute; bottom: 8px; right: 8px; z-index: 1000;
    font-size: 9px; padding: 4px 8px;
  }
- #marca-agua { display: none; }
 }
