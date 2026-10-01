@@ -14,8 +14,28 @@
  <!-- Contenedor General de Pantalla Dividida -->
  <div id="app-container">
 
-   <!-- Título Principal (Se adapta automáticamente en Escritorio y Móvil) -->
+   <!-- Título Principal -->
    <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
+
+   <!-- KPIs del Sistema -->
+   <div id="panel-kpis">
+     <div class="kpi-card kpi-inicial">
+       <span class="kpi-title">Cerco Inicial</span>
+       <span class="kpi-value" id="kpi-inicial">0</span>
+     </div>
+     <div class="kpi-card kpi-residual">
+       <span class="kpi-title">Área Residual</span>
+       <span class="kpi-value" id="kpi-residual">0</span>
+     </div>
+     <div class="kpi-card kpi-liberado">
+       <span class="kpi-title">Área Liberada</span>
+       <span class="kpi-value" id="kpi-liberado">0</span>
+     </div>
+     <div class="kpi-card kpi-culminada">
+       <span class="kpi-title">Culminadas</span>
+       <span class="kpi-value" id="kpi-culminada">0</span>
+     </div>
+   </div>
 
    <!-- Panel de Filtros -->
    <div id="panel-filtros">
@@ -71,7 +91,7 @@
        </div>
      </div>
 
-     <!-- Leyenda de Cerramientos (Esquina Inferior Derecha del Mapa) -->
+     <!-- Leyenda de Cerramientos -->
      <div id="panel-leyenda">
        <div class="leyenda-header-mobile" onclick="toggleLeyenda()">
          <span>📋 LEYENDA</span>
@@ -87,29 +107,8 @@
      </div>
    </div>
 
-   <!-- ================= SECCIÓN PANEL ANALÍTICO (KPIs y Tabla) ================= -->
+   <!-- ================= SECCIÓN PANEL ANALÍTICO (Tabla) ================= -->
    <div id="seccion-panel-derecho">
-     <!-- KPIs del Sistema -->
-     <div id="panel-kpis">
-       <div class="kpi-card kpi-inicial">
-         <span class="kpi-title">Cerco Inicial</span>
-         <span class="kpi-value" id="kpi-inicial">0</span>
-       </div>
-       <div class="kpi-card kpi-residual">
-         <span class="kpi-title">Área Residual</span>
-         <span class="kpi-value" id="kpi-residual">0</span>
-       </div>
-       <div class="kpi-card kpi-liberado">
-         <span class="kpi-title">Área Liberada</span>
-         <span class="kpi-value" id="kpi-liberado">0</span>
-       </div>
-       <div class="kpi-card kpi-culminada">
-         <span class="kpi-title">Culminadas</span>
-         <span class="kpi-value" id="kpi-culminada">0</span>
-       </div>
-     </div>
-
-     <!-- Contenedor de la Tabla de Registros -->
      <div id="contenedor-tabla">
        <div class="tabla-header-titulo">REGISTRO DE ESTRUCTURAS Y VIGENCIAS</div>
        <div class="table-responsive">
