@@ -14,51 +14,53 @@
  <!-- Contenedor General de Pantalla Dividida -->
  <div id="app-container">
 
-   <!-- Título Principal Superior Izquierdo -->
+   <!-- Título Principal Centrado Superior (Versión Web) -->
    <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
-
-   <!-- Panel de Filtros -->
-   <div id="panel-filtros">
-     <div class="filtro-header-mobile" onclick="toggleFiltros()">
-       <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
-       <span id="filtro-icon">▼</span>
-     </div>
-     <div class="filtros-contenido" id="filtrosContenido">
-       <div class="filtro-titulo-web" id="label-filtro-web">FILTRO POR ESTADO</div>
-       <div class="filtros-botones">
-         <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
-         <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
-         <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
-         <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
-         <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
-         <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
-         <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
-       </div>
-     </div>
-   </div>
 
    <!-- ================= SECCIÓN MAPA ================= -->
    <div id="seccion-mapa">
      <div id="map"></div>
 
-     <!-- Contenedor Inferior Izquierdo: Marca de agua sobre los botones -->
+     <!-- Panel de Filtros Móvil (Preservado para celular) -->
+     <div id="panel-filtros-mobile" class="filtro-mobile-container">
+       <div class="filtro-header-mobile" onclick="toggleFiltros()">
+         <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
+         <span id="filtro-icon">▼</span>
+       </div>
+       <div class="filtros-contenido" id="filtrosContenido">
+         <div class="filtros-botones">
+           <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+           <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+           <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+           <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+           <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+           <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+           <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Contenedor Inferior Izquierdo: Marca de agua y botones de acción -->
      <div id="panel-acciones-izquierda">
        <div id="marca-agua">Diseñado por Vladimir Casas</div>
        <div style="display: flex; gap: 8px; align-items: flex-end; position: relative;">
+         
+         <!-- Consultor IA Estilo Chat Integrado -->
          <div id="desplegableIA" class="ia-desplegable-arriba">
            <div class="ia-header">
-             <span>🤖 Consultor IA (beta)</span> 
+             <span>🤖 Consultor IA (Gestión de Obra)</span> 
              <button onclick="toggleConsultorIA()">×</button>
            </div>
            <div class="ia-body">
-             <div class="ia-chat-bubble">
-               Hola. Consulta estados o vigencias (Ej: "¿Qué obras están por vencer?").
+             <div class="ia-chat-container" id="iaChatContainer">
+               <div class="ia-chat-bubble">
+                 Hola. Ingrese el ID de la estructura (Ej: E10, PV05) para consultar estados, fechas y vigencias.
+               </div>
              </div>
              <div class="ia-input-container">
-               <input type="text" id="inputConsultaIA" placeholder="Pregunta aquí...">
+               <input type="text" id="inputConsultaIA" placeholder="Ej. E10..." onkeypress="manejarEnterIA(event)">
                <button onclick="ejecutarConsultaIA()">Enviar</button>
              </div>
-             <div id="respuestaIA" style="margin-top:8px; font-size:11px; color:#334155;"></div>
            </div>
          </div>
          
@@ -87,49 +89,74 @@
      </div>
    </div>
 
-   <!-- ================= SECCIÓN PANEL ANALÍTICO ================= -->
+   <!-- ================= SECCIÓN PANEL ANALÍTICO DERECHO (3 CUERPOS) ================= -->
    <div id="seccion-panel-derecho">
-     <!-- KPIs del Sistema -->
-     <div id="panel-kpis">
-       <div class="kpi-card kpi-inicial">
-         <span class="kpi-title">Cerco Inicial</span>
-         <span class="kpi-value" id="kpi-inicial">0</span>
-       </div>
-       <div class="kpi-card kpi-residual">
-         <span class="kpi-title">Área Residual</span>
-         <span class="kpi-value" id="kpi-residual">0</span>
-       </div>
-       <div class="kpi-card kpi-liberado">
-         <span class="kpi-title">Área Liberada</span>
-         <span class="kpi-value" id="kpi-liberado">0</span>
-       </div>
-       <div class="kpi-card kpi-culminada">
-         <span class="kpi-title">Culminadas</span>
-         <span class="kpi-value" id="kpi-culminada">0</span>
+     
+     <!-- CUERPO 1: KPIs del Sistema -->
+     <div class="panel-seccion-bloque">
+       <div class="bloque-titulo-gerencial">Indicadores Clave (KPIs)</div>
+       <div id="panel-kpis">
+         <div class="kpi-card kpi-inicial">
+           <span class="kpi-title">Cerco Inicial</span>
+           <span class="kpi-value" id="kpi-inicial">0</span>
+         </div>
+         <div class="kpi-card kpi-residual">
+           <span class="kpi-title">Área Residual</span>
+           <span class="kpi-value" id="kpi-residual">0</span>
+         </div>
+         <div class="kpi-card kpi-liberado">
+           <span class="kpi-title">Área Liberada</span>
+           <span class="kpi-value" id="kpi-liberado">0</span>
+         </div>
+         <div class="kpi-card kpi-culminada">
+           <span class="kpi-title">Culminadas</span>
+           <span class="kpi-value" id="kpi-culminada">0</span>
+         </div>
        </div>
      </div>
 
-     <!-- Tabla de Registros -->
-     <div id="contenedor-tabla">
-       <div class="tabla-header-titulo">REGISTRO DE ESTRUCTURAS Y VIGENCIAS</div>
-       <div class="table-responsive">
-         <table id="tabla-estructuras">
-           <thead>
-             <tr>
-               <th>ID</th>
-               <th>Constatación</th>
-               <th>Acta</th>
-               <th>Liberación</th>
-               <th>Asiento</th>
-               <th>Plano</th>
-             </tr>
-           </thead>
-           <tbody id="tabla-tbody">
-             <!-- Dinámico -->
-           </tbody>
-         </table>
+     <div class="panel-separador-estetico"></div>
+
+     <!-- CUERPO 2: Filtros por Estado (Simétricos y proporcionales) -->
+     <div class="panel-seccion-bloque">
+       <div class="bloque-titulo-gerencial" id="label-filtro-web">Filtros Operativos por Estado</div>
+       <div class="filtros-botones-web-grid">
+         <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+         <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+         <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+         <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+         <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+         <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+         <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas</button>
        </div>
      </div>
+
+     <div class="panel-separador-estetico"></div>
+
+     <!-- CUERPO 3: Tabla de Registros (Ocupa la mayor parte del espacio) -->
+     <div class="panel-seccion-bloque table-flex-grow">
+       <div class="tabla-header-titulo">Registro de Estructuras y Vigencias</div>
+       <div id="contenedor-tabla">
+         <div class="table-responsive">
+           <table id="tabla-estructuras">
+             <thead>
+               <tr>
+                 <th>ID</th>
+                 <th>Constatación</th>
+                 <th>Acta</th>
+                 <th>Liberación</th>
+                 <th>Asiento</th>
+                 <th>Plano</th>
+               </tr>
+             </thead>
+             <tbody id="tabla-tbody">
+               <!-- Dinámico -->
+             </tbody>
+           </table>
+         </div>
+       </div>
+     </div>
+
    </div>
 
  </div>
