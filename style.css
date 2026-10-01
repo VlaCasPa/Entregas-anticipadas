@@ -166,9 +166,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 
 /* ==========================================================
    ADAPTABILIDAD MÓVIL (CELULAR) OPTIMIZADA
-   - Título arriba, KPIs debajo, Filtros colapsables en 2-3 hileras compactas
-   - Mapa exactamente 55% de la altura permitiendo scroll vertical natural
-   - Tabla con dimensiones de columnas y textos ajustados
+   - Escritorio intacto. En celular: Título -> KPIs -> Filtros colapsables (2-3 hileras) -> Mapa (55%) -> Tabla con scroll
    ========================================================== */
 @media (max-width: 900px) {
  body, html { overflow: auto !important; height: auto !important; }
@@ -181,7 +179,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    overflow: visible !important;
  }
 
- /* Título fijo arriba en móvil con orden 1 */
+ /* Anular posicionamiento absoluto de escritorio para flujo vertical limpio en móvil */
  #titulo-principal {
    position: static !important;
    order: 1;
@@ -193,6 +191,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    border-left: none;
    border-bottom: 3px solid #2563EB;
    box-sizing: border-box;
+   box-shadow: none;
  }
 
  #panel-kpis {
@@ -224,7 +223,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    max-width: unset;
    box-shadow: none;
  }
- .filtro-header-mobile { display: flex; font-size: 9px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; }
+ .filtro-header-mobile { display: flex; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; }
  .filtro-titulo-web { display: none; }
  .filtros-contenido { display: none; margin-top: 4px; }
  .filtros-contenido.show {
