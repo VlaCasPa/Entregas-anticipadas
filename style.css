@@ -196,7 +196,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 }
 
 /* ==========================================================
-   ADAPTABILIDAD MÓVIL (CELULAR) - RESTAURADA Y CON FILTROS VISIBLES
+   ADAPTABILIDAD MÓVIL (CELULAR) - FILTROS COLAPSIBLES DEBAJO DEL TÍTULO
    ========================================================== */
 @media (max-width: 900px) {
  body, html { overflow: auto !important; height: auto !important; }
@@ -209,6 +209,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    overflow: visible !important;
  }
 
+ /* Orden 1: Título Principal */
  #titulo-principal {
    position: static !important;
    transform: none !important;
@@ -221,54 +222,76 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    border-left: none;
    border-bottom: 3px solid #2563EB;
    box-sizing: border-box;
+   margin-bottom: 4px; /* Espacio simple estético debajo del título */
  }
 
- /* Habilitar panel de filtros móvil original */
+ /* Orden 2: Panel de Filtros Colapsable debajo del Título */
  #panel-filtros {
    display: block !important;
    position: static !important;
-   order: 3;
+   order: 2;
    width: 100%;
    box-sizing: border-box;
    border-radius: 0;
-   padding: 4px 8px;
+   padding: 6px 10px;
    background: #ffffff;
-   border-top: 1px solid #e2e8f0;
-   border-bottom: 1px solid #e2e8f0;
-   max-width: unset;
-   box-shadow: none;
+   border-top: 1px solid #cbd5e1;
+   border-bottom: 1px solid #cbd5e1;
+   box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+   margin-bottom: 6px;
  }
  .filtro-header-mobile { display: flex !important; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; justify-content: space-between; align-items: center; }
  .filtro-titulo-web { display: none !important; }
- .filtros-contenido { display: none; margin-top: 4px; }
+ .filtros-contenido { display: none; margin-top: 6px; }
  .filtros-contenido.show { display: block !important; }
  .filtros-botones {
    display: grid !important;
    grid-template-columns: repeat(3, 1fr) !important;
-   gap: 3px !important;
+   gap: 4px !important;
    padding-bottom: 4px !important;
  }
+ 
+ /* Ajuste de botones de filtro móvil para ocupar entre 2 a 3 líneas y evitar saturación visual */
  .filtro-btn {
    font-size: 8px !important;
-   padding: 4px 2px !important;
+   padding: 5px 3px !important;
    text-align: center !important;
    width: 100% !important;
    box-sizing: border-box !important;
-   white-space: nowrap !important;
-   overflow: hidden !important;
-   text-overflow: ellipsis !important;
+   white-space: normal !important;
+   height: auto !important;
+   min-height: 30px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   line-height: 1.2;
    border-radius: 4px !important;
    grid-column: span 1 !important;
  }
 
- /* Ocultar grid web y separadores web en móvil */
+ /* Ocultar grid web y separadores en móvil */
  .filtros-botones-web-grid { display: none !important; }
  .panel-separador-estetico { display: none !important; }
  .bloque-titulo-gerencial { display: none !important; }
 
- /* Reordenamiento para móvil */
+ /* Orden 3: Sección del Mapa */
+ #seccion-mapa {
+   order: 3;
+   height: 52vh !important;
+   width: 100%;
+   position: relative;
+   flex: unset !important;
+   margin-bottom: 4px;
+ }
+ #map {
+   height: 100% !important;
+   width: 100% !important;
+   position: absolute !important;
+ }
+
+ /* Orden 4: Panel Derecho (KPIs y Tabla) */
  #seccion-panel-derecho {
-   order: 5;
+   order: 4;
    height: auto !important;
    min-height: 45vh;
    width: 100%;
@@ -285,39 +308,25 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  }
 
  #panel-kpis {
-   order: 2;
+   order: 1;
    display: grid;
    grid-template-columns: repeat(4, 1fr);
    gap: 4px;
    padding: 4px 6px;
    background: #fff;
-   border-left: none;
-   border-bottom: none;
-   margin: 0;
+   margin: 0 0 6px 0;
  }
  .kpi-card { padding: 4px 2px; }
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
- #seccion-mapa {
-   order: 4;
-   height: 55vh !important;
-   width: 100%;
-   position: relative;
-   flex: unset !important;
- }
- #map {
-   height: 100% !important;
-   width: 100% !important;
-   position: absolute !important;
- }
-
  .panel-seccion-bloque.table-flex-grow {
+   order: 2;
    flex: unset !important;
    height: auto !important;
  }
  #contenedor-tabla {
-   height: 380px;
+   height: 360px;
    overflow: hidden;
    display: flex;
    flex-direction: column;
