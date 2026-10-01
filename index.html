@@ -41,31 +41,34 @@
        </div>
      </div>
 
-     <!-- Botones de Acciones (Esquina Inferior Izquierda del Mapa) -->
+     <!-- Contenedor Inferior Izquierdo: Marca de agua sobre los botones -->
      <div id="panel-acciones-izquierda">
-       <div id="desplegableIA" class="ia-desplegable-arriba">
-         <div class="ia-header">
-           <span>🤖 Consultor IA (beta)</span> 
-           <button onclick="toggleConsultorIA()">×</button>
-         </div>
-         <div class="ia-body">
-           <div class="ia-chat-bubble">
-             Hola. Consulta estados o vigencias (Ej: "¿Qué obras están por vencer?").
+       <div id="marca-agua">Diseñado por Vladimir Casas</div>
+       <div style="display: flex; gap: 8px; align-items: flex-end;">
+         <div id="desplegableIA" class="ia-desplegable-arriba">
+           <div class="ia-header">
+             <span>🤖 Consultor IA (beta)</span> 
+             <button onclick="toggleConsultorIA()">×</button>
            </div>
-           <div class="ia-input-container">
-             <input type="text" id="inputConsultaIA" placeholder="Pregunta aquí...">
-             <button onclick="ejecutarConsultaIA()">Enviar</button>
+           <div class="ia-body">
+             <div class="ia-chat-bubble">
+               Hola. Consulta estados o vigencias (Ej: "¿Qué obras están por vencer?").
+             </div>
+             <div class="ia-input-container">
+               <input type="text" id="inputConsultaIA" placeholder="Pregunta aquí...">
+               <button onclick="ejecutarConsultaIA()">Enviar</button>
+             </div>
+             <div id="respuestaIA" style="margin-top:8px; font-size:11px; color:#334155;"></div>
            </div>
-           <div id="respuestaIA" style="margin-top:8px; font-size:11px; color:#334155;"></div>
          </div>
+         
+         <button class="btn-accion btn-consultor" onclick="toggleConsultorIA()">
+           🤖 Consultar Datos
+         </button>
+         <button id="btnReporte" class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
+           📄 Reporte
+         </button>
        </div>
-       
-       <button class="btn-accion btn-consultor" onclick="toggleConsultorIA()">
-         🤖 Consultar Datos
-       </button>
-       <button id="btnReporte" class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
-         📄 Reporte
-       </button>
      </div>
 
      <!-- Leyenda de Cerramientos (Esquina Inferior Derecha del Mapa) -->
@@ -82,9 +85,6 @@
          <div class="leyenda-item"><span class="leyenda-color color-culminada"></span> Obra Culminada</div>
        </div>
      </div>
-
-     <!-- Marca de Agua -->
-     <div id="marca-agua">Diseñado por Vladimir Casas</div>
    </div>
 
    <!-- ================= SECCIÓN PANEL ANALÍTICO (1/3 DERECHA EN WEB) ================= -->
