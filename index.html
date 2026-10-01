@@ -11,96 +11,127 @@
 </head>
 <body>
 
- <!-- 1. Contenedor del Mapa -->
- <div id="map"></div>
+ <!-- Contenedor General de Pantalla Dividida (Grid 2/3 y 1/3) -->
+ <div id="app-container">
 
- <!-- 2. Cabecera Web Superior Izquierda (Título y KPIs) -->
- <div id="header-flotante">
-   <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
-   
-   <div id="panel-kpis">
-     <div class="kpi-card kpi-inicial">
-       <span class="kpi-title">Cerco Inicial</span>
-       <span class="kpi-value" id="kpi-inicial">0</span>
-     </div>
-     <div class="kpi-card kpi-residual">
-       <span class="kpi-title">Área Residual</span>
-       <span class="kpi-value" id="kpi-residual">0</span>
-     </div>
-     <div class="kpi-card kpi-liberado">
-       <span class="kpi-title">Área Liberada</span>
-       <span class="kpi-value" id="kpi-liberado">0</span>
-     </div>
-     <div class="kpi-card kpi-culminada">
-       <span class="kpi-title">Culminadas</span>
-       <span class="kpi-value" id="kpi-culminada">0</span>
-     </div>
-   </div>
- </div>
+   <!-- ================= SECCIÓN MAPA (2/3 IZQUIERDA) ================= -->
+   <div id="seccion-mapa">
+     <div id="map"></div>
 
- <!-- 3. Panel de Filtro por Estado (Con contador numérico de IDs) -->
- <div id="panel-filtros">
-   <div class="filtro-header-mobile" onclick="toggleFiltros()">
-     <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
-     <span id="filtro-icon">▼</span>
-   </div>
-   <div class="filtros-contenido" id="filtrosContenido">
-     <div class="filtro-titulo-web" id="label-filtro-web">FILTRO POR ESTADO</div>
-     <div class="filtros-botones">
-       <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
-       <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
-       <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
-       <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
-       <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
-       <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
-       <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
-     </div>
-   </div>
- </div>
+     <!-- Título Superior Izquierdo -->
+     <div id="titulo-principal">Cerramientos de Obra y Áreas Liberadas - Línea 2 y 4</div>
 
- <!-- 4. Marca de Agua (Diseñado por Vladimir Casas) -->
- <div id="marca-agua">Diseñado por Vladimir Casas</div>
-
- <!-- 5. Leyenda de Cerramientos -->
- <div id="panel-leyenda">
-   <div class="leyenda-header-mobile" onclick="toggleLeyenda()">
-     <span>📋 LEYENDA DE CERRAMIENTOS</span>
-     <span id="leyenda-icon">▲</span>
-   </div>
-   <div class="leyenda-contenido" id="leyendaContenido">
-     <span class="leyenda-titulo">LEYENDA DE CERRAMIENTOS</span>
-     <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Mantiene Cerramiento</div>
-     <div class="leyenda-item"><span class="leyenda-color color-residual"></span> Área Residual</div>
-     <div class="leyenda-item"><span class="leyenda-color color-liberado"></span> Área Liberada</div>
-     <div class="leyenda-item"><span class="leyenda-color color-culminada"></span> Obra Culminada</div>
-   </div>
- </div>
-
- <!-- 6. Botones de Acciones y Consultor IA Colapsable -->
- <div id="panel-acciones">
-   <div id="desplegableIA" class="ia-desplegable-arriba">
-     <div class="ia-header">
-       <span>🤖 Consultor IA (beta)</span> 
-       <button onclick="toggleConsultorIA()">×</button>
-     </div>
-     <div class="ia-body">
-       <div class="ia-chat-bubble">
-         Hola. Consulta estados o vigencias (Ej: "¿Qué obras están por vencer?").
+     <!-- Panel de Filtros (Debajo del Título de forma separada) -->
+     <div id="panel-filtros">
+       <div class="filtro-header-mobile" onclick="toggleFiltros()">
+         <span id="label-filtro-mobile">🔍 FILTRAR POR ESTADO</span>
+         <span id="filtro-icon">▼</span>
        </div>
-       <div class="ia-input-container">
-         <input type="text" id="inputConsultaIA" placeholder="Pregunta aquí...">
-         <button onclick="ejecutarConsultaIA()">Enviar</button>
+       <div class="filtros-contenido" id="filtrosContenido">
+         <div class="filtro-titulo-web" id="label-filtro-web">FILTRO POR ESTADO</div>
+         <div class="filtros-botones">
+           <button class="filtro-btn btn-todos active" onclick="filtrarEstado('todos')">Todos</button>
+           <button class="filtro-btn btn-inicial" onclick="filtrarEstado('inicial')">Cerramiento Inicial</button>
+           <button class="filtro-btn btn-residual" onclick="filtrarEstado('residual')">Área Residual</button>
+           <button class="filtro-btn btn-liberado" onclick="filtrarEstado('liberado')">Área Liberada</button>
+           <button class="filtro-btn btn-culminada" onclick="filtrarEstado('culminada')">Obra Culminada</button>
+           <button class="filtro-btn btn-temporal" onclick="filtrarEstado('30dias')">&lt; 30 Días</button>
+           <button class="filtro-btn btn-proximas" onclick="filtrarEstado('proximas')">Próximas Liberaciones</button>
+         </div>
        </div>
-       <div id="respuestaIA" style="margin-top:8px; font-size:11px; color:#334155;"></div>
+     </div>
+
+     <!-- Botones de Acciones (Esquina Inferior Izquierda) -->
+     <div id="panel-acciones-izquierda">
+       <div id="desplegableIA" class="ia-desplegable-arriba">
+         <div class="ia-header">
+           <span>🤖 Consultor IA (beta)</span> 
+           <button onclick="toggleConsultorIA()">×</button>
+         </div>
+         <div class="ia-body">
+           <div class="ia-chat-bubble">
+             Hola. Consulta estados o vigencias (Ej: "¿Qué obras están por vencer?").
+           </div>
+           <div class="ia-input-container">
+             <input type="text" id="inputConsultaIA" placeholder="Pregunta aquí...">
+             <button onclick="ejecutarConsultaIA()">Enviar</button>
+           </div>
+           <div id="respuestaIA" style="margin-top:8px; font-size:11px; color:#334155;"></div>
+         </div>
+       </div>
+       
+       <button class="btn-accion btn-consultor" onclick="toggleConsultorIA()">
+         🤖 Consultar Datos
+       </button>
+       <button id="btnReporte" class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
+         📄 Reporte
+       </button>
+     </div>
+
+     <!-- Leyenda de Cerramientos (Esquina Inferior Derecha del Mapa) -->
+     <div id="panel-leyenda">
+       <div class="leyenda-header-mobile" onclick="toggleLeyenda()">
+         <span>📋 LEYENDA</span>
+         <span id="leyenda-icon">▲</span>
+       </div>
+       <div class="leyenda-contenido" id="leyendaContenido">
+         <span class="leyenda-titulo">LEYENDA</span>
+         <div class="leyenda-item"><span class="leyenda-color color-inicial"></span> Mantiene Cerramiento</div>
+         <div class="leyenda-item"><span class="leyenda-color color-residual"></span> Área Residual</div>
+         <div class="leyenda-item"><span class="leyenda-color color-liberado"></span> Área Liberada</div>
+         <div class="leyenda-item"><span class="leyenda-color color-culminada"></span> Obra Culminada</div>
+       </div>
+     </div>
+
+     <!-- Marca de Agua -->
+     <div id="marca-agua">Diseñado por Vladimir Casas</div>
+   </div>
+
+   <!-- ================= SECCIÓN PANEL ANALÍTICO (1/3 DERECHA) ================= -->
+   <div id="seccion-panel-derecho">
+     <!-- KPIs del Sistema -->
+     <div id="panel-kpis">
+       <div class="kpi-card kpi-inicial">
+         <span class="kpi-title">Cerco Inicial</span>
+         <span class="kpi-value" id="kpi-inicial">0</span>
+       </div>
+       <div class="kpi-card kpi-residual">
+         <span class="kpi-title">Área Residual</span>
+         <span class="kpi-value" id="kpi-residual">0</span>
+       </div>
+       <div class="kpi-card kpi-liberado">
+         <span class="kpi-title">Área Liberada</span>
+         <span class="kpi-value" id="kpi-liberado">0</span>
+       </div>
+       <div class="kpi-card kpi-culminada">
+         <span class="kpi-title">Culminadas</span>
+         <span class="kpi-value" id="kpi-culminada">0</span>
+       </div>
+     </div>
+
+     <!-- Contenedor de la Tabla de Registros -->
+     <div id="contenedor-tabla">
+       <div class="tabla-header-titulo">REGISTRO DE ESTRUCTURAS Y VIGENCIAS</div>
+       <div class="table-responsive">
+         <table id="tabla-estructuras">
+           <thead>
+             <tr>
+               <th>ID</th>
+               <th>Constatación</th>
+               <th>Acta</th>
+               <th>Liberación</th>
+               <th>Asiento</th>
+               <th>Plano</th>
+             </tr>
+           </thead>
+           <tbody id="tabla-tbody">
+             <!-- Se llena dinámicamente desde script.js -->
+           </tbody>
+         </table>
+       </div>
      </div>
    </div>
-   
-   <button class="btn-accion btn-consultor" onclick="toggleConsultorIA()">
-     🤖 Consultar Datos
-   </button>
-   <button id="btnReporte" class="btn-accion btn-reporte" onclick="copiarReporteTexto()">
-     📄 Reporte
-   </button>
+
  </div>
 
  <!-- Librerías JS y Script -->
