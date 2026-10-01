@@ -11,6 +11,18 @@ body, html {
  filter: grayscale(100%) brightness(1.05) contrast(0.9);
 }
 
+/* --- Personalización de Popups Leaflet --- */
+.leaflet-popup-content-wrapper {
+  background-color: #F5F5EB !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+  border-radius: 8px !important;
+}
+
+.leaflet-popup-tip {
+  background-color: #F5F5EB !important;
+}
+
 /* --- Cabecera Web --- */
 #header-flotante {
  position: absolute; top: 15px; left: 60px; z-index: 1000;
@@ -130,7 +142,6 @@ body, html {
  .kpi-card { min-width: unset; padding: 6px 2px; }
  .kpi-title { font-size: 6px; } .kpi-value { font-size: 12px; }
 
- /* Filtro móvil desplazado debajo de los KPIs */
  #panel-filtros {
    position: relative; top: auto; right: auto; width: calc(100% - 16px); box-sizing: border-box; padding: 8px 12px; margin: 16px 8px 0 8px;
  }
@@ -139,13 +150,11 @@ body, html {
  .filtros-contenido { display: none; margin-top: 8px; }
  .filtros-contenido.show { display: flex; flex-wrap: wrap; gap: 5px; }
 
- /* Botones de acción fijos en la base */
  #panel-acciones { 
    position: fixed; bottom: 8px; right: 8px; left: 8px; justify-content: center; z-index: 1000; margin: 0;
  }
  .btn-accion { flex: 1; justify-content: center; padding: 10px 6px; font-size: 11px; }
 
- /* Leyenda situada justo encima de los botones */
  #panel-leyenda {
    position: fixed; bottom: 52px; left: 8px; right: 8px; z-index: 1000;
    background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
@@ -157,7 +166,6 @@ body, html {
  .leyenda-contenido { display: none; margin-bottom: 4px; }
  .leyenda-contenido.show { display: flex; flex-direction: column; gap: 3px; }
 
- /* Marca de agua situada encima de la leyenda */
  #marca-agua { 
    position: fixed; bottom: 93px; left: 50%; transform: translateX(-50%); z-index: 1000; 
    font-size: 9px; padding: 2px 10px; background-color: rgba(255, 255, 255, 0.9); border-radius: 4px;
