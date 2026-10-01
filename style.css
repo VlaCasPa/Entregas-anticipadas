@@ -37,7 +37,7 @@ body, html {
   background-color: #F5F5EB !important;
 }
 
-/* --- Título Principal Superior Izquierdo (Desplazado para no tapar + -) --- */
+/* --- Título Principal Superior Izquierdo (Versión Web) --- */
 #titulo-principal {
  position: absolute; top: 15px; left: 65px; z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95); padding: 8px 14px; border-radius: 8px;
@@ -45,7 +45,7 @@ body, html {
  box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-left: 5px solid #2563EB;
 }
 
-/* --- Panel de Filtros (Debajo del Título) --- */
+/* --- Panel de Filtros (Debajo del Título en Web) --- */
 #panel-filtros {
  position: absolute; top: 62px; left: 65px; z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
@@ -138,7 +138,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 }
 
 .btn-accion {
- background-color: #0f172a; color: #ffffff; border-color: transparent; padding: 8px 14px; border-radius: 8px;
+ background-color: #0f172a; color: #ffffff; border: none; padding: 8px 14px; border-radius: 8px;
  font-weight: 600; font-size: 11px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 5px; transition: all 0.3s ease;
 }
 .btn-consultor { background-color: #2563eb; }
@@ -167,7 +167,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 /* ==========================================================
    ADAPTABILIDAD MÓVIL (CELULAR) OPTIMIZADA
    - Título arriba, KPIs debajo, Filtros colapsables en 2 hileras estéticas
-   - Mapa 55% de la altura permitiendo scroll vertical natural
+   - Mapa exactamente 55% de la altura permitiendo scroll vertical natural
    - Tabla con dimensiones de columnas y textos ajustados
    ========================================================== */
 @media (max-width: 900px) {
@@ -181,8 +181,10 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    overflow: visible !important;
  }
 
+ /* Título fijo arriba en móvil con orden 1 */
  #titulo-principal {
    position: static !important;
+   order: 1;
    width: 100%;
    border-radius: 0;
    text-align: center;
@@ -194,6 +196,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  }
 
  #panel-kpis {
+   order: 2;
    display: grid;
    grid-template-columns: repeat(4, 1fr);
    gap: 4px;
@@ -207,9 +210,10 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
- /* Panel de filtros colapsable adaptado en 2 hileras (grid de 4 columnas para encajar estéticamente) */
+ /* Panel de filtros colapsable orden 3, adaptado en 2 hileras para ocupar simétricamente la pantalla */
  #panel-filtros {
    position: static !important;
+   order: 3;
    width: 100%;
    box-sizing: border-box;
    border-radius: 0;
@@ -219,7 +223,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    border-bottom: 1px solid #e2e8f0;
    max-width: unset;
  }
- .filtro-header-mobile { display: flex; font-size: 10px; font-weight: 700; color: #64748b; }
+ .filtro-header-mobile { display: flex; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; }
  .filtro-titulo-web { display: none; }
  .filtros-contenido { display: none; margin-top: 6px; }
  .filtros-contenido.show {
@@ -238,8 +242,9 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    text-overflow: ellipsis;
  }
 
- /* Mapa: exactamente 55% de la altura de la pantalla con scroll natural */
+ /* Mapa: exactamente 55% de la altura de la pantalla con scroll natural, orden 4 */
  #seccion-mapa {
+   order: 4;
    height: 55vh !important;
    width: 100%;
    position: relative;
@@ -251,8 +256,9 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    position: absolute !important;
  }
 
- /* Panel de tabla inferior: ocupando el resto con altura controlada y columnas ajustadas */
+ /* Panel de tabla inferior: ocupando el resto con altura controlada y columnas ajustadas, orden 5 */
  #seccion-panel-derecho {
+   order: 5;
    height: auto !important;
    min-height: 45vh;
    width: 100%;
