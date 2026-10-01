@@ -206,7 +206,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
- /* Panel de filtros móvil: Colapsable y forzado estrictamente en grid de 3 columnas compactas */
+ /* Panel de filtros móvil corregido: grid directo en .filtros-botones para 3 columnas exactas */
  #panel-filtros {
    position: static !important;
    order: 3;
@@ -224,6 +224,9 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .filtro-titulo-web { display: none !important; }
  .filtros-contenido { display: none; margin-top: 4px; }
  .filtros-contenido.show {
+   display: block !important;
+ }
+ .filtros-botones {
    display: grid !important;
    grid-template-columns: repeat(3, 1fr) !important;
    gap: 3px !important;
@@ -239,12 +242,6 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    overflow: hidden !important;
    text-overflow: ellipsis !important;
    border-radius: 4px !important;
-   display: inline-block !important;
- }
-
- /* Forzar contenedor interno de botones móviles a no usar flex vertical */
- .filtros-botones {
-   display: contents !important;
  }
 
  /* Mapa: exactamente 55% de la altura con scroll natural, orden 4 */
