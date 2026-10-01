@@ -55,6 +55,23 @@ Promise.all([
  actualizarDashboardYMapa(csvData, geojsonData, 'todos');
 });
 
+// Función auxiliar para evaluar si una fecha de la estructura está dentro de los últimos 30 días
+function esMenorA30Dias(data) {
+    let fechaHoy = new Date("2026-10-01"); // Fecha actual del sistema
+    // Jerarquía de fechas a evaluar: Liberación -> Acta -> Constatación
+    let fechaStr = data.Fecha_Liberacion || data.Fecha_Acta || data.Fecha_Constatacion;
+    
+    if (fechaStr && fechaStr.includes('/')) {
+        let partes = fechaStr.split('/');
+        if (partes.length === 3) {
+            let fechaItem = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+            let diferenciaDias = (fechaHoy - fechaItem) / (1000 * 60 * 60 * 24);
+            return (diferenciaDias >= 0 && diferenciaDias <= 30);
+        }
+    }
+    return false;
+}
+
 function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  filtroActualGlobal = filtroEstado;
  
@@ -87,12 +104,15 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
          estadoCalculado = 'inicial';
        }
 
+       let cumple30Dias = esMenorA30Dias(item);
+
        estructurasUnicasMap.set(idNorm, {
          ...item,
          estadoCalculado: estadoCalculado,
          esSi: esSi,
          esCulminada: esCulminada,
-         esNo: esNo
+         esNo: esNo,
+         cumple30Dias: cumple30Dias
        });
      }
    }  
@@ -132,6 +152,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    features: featuresOrdenadas.filter(feature => {
      let tipoGeo = feature.properties.tipo ? feature.properties.tipo.toLowerCase() : "";
      let idGeo = normalizarID(feature.properties.id || feature.properties.ID);
+     let datosItem = mapaDatosSheets[idGeo];
      
      if (filtroEstado === 'todos') {
        idsPoligonosFiltrados.add(idGeo);
@@ -143,7 +164,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (filtroEstado === 'residual') coincide = (tipoGeo === 'residual');
      if (filtroEstado === 'liberado') coincide = (tipoGeo === 'liberado');
      if (filtroEstado === 'culminada') coincide = (tipoGeo === 'culminada');
-     if (filtroEstado === '30dias') coincide = false; 
+     if (filtroEstado === '30dias') {
+         coincide = datosItem && datosItem.cumple30Dias;
+     }
 
      if (coincide) {
        idsPoligonosFiltrados.add(idGeo);
@@ -169,7 +192,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    if (filtroEstado === 'residual') cumpleFiltro = (item.estadoCalculado === 'liberado_residual' || idsPoligonosFiltrados.has(idNorm));
    if (filtroEstado === 'liberado') cumpleFiltro = (item.estadoCalculado === 'liberado_residual' || idsPoligonosFiltrados.has(idNorm));
    if (filtroEstado === 'culminada') cumpleFiltro = (item.estadoCalculado === 'culminada');
-   if (filtroEstado === '30dias') cumpleFiltro = false;
+   if (filtroEstado === '30dias') cumpleFiltro = item.cumple30Dias;
 
    if (cumpleFiltro) {
      contadorIDsFiltrados++;
@@ -225,7 +248,6 @@ function actualizarTextoFiltroUI(filtro, cantidad) {
  if(labelWeb) labelWeb.innerText = `FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
 }
 
-// Función actualizada con fondo #F5F5EB, eliminación de tipo y adición de Fecha_Acta
 function generarHTMLPopup(idEstructura, datos) {
   return `  
     <div style="min-width: 210px; font-size: 11px; background-color: #F5F5EB; padding: 8px; border-radius: 6px;">  
@@ -294,8 +316,6 @@ function copiarReporteTexto() {
     let idsCulminada = [];
     let idsMenores30Días = [];
 
-    let fechaHoy = new Date("2026-09-29"); 
-
     if (estructurasUnicasMap.size > 0) {
         estructurasUnicasMap.forEach((data, idNorm) => {
             let idOriginal = data.ID || idNorm;
@@ -309,16 +329,9 @@ function copiarReporteTexto() {
                 idsCercoInicial.push(idOriginal);
             }
 
-            let fechaStr = data.Fecha_Liberacion || data.Fecha_Constatacion;
-            if (fechaStr && fechaStr.includes('/')) {
-                let partes = fechaStr.split('/');
-                if (partes.length === 3) {
-                    let fechaItem = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
-                    let diferenciaDias = (fechaHoy - fechaItem) / (1000 * 60 * 60 * 24);
-                    if (diferenciaDias >= 0 && diferenciaDias <= 30) {
-                        idsMenores30Días.push(`${idOriginal} (${fechaStr})`);
-                    }
-                }
+            if (data.cumple30Dias) {
+                let fechaRef = data.Fecha_Liberacion || data.Fecha_Acta || data.Fecha_Constatacion;
+                idsMenores30Días.push(`${idOriginal} (${fechaRef})`);
             }
         });
     }
@@ -337,10 +350,10 @@ function copiarReporteTexto() {
     textoReporte += `✅ Culminadas (${idsCulminada.length}):\n`;
     textoReporte += `${idsCulminada.join(', ')}\n\n`;
     
-    textoReporte += `📅 Registros con área residual o liberada en los últimos 30 días:\n`;
+    textoReporte += `📅 Registros con fecha de liberación, acta o constatación en los últimos 30 días:\n`;
     textoReporte += idsMenores30Días.length > 0 ? `${idsMenores30Días.join(', ')}\n\n` : `Ninguno registrado en el periodo.\n\n`;
     
-    textoReporte += `Fecha del reporte: 29/09/2026\n`;
+    textoReporte += `Fecha del reporte: 01/10/2026\n`;
     textoReporte += `Diseñado por Vladimir Casas.`;
 
     navigator.clipboard.writeText(textoReporte).then(() => {
