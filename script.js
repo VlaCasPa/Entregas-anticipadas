@@ -358,7 +358,7 @@ function actualizarTextoFiltroUI(filtro, cantidad) {
  let contenidoStr = `🔍 FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
  
  if(labelMobile) labelMobile.innerText = contenidoStr;
- if(labelWeb) labelWeb.innerText = `Filtros Operativos por Estado (${cantidad} registros)`;
+ if(labelWeb) labelWeb.innerText = `FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
 }
 
 function generarHTMLPopup(idEstructura, datos) {
