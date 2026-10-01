@@ -46,7 +46,12 @@ body, html {
  white-space: nowrap;
 }
 
-/* --- Estructura Gerencial de los 3 Cuerpos del Panel Derecho --- */
+/* --- Panel de Filtros flotante (Oculto en web, usado en móvil) --- */
+#panel-filtros {
+ display: none;
+}
+
+/* --- Estructura Gerencial de los 3 Cuerpos del Panel Derecho (Web) --- */
 .panel-seccion-bloque {
  display: flex; flex-direction: column; flex-shrink: 0;
 }
@@ -190,11 +195,8 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  z-index: 3000 !important;
 }
 
-/* Ocultar elementos de celular en web por defecto */
-.filtro-mobile-container { display: none; }
-
 /* ==========================================================
-   ADAPTABILIDAD MÓVIL (CELULAR) - INTACTO SEGÚN SOLICITUD
+   ADAPTABILIDAD MÓVIL (CELULAR) - RESTAURADA A SU ESTADO ORIGINAL
    ========================================================== */
 @media (max-width: 900px) {
  body, html { overflow: auto !important; height: auto !important; }
@@ -221,54 +223,87 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    box-sizing: border-box;
  }
 
- /* Ocultar grid web y mostrar contenedor móvil de filtros */
- .filtros-botones-web-grid { display: none !important; }
- .filtro-mobile-container {
-   position: absolute !important; top: 12px; left: 12px; right: 12px; z-index: 1000;
-   background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
-   box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: unset; display: block !important;
- }
- .filtro-header-mobile { display: flex !important; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; justify-content: space-between; align-items: center; }
- .filtros-contenido { display: none; margin-top: 4px; }
- .filtros-contenido.show { display: block !important; }
- .filtros-contenido .filtros-botones {
-   display: grid !important;
-   grid-template-columns: repeat(3, 1fr) !important;
-   gap: 3px !important;
-   padding-bottom: 4px !important;
- }
- .filtros-contenido .filtro-btn {
-   font-size: 8px !important;
-   padding: 4px 2px !important;
-   text-align: center !important;
-   width: 100% !important;
-   grid-column: span 1 !important;
- }
-
- /* Reordenamiento para móvil */
+ /* Restaurar KPIs en orden 2 para móvil */
  #seccion-panel-derecho {
-   order: 2;
+   order: 5;
    height: auto !important;
+   min-height: 45vh;
    width: 100%;
    border-left: none;
    border-top: 2px solid #cbd5e1;
-   padding: 8px;
-   box-sizing: border-box;
+   padding: 6px;
+   display: flex;
+   flex-direction: column;
    overflow: visible !important;
+   box-sizing: border-box;
+   background-color: #ffffff;
+   box-shadow: none;
    flex: unset !important;
  }
+
  #panel-kpis {
+   order: 2;
    display: grid;
    grid-template-columns: repeat(4, 1fr);
    gap: 4px;
-   margin-bottom: 6px;
+   padding: 4px 6px;
+   background: #fff;
+   border-left: none;
+   border-bottom: none;
+   margin: 0;
  }
  .kpi-card { padding: 4px 2px; }
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
- #seccion-mapa {
+ /* Ocultar grid web y habilitar panel de filtros móvil original */
+ .filtros-botones-web-grid { display: none !important; }
+ .panel-separador-estetico { display: none !important; }
+ .bloque-titulo-gerencial { display: none !important; }
+
+ #panel-filtros {
+   position: absolute !important; top: 62px; left: 65px; z-index: 1000;
+   background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
+   box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 380px;
+   display: block !important;
    order: 3;
+   width: 100%;
+   box-sizing: border-box;
+   border-radius: 0;
+   padding: 4px 8px;
+   background: #ffffff;
+   border-top: 1px solid #e2e8f0;
+   border-bottom: 1px solid #e2e8f0;
+   box-shadow: none;
+   left: 0 !important;
+   top: unset !important;
+ }
+ .filtro-header-mobile { display: flex !important; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; justify-content: space-between; align-items: center; }
+ .filtro-titulo-web { display: none !important; }
+ .filtros-contenido { display: none; margin-top: 4px; }
+ .filtros-contenido.show { display: block !important; }
+ .filtros-botones {
+   display: grid !important;
+   grid-template-columns: repeat(3, 1fr) !important;
+   gap: 3px !important;
+   padding-bottom: 4px !important;
+ }
+ .filtro-btn {
+   font-size: 8px !important;
+   padding: 4px 2px !important;
+   text-align: center !important;
+   width: 100% !important;
+   box-sizing: border-box !important;
+   white-space: nowrap !important;
+   overflow: hidden !important;
+   text-overflow: ellipsis !important;
+   border-radius: 4px !important;
+   grid-column: span 1 !important;
+ }
+
+ /* Mapa móvil orden 4 */
+ #seccion-mapa {
+   order: 4;
    height: 55vh !important;
    width: 100%;
    position: relative;
@@ -280,16 +315,18 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    position: absolute !important;
  }
 
+ /* Tabla móvil orden 5 */
  .panel-seccion-bloque.table-flex-grow {
    flex: unset !important;
    height: auto !important;
  }
  #contenedor-tabla {
-   height: 360px;
+   height: 380px;
    overflow: hidden;
    display: flex;
    flex-direction: column;
    margin-top: 0;
+   border-radius: 6px;
  }
  .tabla-header-titulo { font-size: 9px; padding: 6px 8px; }
  #tabla-estructuras { font-size: 9px; }
