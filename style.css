@@ -37,7 +37,7 @@ body, html {
   background-color: #F5F5EB !important;
 }
 
-/* --- Título Principal Superior Izquierdo --- */
+/* --- Título Principal Superior Izquierdo (Desplazado para no tapar + -) --- */
 #titulo-principal {
  position: absolute; top: 15px; left: 65px; z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95); padding: 8px 14px; border-radius: 8px;
@@ -138,7 +138,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 }
 
 .btn-accion {
- background-color: #0f172a; color: #ffffff; border: none; padding: 8px 14px; border-radius: 8px;
+ background-color: #0f172a; color: #ffffff; border-color: transparent; padding: 8px 14px; border-radius: 8px;
  font-weight: 600; font-size: 11px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 5px; transition: all 0.3s ease;
 }
 .btn-consultor { background-color: #2563eb; }
@@ -165,10 +165,10 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 }
 
 /* ==========================================================
-   ADAPTABILIDAD MÓVIL (CELULAR)
-   - Título arriba, KPIs debajo, Filtros colapsables
-   - Mapa exactamente 55% de la altura
-   - Tabla con scroll vertical fluido hacia abajo
+   ADAPTABILIDAD MÓVIL (CELULAR) OPTIMIZADA
+   - Título arriba, KPIs debajo, Filtros colapsables en 2 hileras estéticas
+   - Mapa 55% de la altura permitiendo scroll vertical natural
+   - Tabla con dimensiones de columnas y textos ajustados
    ========================================================== */
 @media (max-width: 900px) {
  body, html { overflow: auto !important; height: auto !important; }
@@ -207,6 +207,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
+ /* Panel de filtros colapsable adaptado en 2 hileras (grid de 4 columnas para encajar estéticamente) */
  #panel-filtros {
    position: static !important;
    width: 100%;
@@ -223,18 +224,21 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .filtros-contenido { display: none; margin-top: 6px; }
  .filtros-contenido.show {
    display: grid;
-   grid-template-columns: repeat(3, 1fr);
-   gap: 4px;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 3px;
  }
  .filtro-btn {
-   font-size: 9px;
+   font-size: 8px;
    padding: 4px 2px;
    text-align: center;
    width: 100%;
    box-sizing: border-box;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
  }
 
- /* Mapa: 55% de la altura de la pantalla, con scroll natural */
+ /* Mapa: exactamente 55% de la altura de la pantalla con scroll natural */
  #seccion-mapa {
    height: 55vh !important;
    width: 100%;
@@ -247,14 +251,14 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    position: absolute !important;
  }
 
- /* Panel derecho / Tabla: debajo del mapa, permitiendo desplazamiento completo con scroll */
+ /* Panel de tabla inferior: ocupando el resto con altura controlada y columnas ajustadas */
  #seccion-panel-derecho {
    height: auto !important;
    min-height: 45vh;
    width: 100%;
    border-left: none;
    border-top: 2px solid #cbd5e1;
-   padding: 8px;
+   padding: 6px;
    display: flex;
    flex-direction: column;
    overflow: visible !important;
@@ -264,24 +268,48 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    flex: unset !important;
  }
  #contenedor-tabla {
-   height: 350px;
+   height: 380px;
    overflow: hidden;
    display: flex;
    flex-direction: column;
    margin-top: 0;
+   border-radius: 6px;
  }
+ .tabla-header-titulo { font-size: 9px; padding: 6px 8px; }
  .table-responsive {
    flex: 1;
    overflow-y: auto;
+   overflow-x: auto;
  }
+
+ /* Ajustes finos de tamaño de celdas, columnas y textos para celular */
+ #tabla-estructuras {
+   font-size: 9px;
+ }
+ #tabla-estructuras th, #tabla-estructuras td {
+   padding: 4px 5px;
+   white-space: nowrap;
+ }
+ #tabla-estructuras th:nth-child(1), #tabla-estructuras td:nth-child(1) { width: 12%; } /* ID */
+ #tabla-estructuras th:nth-child(2), #tabla-estructuras td:nth-child(2) { width: 20%; } /* Constatación */
+ #tabla-estructuras th:nth-child(3), #tabla-estructuras td:nth-child(3) { width: 16%; } /* Acta */
+ #tabla-estructuras th:nth-child(4), #tabla-estructuras td:nth-child(4) { width: 20%; } /* Liberación */
+ #tabla-estructuras th:nth-child(5), #tabla-estructuras td:nth-child(5) { width: 14%; } /* Asiento */
+ #tabla-estructuras th:nth-child(6), #tabla-estructuras td:nth-child(6) { width: 18%; } /* Plano */
 
  #panel-acciones-izquierda {
    position: absolute; bottom: 8px; left: 8px; z-index: 1000;
+   gap: 3px;
  }
- .btn-accion { padding: 6px 10px; font-size: 10px; }
+ #marca-agua {
+   font-size: 8px; padding: 2px 6px;
+ }
+ .btn-accion { padding: 5px 8px; font-size: 9px; }
 
  #panel-leyenda {
    position: absolute; bottom: 8px; right: 8px; z-index: 1000;
-   font-size: 9px; padding: 4px 8px;
+   font-size: 8px; padding: 4px 6px;
  }
+ .leyenda-item { gap: 4px; margin-bottom: 1px; }
+ .leyenda-color { width: 8px; height: 8px; }
 }
