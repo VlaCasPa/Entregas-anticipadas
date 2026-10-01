@@ -1,5 +1,5 @@
-// Inicialización con Zoom Dinámico (FitBounds) optimizado para celulares y web
-const map = L.map('map').setView([-12.055, -77.050], 12);  
+// Inicialización del mapa
+const map = L.map('map').setView([-12.055, -77.050], 11);  
 
 L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
  maxZoom: 20,  
@@ -7,7 +7,7 @@ L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
  attribution: '&copy; Google',  
  opacity: 0.65,  
  className: 'mapa-google-gris'  
-}).addTo(map);  
+end = '').addTo(map);  
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
 
@@ -19,6 +19,7 @@ let datosGlobalesCSV = [];
 let geojsonDataGlobal = null;
 let filtroActualGlobal = 'todos';
 let estructurasUnicasMap = new Map(); 
+let marcadoresMapIndex = {}; // Almacena referencias a los marcadores para hover cruzado
 
 function normalizarID(texto) {  
  if (!texto) return "";  
@@ -55,7 +56,7 @@ Promise.all([
  actualizarDashboardYMapa(csvData, geojsonData, 'todos');
 });
 
-// Función para evaluar si una fecha está en los últimos 30 días
+// Función para evaluar si una fecha está en los últimos 30 días (liberados recientemente)
 function esMenorA30Dias(data) {
     let fechaHoy = new Date("2026-10-01"); 
     let fechaStr = data.Fecha_Liberacion || data.Fecha_Acta || data.Fecha_Constatacion;
@@ -71,7 +72,7 @@ function esMenorA30Dias(data) {
     return false;
 }
 
-// Función para evaluar si la Fecha_Liberacion es una fecha a futuro (Próximas Liberaciones)
+// Función para evaluar si la Fecha_Liberacion es a futuro (próximas a liberar)
 function esProximaLiberacion(data) {
     let fechaHoy = new Date("2026-10-01"); 
     let fechaStr = data.Fecha_Liberacion;
@@ -80,7 +81,6 @@ function esProximaLiberacion(data) {
         let partes = fechaStr.split('/');
         if (partes.length === 3) {
             let fechaItem = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
-            // Si la fecha de liberación es estrictamente posterior a hoy
             return (fechaItem > fechaHoy);
         }
     }
@@ -94,6 +94,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  grupoMarcadoresIDs.clearLayers();
  mapaDatosSheets = {};
  estructurasUnicasMap.clear();
+ marcadoresMapIndex = {};
 
  csvData.forEach(item => {  
    if (item.ID) {  
@@ -122,6 +123,18 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        let cumple30Dias = esMenorA30Dias(item);
        let cumpleProxima = esProximaLiberacion(item);
 
+       // Jerarquía de ordenamiento para la tabla solicitada:
+       // 1. Próximos a liberar, 2. Liberados recientemente (<30d), 3. El resto
+       let prioridad = 3;
+       let tipoFila = 'resto';
+       if (cumpleProxima) {
+           prioridad = 1;
+           tipoFila = 'proxima';
+       } else if (cumple30Dias) {
+           prioridad = 2;
+           tipoFila = 'reciente';
+       }
+
        estructurasUnicasMap.set(idNorm, {
          ...item,
          estadoCalculado: estadoCalculado,
@@ -129,7 +142,9 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
          esCulminada: esCulminada,
          esNo: esNo,
          cumple30Dias: cumple30Dias,
-         cumpleProxima: cumpleProxima
+         cumpleProxima: cumpleProxima,
+         prioridad: prioridad,
+         tipoFila: tipoFila
        });
      }
    }  
@@ -163,6 +178,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
  let idsPoligonosFiltrados = new Set();
  let contadorIDsFiltrados = 0;
+ let listaElementosTabla = [];
 
  let geojsonFiltrado = {
    type: "FeatureCollection",
@@ -181,12 +197,8 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (filtroEstado === 'residual') coincide = (tipoGeo === 'residual');
      if (filtroEstado === 'liberado') coincide = (tipoGeo === 'liberado');
      if (filtroEstado === 'culminada') coincide = (tipoGeo === 'culminada');
-     if (filtroEstado === '30dias') {
-         coincide = datosItem && datosItem.cumple30Dias;
-     }
-     if (filtroEstado === 'proximas') {
-         coincide = datosItem && datosItem.cumpleProxima;
-     }
+     if (filtroEstado === '30dias') coincide = datosItem && datosItem.cumple30Dias;
+     if (filtroEstado === 'proximas') coincide = datosItem && datosItem.cumpleProxima;
 
      if (coincide) {
        idsPoligonosFiltrados.add(idGeo);
@@ -217,6 +229,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
    if (cumpleFiltro) {
      contadorIDsFiltrados++;
+     listaElementosTabla.push(item);
 
      let lat = parseFloat(item.Latitud ? item.Latitud.toString().replace(',', '.') : "");  
      let lon = parseFloat(item.Longitud ? item.Longitud.toString().replace(',', '.') : "");  
@@ -237,19 +250,83 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
        marker.bindPopup(generarHTMLPopup(item.ID, item));
        marker.addTo(grupoMarcadoresIDs);  
+
+       marcadoresMapIndex[idNorm] = marker;
      }  
    }  
  });  
 
+ // Ordenar tabla: 1. Próximos a liberar, 2. Liberados recientemente, 3. Resto
+ listaElementosTabla.sort((a, b) => a.prioridad - b.prioridad);
+ construirTablaHTML(listaElementosTabla);
+
  actualizarTextoFiltroUI(filtroEstado, contadorIDsFiltrados);
 
+ // Zoom out general y centrado automático garantizado al iniciar o filtrar
  if (boundsArray.length > 0) {
-   map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 13 });
+   map.fitBounds(boundsArray, { padding: [40, 40], maxZoom: 12 });
  } else {
    map.setView([-12.055, -77.050], 11);
  }
 
  setTimeout(() => { map.invalidateSize(); }, 200);
+}
+
+// Renderizado de tabla con colores de fondo y sincronización de eventos de mouse (Hover bidireccional)
+function construirTablaHTML(elementos) {
+    let tbody = document.getElementById('tabla-tbody');
+    tbody.innerHTML = "";
+
+    if (elementos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#64748b; padding: 12px;">No hay registros para mostrar.</td></tr>`;
+        return;
+    }
+
+    elementos.forEach(item => {
+        let idNorm = normalizarID(item.ID);
+        let tr = document.createElement('tr');
+        tr.className = `fila-${item.tipoTag || item.tipoFila}`;
+        tr.setAttribute('data-id', idNorm);
+
+        tr.innerHTML = `
+            <td><b>${item.ID || '-'}</b></td>
+            <td>${item.Fecha_Constatacion || '-'}</td>
+            <td>${item.Fecha_Acta || '-'}</td>
+            <td>${item.Fecha_Liberacion || '-'}</td>
+            <td>${item.Asiento_Obra || '-'}</td>
+            <td>${item.Codigo_Plano || '-'}</td>
+        `;
+
+        // Evento Hover Tabla -> Mapa (Centra y destaca el marcador en el mapa)
+        tr.addEventListener('mouseenter', () => {
+            tr.classList.add('fila-hover');
+            let marker = marcadoresMapIndex[idNorm];
+            if (marker) {
+                marker.setStyle({ fillColor: '#EF4444', radius: 10 });
+                marker.setZIndexOffset(1000);
+            }
+        });
+
+        tr.addEventListener('mouseleave', () => {
+            tr.classList.remove('fila-hover');
+            let marker = marcadoresMapIndex[idNorm];
+            if (marker) {
+                marker.setStyle({ fillColor: '#FACC15', radius: 7 });
+                marker.setZIndexOffset(0);
+            }
+        });
+
+        // Click en la fila para centrar el mapa en la estructura
+        tr.addEventListener('click', () => {
+            let marker = marcadoresMapIndex[idNorm];
+            if (marker) {
+                map.setView(marker.getLatLng(), 15);
+                marker.openPopup();
+            }
+        });
+
+        tbody.appendChild(tr);
+    });
 }
 
 function actualizarTextoFiltroUI(filtro, cantidad) {
