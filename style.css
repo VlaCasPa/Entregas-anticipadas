@@ -3,41 +3,6 @@ body, html {
  font-family: 'Inter', sans-serif; background-color: #f3f4f6; overflow: hidden;
 }
 
-/* --- Estilos del Modal de Disclaimer Legal --- */
-.modal-overlay {
- position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
- background-color: rgba(15, 23, 42, 0.85); z-index: 99999;
- display: flex; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box;
- backdrop-filter: blur(4px);
-}
-.modal-card {
- background: #ffffff; width: 100%; max-width: 520px; border-radius: 12px;
- box-shadow: 0 20px 40px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column;
- border-top: 5px solid #2563EB; animation: modalFadeIn 0.3s ease;
-}
-@keyframes modalFadeIn {
- from { opacity: 0; transform: translateY(-20px); }
- to { opacity: 1; transform: translateY(0); }
-}
-.modal-header {
- background-color: #0f172a; color: #ffffff; padding: 14px 18px;
- font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
-}
-.modal-body {
- padding: 18px; font-size: 11px; color: #334155; line-height: 1.5;
- max-height: 60vh; overflow-y: auto;
-}
-.modal-body p { margin-bottom: 10px; }
-.modal-footer {
- padding: 12px 18px; background-color: #f8fafc; border-top: 1px solid #e2e8f0;
- display: flex; justify-content: flex-end;
-}
-.modal-footer button {
- background-color: #2563eb; color: white; border: none; padding: 9px 16px;
- font-size: 11px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background 0.2s;
-}
-.modal-footer button:hover { background-color: #1d4ed8; }
-
 /* --- Distribución Pantalla Dividida (Escritorio: 2/3 y 1/3) --- */
 #app-container {
  display: flex; height: 100vh; width: 100vw; position: relative; overflow: hidden;
@@ -200,8 +165,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 }
 
 /* ==========================================================
-   ADAPTABILIDAD MÓVIL (CELULAR) OPTIMIZADA
-   - Escritorio intacto. En celular: Título -> KPIs -> Filtros colapsables (2-3 hileras) -> Mapa (55%) -> Tabla con scroll
+   ADAPTABILIDAD MÓVIL (CELULAR) OPTIMIZADA ESTRICTAMENTE
    ========================================================== */
 @media (max-width: 900px) {
  body, html { overflow: auto !important; height: auto !important; }
@@ -214,7 +178,6 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    overflow: visible !important;
  }
 
- /* Título fijo arriba en móvil con orden 1 */
  #titulo-principal {
    position: static !important;
    order: 1;
@@ -243,7 +206,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
- /* Panel de filtros colapsable orden 3: compacto en grid de 3 columnas para ocupar solo 2-3 hileras */
+ /* Panel de filtros móvil: Colapsable y forzado estrictamente en 3 columnas (2 a 3 hileras) */
  #panel-filtros {
    position: static !important;
    order: 3;
@@ -257,28 +220,28 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    max-width: unset;
    box-shadow: none;
  }
- .filtro-header-mobile { display: flex; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; }
- .filtro-titulo-web { display: none; }
+ .filtro-header-mobile { display: flex !important; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; }
+ .filtro-titulo-web { display: none !important; }
  .filtros-contenido { display: none; margin-top: 4px; }
  .filtros-contenido.show {
-   display: grid;
-   grid-template-columns: repeat(3, 1fr);
-   gap: 3px;
-   padding-bottom: 2px;
+   display: grid !important;
+   grid-template-columns: repeat(3, 1fr) !important;
+   gap: 3px !important;
+   padding-bottom: 4px !important;
  }
  .filtro-btn {
-   font-size: 8px;
-   padding: 3px 2px;
-   text-align: center;
-   width: 100%;
-   box-sizing: border-box;
-   white-space: nowrap;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   border-radius: 4px;
+   font-size: 8px !important;
+   padding: 4px 2px !important;
+   text-align: center !important;
+   width: 100% !important;
+   box-sizing: border-box !important;
+   white-space: nowrap !important;
+   overflow: hidden !important;
+   text-overflow: ellipsis !important;
+   border-radius: 4px !important;
  }
 
- /* Mapa: exactamente 55% de la altura de la pantalla con scroll natural, orden 4 */
+ /* Mapa: exactamente 55% de la altura con scroll natural, orden 4 */
  #seccion-mapa {
    order: 4;
    height: 55vh !important;
@@ -292,7 +255,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    position: absolute !important;
  }
 
- /* Panel de tabla inferior: ocupando el resto con altura controlada y columnas ajustadas, orden 5 */
+ /* Panel de tabla inferior, orden 5 */
  #seccion-panel-derecho {
    order: 5;
    height: auto !important;
@@ -324,7 +287,6 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    overflow-x: auto;
  }
 
- /* Ajustes finos de tamaño de celdas, columnas y textos para celular */
  #tabla-estructuras {
    font-size: 9px;
  }
@@ -332,12 +294,12 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    padding: 4px 5px;
    white-space: nowrap;
  }
- #tabla-estructuras th:nth-child(1), #tabla-estructuras td:nth-child(1) { width: 12%; } /* ID */
- #tabla-estructuras th:nth-child(2), #tabla-estructuras td:nth-child(2) { width: 20%; } /* Constatación */
- #tabla-estructuras th:nth-child(3), #tabla-estructuras td:nth-child(3) { width: 16%; } /* Acta */
- #tabla-estructuras th:nth-child(4), #tabla-estructuras td:nth-child(4) { width: 20%; } /* Liberación */
- #tabla-estructuras th:nth-child(5), #tabla-estructuras td:nth-child(5) { width: 14%; } /* Asiento */
- #tabla-estructuras th:nth-child(6), #tabla-estructuras td:nth-child(6) { width: 18%; } /* Plano */
+ #tabla-estructuras th:nth-child(1), #tabla-estructuras td:nth-child(1) { width: 12%; }
+ #tabla-estructuras th:nth-child(2), #tabla-estructuras td:nth-child(2) { width: 20%; }
+ #tabla-estructuras th:nth-child(3), #tabla-estructuras td:nth-child(3) { width: 16%; }
+ #tabla-estructuras th:nth-child(4), #tabla-estructuras td:nth-child(4) { width: 20%; }
+ #tabla-estructuras th:nth-child(5), #tabla-estructuras td:nth-child(5) { width: 14%; }
+ #tabla-estructuras th:nth-child(6), #tabla-estructuras td:nth-child(6) { width: 18%; }
 
  #panel-acciones-izquierda {
    position: absolute; bottom: 8px; left: 8px; z-index: 1000;
