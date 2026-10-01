@@ -11,23 +11,6 @@
 </head>
 <body>
 
- <!-- ================= MODAL DE DISCLAIMER LEGAL ================= -->
- <div id="modal-disclaimer" class="modal-overlay">
-   <div class="modal-card">
-     <div class="modal-header">
-       🔒 AVISO DE CONFIDENCIALIDAD Y USO RESTRINGIDO
-     </div>
-     <div class="modal-body">
-       <p>El presente aplicativo y repositorio constituyen una herramienta de gestión operativa de uso exclusivo para el personal autorizado del Consorcio Constructor Metro 2 de Lima (CCM2L).</p>
-       <p>Queda terminantemente prohibida la reproducción, distribución, comercialización o uso de la presente información para fines ajenos a los contractuales y de supervisión de obra.</p>
-       <p>El acceso no autorizado, la extracción, el uso indebido o la divulgación de los datos contenidos contravienen las normas internas de seguridad de la información, el deber de confidencialidad, la <b>Ley N° 30096 (Ley de Delitos Informáticos)</b> y la <b>Ley N° 29733 (Ley de Protección de Datos Personales)</b>, quedando el infractor sujeto a las sanciones laborales correspondientes y a las responsabilidades civiles y penales previstas en la legislación de la República del Perú.</p>
-     </div>
-     <div class="modal-footer">
-       <button id="btn-aceptar-disclaimer" onclick="aceptarDisclaimer()">He leído y acepto los términos</button>
-     </div>
-   </div>
- </div>
-
  <!-- Contenedor General de Pantalla Dividida -->
  <div id="app-container">
 
@@ -150,20 +133,6 @@
    </div>
 
  </div>
-
- <!-- Script para manejar la validación del Disclaimer -->
- <script>
-   function aceptarDisclaimer() {
-     localStorage.setItem('ccm2l_disclaimer_aceptado', 'true');
-     document.getElementById('modal-disclaimer').style.display = 'none';
-   }
-
-   window.addEventListener('DOMContentLoaded', () => {
-     if (localStorage.getItem('ccm2l_disclaimer_aceptado') === 'true') {
-       document.getElementById('modal-disclaimer').style.display = 'none';
-     }
-   });
- </script>
 
  <!-- Librerías JS y Script -->
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
