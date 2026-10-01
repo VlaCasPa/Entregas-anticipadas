@@ -1,4 +1,4 @@
-// Inicialización del mapa
+// Inicialización del mapa con ajuste de tamaño para pantalla dividida
 const map = L.map('map').setView([-12.055, -77.050], 11);  
 
 L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
@@ -123,8 +123,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        let cumple30Dias = esMenorA30Dias(item);
        let cumpleProxima = esProximaLiberacion(item);
 
-       // Jerarquía de ordenamiento para la tabla:
-       // 1. Próximos a liberar, 2. Liberados recientemente (<30d), 3. El resto
        let prioridad = 3;
        let tipoFila = 'resto';
        if (cumpleProxima) {
@@ -249,20 +247,23 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        let marker = L.circleMarker([lat, lon], { radius: 7, fillColor: "#FACC15", color: "#1E293B", weight: 2, opacity: 1, fillOpacity: 1 });  
        marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
        marker.bindPopup(generarHTMLPopup(item.ID, item));
-       marker.addTo(grupoMarcadoresIDs);  
+       
+       // Sincronización Click Mapa -> Tabla (Resalta y scrollea en la tabla)
+       marker.on('click', () => {
+           resaltarFilaEnTabla(idNorm);
+       });
 
+       marker.addTo(grupoMarcadoresIDs);  
        marcadoresMapIndex[idNorm] = marker;
      }  
    }  
  });  
 
- // Ordenar tabla: 1. Próximos a liberar, 2. Liberados recientemente, 3. Resto
  listaElementosTabla.sort((a, b) => a.prioridad - b.prioridad);
  construirTablaHTML(listaElementosTabla);
 
  actualizarTextoFiltroUI(filtroEstado, contadorIDsFiltrados);
 
- // Zoom out general y centrado automático al iniciar o filtrar
  if (boundsArray.length > 0) {
    map.fitBounds(boundsArray, { padding: [40, 40], maxZoom: 12 });
  } else {
@@ -272,7 +273,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  setTimeout(() => { map.invalidateSize(); }, 200);
 }
 
-// Renderizado de tabla con colores de fondo y sincronización de eventos de mouse
+// Renderizado de tabla con eventos cruzados
 function construirTablaHTML(elementos) {
     let tbody = document.getElementById('tabla-tbody');
     tbody.innerHTML = "";
@@ -297,7 +298,7 @@ function construirTablaHTML(elementos) {
             <td>${item.Codigo_Plano || '-'}</td>
         `;
 
-        // Evento Hover Tabla -> Mapa
+        // Hover Tabla -> Mapa
         tr.addEventListener('mouseenter', () => {
             tr.classList.add('fila-hover');
             let marker = marcadoresMapIndex[idNorm];
@@ -316,17 +317,30 @@ function construirTablaHTML(elementos) {
             }
         });
 
-        // Click en la fila para centrar el mapa
+        // Click Tabla -> Centrar mapa exactamente en el punto y abrir popup
         tr.addEventListener('click', () => {
+            document.querySelectorAll('#tabla-tbody tr').forEach(r => r.classList.remove('fila-seleccionada'));
+            tr.classList.add('fila-seleccionada');
+
             let marker = marcadoresMapIndex[idNorm];
             if (marker) {
-                map.setView(marker.getLatLng(), 15);
+                map.setView(marker.getLatLng(), 15, { animate: true });
                 marker.openPopup();
             }
         });
 
         tbody.appendChild(tr);
     });
+}
+
+// Función para resaltar la fila en la tabla cuando se hace clic en el mapa
+function resaltarFilaEnTabla(idNorm) {
+    document.querySelectorAll('#tabla-tbody tr').forEach(r => r.classList.remove('fila-seleccionada'));
+    let fila = document.querySelector(`#tabla-tbody tr[data-id="${idNorm}"]`);
+    if (fila) {
+        fila.classList.add('fila-seleccionada');
+        fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 function actualizarTextoFiltroUI(filtro, cantidad) {
