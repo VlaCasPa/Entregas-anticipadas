@@ -199,7 +199,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
  actualizarTextoFiltroUI(filtroEstado, contadorIDsFiltrados);
 
- // Zoom dinámico (FitBounds) garantizado para ajustar la macrozona al abrir en celular o web
  if (boundsArray.length > 0) {
    map.fitBounds(boundsArray, { padding: [50, 50], maxZoom: 13 });
  } else {
@@ -226,14 +225,15 @@ function actualizarTextoFiltroUI(filtro, cantidad) {
  if(labelWeb) labelWeb.innerText = `FILTRAR POR ESTADO: ${textoEstado} (${cantidad})`;
 }
 
+// Función actualizada con fondo #F5F5EB, eliminación de tipo y adición de Fecha_Acta
 function generarHTMLPopup(idEstructura, datos) {
   return `  
-    <div style="min-width: 200px; font-size: 11px;">  
-      <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">${idEstructura}: ${datos.Nombre || 'Estructura Línea 2 y 4'}</h3>  
-      <div style="color: #64748b; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Tipo: ${datos.Tipo_Cerramiento || 'Cerramiento'}</div>  
-      <div>📅 <b>Constatación:</b> ${datos.Fecha_Constatacion || '-'}</div>  
-      <div>🚧 <b>Liberación:</b> ${datos.Fecha_Liberacion || '-'}</div>  
-      <div>📖 <b>Asiento:</b> ${datos.Asiento_Obra || '-'}</div>  
+    <div style="min-width: 210px; font-size: 11px; background-color: #F5F5EB; padding: 8px; border-radius: 6px;">  
+      <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0; border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">${idEstructura}: ${datos.Nombre || 'Estructura Línea 2 y 4'}</h3>  
+      <div style="margin-bottom: 3px;">📅 <b>Constatación:</b> ${datos.Fecha_Constatacion || '-'}</div>  
+      <div style="margin-bottom: 3px;">📝 <b>Acta:</b> ${datos.Fecha_Acta || '-'}</div>  
+      <div style="margin-bottom: 3px;">🚧 <b>Liberación:</b> ${datos.Fecha_Liberacion || '-'}</div>  
+      <div style="margin-bottom: 3px;">📖 <b>Asiento:</b> ${datos.Asiento_Obra || '-'}</div>  
       <div>📐 <b>Plano:</b> ${datos.Codigo_Plano || '-'}</div>  
     </div>  
   `;
@@ -278,8 +278,8 @@ function ejecutarConsultaIA() {
  if (datosID) {
    cajaResp.innerHTML = `<b>Datos para [${datosID.ID}]:</b><br>` +
                         `- Nombre: ${datosID.Nombre || 'N/A'}<br>` +
-                        `- Tipo: ${datosID.Tipo_Cerramiento || 'N/A'}<br>` +
                         `- Constatación: ${datosID.Fecha_Constatacion || 'N/A'}<br>` +
+                        `- Acta: ${datosID.Fecha_Acta || 'N/A'}<br>` +
                         `- Liberación: ${datosID.Fecha_Liberacion || 'N/A'}<br>` +
                         `- Asiento: ${datosID.Asiento_Obra || 'N/A'}`;
  } else {
