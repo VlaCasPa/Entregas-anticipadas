@@ -196,6 +196,193 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 }
 
 /* ==========================================================
+   ESTILOS NUEVOS: VENTANAS MODALES DE FIREBASE IAM & DISCLAIMER
+   ========================================================== */
+.modal-overlay-login {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999999;
+}
+
+.login-card {
+    background: #ffffff;
+    color: #1e293b;
+    width: 90%;
+    max-width: 400px;
+    padding: 35px 30px;
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.login-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.login-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.login-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    box-sizing: border-box;
+    outline: none;
+    color: #1e293b;
+    background: #f8fafc;
+}
+
+.btn-login-sistema {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.login-divider {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+    line-height: 0.1em;
+    margin: 20px 0;
+}
+
+.login-divider span {
+    background: #ffffff;
+    padding: 0 10px;
+    color: #94a3b8;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.btn-google-auth {
+    width: 100%;
+    background: #ffffff;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 11px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.modal-overlay-disclaimer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999998;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.modal-box {
+    background: #1e293b;
+    border: 1px solid #334155;
+    width: 100%;
+    max-width: 620px;
+    border-radius: 10px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header-disc {
+    background: #0f172a;
+    padding: 16px 20px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+}
+
+.modal-header-disc h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #f8fafc;
+    text-transform: uppercase;
+}
+
+.modal-body-disc {
+    padding: 22px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #cbd5e1;
+    max-height: 55vh;
+    overflow-y: auto;
+    text-align: justify;
+}
+
+.modal-footer-disc {
+    background: #0f172a;
+    padding: 14px 20px;
+    border-top: 1px solid #334155;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#btn-aceptar-disclaimer {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 11px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+/* ==========================================================
    ADAPTABILIDAD MÓVIL (CELULAR) - FILTROS COLAPSIBLES DEBAJO DEL TÍTULO
    ========================================================== */
 @media (max-width: 900px) {
@@ -222,7 +409,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    border-left: none;
    border-bottom: 3px solid #2563EB;
    box-sizing: border-box;
-   margin-bottom: 4px; /* Espacio simple estético debajo del título */
+   margin-bottom: 4px;
  }
 
  /* Orden 2: Panel de Filtros Colapsable debajo del Título */
@@ -251,7 +438,6 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    padding-bottom: 4px !important;
  }
  
- /* Ajuste de botones de filtro móvil para ocupar entre 2 a 3 líneas y evitar saturación visual */
  .filtro-btn {
    font-size: 8px !important;
    padding: 5px 3px !important;
@@ -269,7 +455,6 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
    grid-column: span 1 !important;
  }
 
- /* Ocultar grid web y separadores en móvil */
  .filtros-botones-web-grid { display: none !important; }
  .panel-separador-estetico { display: none !important; }
  .bloque-titulo-gerencial { display: none !important; }
