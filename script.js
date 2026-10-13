@@ -1,3 +1,27 @@
+// --- CONFIGURACIÓN DE FIREBASE (PROYECTO CENTRAL: MetroL2-IAM-Central) ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC1XakVAZLUDq3-240Q_KoYYPU5JKCTjzs",
+    authDomain: "metrol2-iam-central.firebaseapp.com",
+    projectId: "metrol2-iam-central",
+    storageBucket: "metrol2-iam-central.firebasestorage.app",
+    messagingSenderId: "78845391762",
+    appId: "1:78845391762:web:d64611cd7c4ef65a24074b"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+
+const REPO_ACTUAL = "Entregas-anticipadas";
+const STORAGE_KEY_DISCLAIMER = "ccm2l_entregas_anticipadas_disclaimer_accepted_v1";
+
+let usuarioActualGlobal = null;
+
 // Inicialización del mapa con ajuste de tamaño para pantalla dividida
 const map = L.map('map').setView([-12.055, -77.050], 11);  
 
@@ -21,6 +45,165 @@ let filtroActualGlobal = 'todos';
 let estructurasUnicasMap = new Map(); 
 let marcadoresMapIndex = {}; 
 
+// Control de flujo inicial de Autenticación IAM y Disclaimer al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            usuarioActualGlobal = user;
+            ocultarModalLogin();
+            await validarPermisosYDisclaimer(user);
+        } else {
+            mostrarModalLogin();
+        }
+    });
+
+    cargarDatosYMapaInicial();
+});
+
+// Funciones de Autenticación IAM
+window.loginConGoogle = async function() {
+    try {
+        await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+        console.error("Error en Google Auth:", err);
+        alert("No se pudo completar el inicio de sesión con Google.");
+    }
+};
+
+window.loginConCorreoPassword = async function() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+
+    if (!email || !password) {
+        alert("Por favor ingrese su correo corporativo y contraseña.");
+        return;
+    }
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+        console.error("Error en Login corporativo:", err);
+        alert("Credenciales incorrectas o usuario no registrado.");
+    }
+};
+
+function mostrarModalLogin() {
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function ocultarModalLogin() {
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Validación de Permisos en Firestore y Verificación de Disclaimer
+async function validarPermisosYDisclaimer(user) {
+    const emailUser = user.email.toLowerCase().trim();
+
+    // Resguardo absoluto inmediato para superadministradores
+    if (emailUser === "zebaxx@gmail.com" || emailUser === "vcasasp@ccmetrolima.com") {
+        verificarDisclaimerUsuario();
+        return;
+    }
+
+    try {
+        const docRef = doc(db, "usuarios", emailUser);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const datosUsuario = docSnap.data();
+            const esAdmin = datosUsuario.es_admin || false;
+            const reposPermitidos = datosUsuario.repositorios_permitidos || datosUsuario.permisos_escritura || [];
+
+            let usuarioAutorizado = (esAdmin || reposPermitidos.includes("todos") || reposPermitidos.includes(REPO_ACTUAL));
+
+            if (usuarioAutorizado) {
+                verificarDisclaimerUsuario();
+            } else {
+                restringirAccesoNoAutorizado();
+            }
+        } else {
+            restringirAccesoNoAutorizado();
+        }
+    } catch (error) {
+        console.error("Error al validar contra Firestore:", error);
+        if (emailUser === "zebaxx@gmail.com" || emailUser === "vcasasp@ccmetrolima.com") {
+            verificarDisclaimerUsuario();
+        } else {
+            restringirAccesoNoAutorizado();
+        }
+    }
+}
+
+function verificarDisclaimerUsuario() {
+    if (!localStorage.getItem(STORAGE_KEY_DISCLAIMER)) {
+        mostrarDisclaimer();
+    } else {
+        ocultarDisclaimer();
+    }
+}
+
+async function restringirAccesoNoAutorizado() {
+    alert("No cuenta con autorización para acceder a este repositorio. Consulte con el administrador.");
+    await signOut(auth);
+    window.location.href = "https://github.com";
+}
+
+function mostrarDisclaimer() {
+    const modal = document.getElementById('disclaimer-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function ocultarDisclaimer() {
+    const modal = document.getElementById('disclaimer-modal');
+    if (modal) {
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    }
+}
+
+window.aceptarDisclaimer = async function() {
+    if (!usuarioActualGlobal) return;
+    const emailUser = usuarioActualGlobal.email.toLowerCase().trim();
+    localStorage.setItem(STORAGE_KEY_DISCLAIMER, "true");
+
+    try {
+        const discRef = doc(db, "aceptaciones_disclaimer", emailUser);
+        await setDoc(discRef, {
+            email: emailUser,
+            aceptado: true,
+            repositorio: REPO_ACTUAL,
+            fecha_aceptacion: serverTimestamp(),
+            dispositivo: navigator.userAgent
+        }, { merge: true });
+
+        ocultarDisclaimer();
+    } catch (err) {
+        console.error("Error al registrar aceptación en Firestore:", err);
+        ocultarDisclaimer();
+    }
+};
+
+function cargarDatosYMapaInicial() {
+    Promise.all([  
+      fetch('cerramientos.geojson').then(res => res.json()),  
+      new Promise(resolve => {  
+        Papa.parse(urlCSV, {  
+          download: true,  
+          header: true,  
+          complete: results => resolve(results.data)  
+        });  
+      })  
+    ]).then(([geojsonData, csvData]) => {  
+      geojsonDataGlobal = geojsonData;
+      datosGlobalesCSV = csvData;
+
+      actualizarDashboardYMapa(csvData, geojsonData, 'todos');
+    });
+}
+
 function normalizarID(texto) {  
  if (!texto) return "";  
  return texto.toString().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();  
@@ -39,22 +222,6 @@ function estiloPoligono(feature) {
  }  
  return { color: "#d4a39b", fillColor: "#f5ebe9", weight: 2, opacity: 0.8, fillOpacity: 0.4 };  
 }  
-
-Promise.all([  
- fetch('cerramientos.geojson').then(res => res.json()),  
- new Promise(resolve => {  
-   Papa.parse(urlCSV, {  
-     download: true,  
-     header: true,  
-     complete: results => resolve(results.data)  
-   });  
- })  
-]).then(([geojsonData, csvData]) => {  
- geojsonDataGlobal = geojsonData;
- datosGlobalesCSV = csvData;
-
- actualizarDashboardYMapa(csvData, geojsonData, 'todos');
-});
 
 // Función para evaluar si una fecha está en los últimos 30 días (liberados recientemente)
 function esMenorA30Dias(data) {
@@ -248,7 +415,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
        marker.bindTooltip(item.ID, { permanent: true, direction: 'right', className: 'id-tooltip', offset: [5, 0] });  
        marker.bindPopup(generarHTMLPopup(item.ID, item));
        
-       // Sincronización Click Mapa -> Tabla (Resalta y scrollea en la tabla)
        marker.on('click', () => {
            resaltarFilaEnTabla(idNorm);
        });
@@ -298,7 +464,6 @@ function construirTablaHTML(elementos) {
             <td>${item.Codigo_Plano || '-'}</td>
         `;
 
-        // Hover Tabla -> Mapa
         tr.addEventListener('mouseenter', () => {
             tr.classList.add('fila-hover');
             let marker = marcadoresMapIndex[idNorm];
@@ -317,7 +482,6 @@ function construirTablaHTML(elementos) {
             }
         });
 
-        // Click Tabla -> Centrar mapa exactamente en el punto y abrir popup
         tr.addEventListener('click', () => {
             document.querySelectorAll('#tabla-tbody tr').forEach(r => r.classList.remove('fila-seleccionada'));
             tr.classList.add('fila-seleccionada');
@@ -333,7 +497,6 @@ function construirTablaHTML(elementos) {
     });
 }
 
-// Función para resaltar la fila en la tabla cuando se hace clic en el mapa
 function resaltarFilaEnTabla(idNorm) {
     document.querySelectorAll('#tabla-tbody tr').forEach(r => r.classList.remove('fila-seleccionada'));
     let fila = document.querySelector(`#tabla-tbody tr[data-id="${idNorm}"]`);
@@ -374,44 +537,43 @@ function generarHTMLPopup(idEstructura, datos) {
   `;
 }
 
-function filtrarEstado(tipo) {
+window.filtrarEstado = function(tipo) {
  document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
  event.target.classList.add('active');
  if (geojsonDataGlobal && datosGlobalesCSV) actualizarDashboardYMapa(datosGlobalesCSV, geojsonDataGlobal, tipo);
 }
 
-function toggleFiltros() {  
+window.toggleFiltros = function() {  
  const contenido = document.getElementById('filtrosContenido');  
  const icon = document.getElementById('filtro-icon');  
  contenido.classList.toggle('show');  
  icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';  
 }  
 
-function toggleLeyenda() {
+window.toggleLeyenda = function() {
  const contenido = document.getElementById('leyendaContenido');
  const icon = document.getElementById('leyenda-icon');
  contenido.classList.toggle('show');
  icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';
 }
 
-function toggleConsultorIA() {
+window.toggleConsultorIA = function() {
  document.getElementById('desplegableIA').classList.toggle('show');
 }
 
-function manejarEnterIA(event) {
+window.manejarEnterIA = function(event) {
     if (event.key === 'Enter') {
         ejecutarConsultaIA();
     }
 }
 
-function ejecutarConsultaIA() {
+window.ejecutarConsultaIA = function() {
  let inputElem = document.getElementById('inputConsultaIA');
  let consulta = inputElem.value.trim();
  if(!consulta) return;
 
  let chatContainer = document.getElementById('iaChatContainer');
  
- // Añadir mensaje del usuario al chat
  let userBubble = document.createElement('div');
  userBubble.className = 'ia-chat-bubble user';
  userBubble.innerText = consulta;
@@ -431,7 +593,6 @@ function ejecutarConsultaIA() {
                         `• Liberación: ${datosID.Fecha_Liberacion || 'N/A'}<br>` +
                         `• Asiento: ${datosID.Asiento_Obra || 'N/A'}`;
    
-   // Si el marcador existe, centrar mapa automáticamente
    let marker = marcadoresMapIndex[idNorm];
    if (marker) {
        map.setView(marker.getLatLng(), 15, { animate: true });
@@ -447,7 +608,7 @@ function ejecutarConsultaIA() {
  inputElem.value = "";
 }
 
-function copiarReporteTexto() {
+window.copiarReporteTexto = function() {
     let idsCercoInicial = [];
     let idsResidual = [];
     let idsLiberado = [];
