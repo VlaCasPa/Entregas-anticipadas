@@ -22,7 +22,7 @@ const STORAGE_KEY_DISCLAIMER = "ccm2l_entregas_anticipadas_disclaimer_accepted_v
 
 let usuarioActualGlobal = null;
 
-// Inicialización del mapa con ajuste de tamaño para pantalla dividida
+// Inicialización del mapa
 const map = L.map('map').setView([-12.055, -77.050], 11);  
 
 L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
@@ -37,6 +37,7 @@ const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYN
 
 let grupoPoligonos = L.featureGroup().addTo(map);  
 let grupoMarcadoresIDs = L.featureGroup().addTo(map);  
+let grupoLineasMetro = L.featureGroup().addTo(map); // Grupo para los trazos de referencia de L2 y L4
 
 let mapaDatosSheets = {};  
 let datosGlobalesCSV = [];
@@ -45,7 +46,7 @@ let filtroActualGlobal = 'todos';
 let estructurasUnicasMap = new Map(); 
 let marcadoresMapIndex = {}; 
 
-// Control de flujo inicial de Autenticación IAM y Disclaimer al cargar la página
+// Control de flujo inicial de Autenticación IAM y Disclaimer
 document.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -60,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     cargarDatosYMapaInicial();
 });
 
-// Funciones de Autenticación IAM
 window.loginConGoogle = async function() {
     try {
         await signInWithPopup(auth, googleProvider);
@@ -97,11 +97,9 @@ function ocultarModalLogin() {
     if (modal) modal.style.display = 'none';
 }
 
-// Validación de Permisos en Firestore y Verificación de Disclaimer
 async function validarPermisosYDisclaimer(user) {
     const emailUser = user.email.toLowerCase().trim();
 
-    // Resguardo absoluto inmediato para superadministradores
     if (emailUser === "zebaxx@gmail.com" || emailUser === "vcasasp@ccmetrolima.com") {
         verificarDisclaimerUsuario();
         return;
@@ -186,9 +184,28 @@ window.aceptarDisclaimer = async function() {
     }
 };
 
+// Función para calcular el grosor dinámico de las líneas de metro según el zoom
+function obtenerGrosorLineaMetro() {
+    let zoom = map.getZoom();
+    if (zoom <= 11) return 1.5;
+    if (zoom <= 13) return 2.5;
+    if (zoom <= 15) return 4;
+    return 5;
+}
+
+function estiloLineaReferencia() {
+    return {
+        color: "#9ca3af", // Gris tenue referencial
+        weight: obtenerGrosorLineaMetro(),
+        opacity: 0.55,
+        interactive: false // No interfiere con clics de polígonos
+    };
+}
+
 function cargarDatosYMapaInicial() {
     Promise.all([  
       fetch('cerramientos.geojson').then(res => res.json()),  
+      fetch('lineas.geojson').then(res => res.json()).catch(() => null), // Carga segura de los trazos de L2 y L4
       new Promise(resolve => {  
         Papa.parse(urlCSV, {  
           download: true,  
@@ -196,9 +213,26 @@ function cargarDatosYMapaInicial() {
           complete: results => resolve(results.data)  
         });  
       })  
-    ]).then(([geojsonData, csvData]) => {  
+    ]).then(([geojsonData, lineasGeojson, csvData]) => {  
       geojsonDataGlobal = geojsonData;
       datosGlobalesCSV = csvData;
+
+      // Renderizar trazos de Línea 2 y Línea 4 si el archivo existe
+      if (lineasGeojson) {
+          L.geoJSON(lineasGeojson, {
+              style: estiloLineaReferencia,
+              interactive: false
+          }).addTo(grupoLineasMetro);
+      }
+
+      // Actualizar grosor al hacer zoom en pantalla
+      map.on('zoomend', () => {
+          grupoLineasMetro.eachLayer(layer => {
+              if (layer.setStyle) {
+                  layer.setStyle({ weight: obtenerGrosorLineaMetro() });
+              }
+          });
+      });
 
       actualizarDashboardYMapa(csvData, geojsonData, 'todos');
     });
@@ -223,7 +257,6 @@ function estiloPoligono(feature) {
  return { color: "#d4a39b", fillColor: "#f5ebe9", weight: 2, opacity: 0.8, fillOpacity: 0.4 };  
 }  
 
-// Función para evaluar si una fecha está en los últimos 30 días (liberados recientemente)
 function esMenorA30Dias(data) {
     let fechaHoy = new Date("2026-10-01"); 
     let fechaStr = data.Fecha_Liberacion || data.Fecha_Acta || data.Fecha_Constatacion;
@@ -239,7 +272,6 @@ function esMenorA30Dias(data) {
     return false;
 }
 
-// Función para evaluar si la Fecha_Liberacion es a futuro (próximas a liberar)
 function esProximaLiberacion(data) {
     let fechaHoy = new Date("2026-10-01"); 
     let fechaStr = data.Fecha_Liberacion;
@@ -439,7 +471,6 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
  setTimeout(() => { map.invalidateSize(); }, 200);
 }
 
-// Renderizado de tabla con eventos cruzados
 function construirTablaHTML(elementos) {
     let tbody = document.getElementById('tabla-tbody');
     tbody.innerHTML = "";
