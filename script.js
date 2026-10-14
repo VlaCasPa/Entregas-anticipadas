@@ -21,23 +21,10 @@ const REPO_ACTUAL = "Entregas-anticipadas";
 const STORAGE_KEY_DISCLAIMER = "ccm2l_entregas_anticipadas_disclaimer_accepted_v1";
 
 let usuarioActualGlobal = null;
-
-// Inicialización del mapa
-const map = L.map('map').setView([-12.055, -77.050], 11);  
-
-L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
- maxZoom: 20,  
- subdomains: ['mt0','mt1','mt2','mt3'],  
- attribution: '&copy; Google',  
- opacity: 0.65,  
- className: 'mapa-google-gris'  
-}).addTo(map);  
-
-const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
-
-let grupoPoligonos = L.featureGroup().addTo(map);  
-let grupoMarcadoresIDs = L.featureGroup().addTo(map);  
-let grupoLineasMetro = L.featureGroup().addTo(map); // Grupo para los trazos de referencia de L2 y L4
+let map = null;
+let grupoPoligonos = null;
+let grupoMarcadoresIDs = null;
+let grupoLineasMetro = null;
 
 let mapaDatosSheets = {};  
 let datosGlobalesCSV = [];
@@ -46,7 +33,9 @@ let filtroActualGlobal = 'todos';
 let estructurasUnicasMap = new Map(); 
 let marcadoresMapIndex = {}; 
 
-// Control de flujo inicial de Autenticación IAM y Disclaimer
+const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
+
+// Control de flujo inicial de Autenticación IAM (Blindado contra cargas prematuras)
 document.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -54,11 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
             ocultarModalLogin();
             await validarPermisosYDisclaimer(user);
         } else {
+            usuarioActualGlobal = null;
             mostrarModalLogin();
         }
     });
-
-    cargarDatosYMapaInicial();
 });
 
 window.loginConGoogle = async function() {
@@ -102,6 +90,7 @@ async function validarPermisosYDisclaimer(user) {
 
     if (emailUser === "zebaxx@gmail.com" || emailUser === "vcasasp@ccmetrolima.com") {
         verificarDisclaimerUsuario();
+        inicializarEstructuraMapaSiEsNecesario();
         return;
     }
 
@@ -118,6 +107,7 @@ async function validarPermisosYDisclaimer(user) {
 
             if (usuarioAutorizado) {
                 verificarDisclaimerUsuario();
+                inicializarEstructuraMapaSiEsNecesario();
             } else {
                 restringirAccesoNoAutorizado();
             }
@@ -126,11 +116,7 @@ async function validarPermisosYDisclaimer(user) {
         }
     } catch (error) {
         console.error("Error al validar contra Firestore:", error);
-        if (emailUser === "zebaxx@gmail.com" || emailUser === "vcasasp@ccmetrolima.com") {
-            verificarDisclaimerUsuario();
-        } else {
-            restringirAccesoNoAutorizado();
-        }
+        restringirAccesoNoAutorizado();
     }
 }
 
@@ -184,9 +170,30 @@ window.aceptarDisclaimer = async function() {
     }
 };
 
+// Inicialización segura controlada solo tras la autorización
+function inicializarEstructuraMapaSiEsNecesario() {
+    if (map) return; // Evita inicializar doble si ya estaba activo
+
+    map = L.map('map').setView([-12.055, -77.050], 11);  
+
+    L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {  
+     maxZoom: 20,  
+     subdomains: ['mt0','mt1','mt2','mt3'],  
+     attribution: '&copy; Google',  
+     opacity: 0.65,  
+     className: 'mapa-google-gris'  
+    }).addTo(map);  
+
+    grupoPoligonos = L.featureGroup().addTo(map);  
+    grupoMarcadoresIDs = L.featureGroup().addTo(map);  
+    grupoLineasMetro = L.featureGroup().addTo(map);
+
+    cargarDatosYMapaInicial();
+}
+
 // Función para calcular el grosor dinámico de las líneas de metro según el zoom
 function obtenerGrosorLineaMetro() {
-    let zoom = map.getZoom();
+    let zoom = map ? map.getZoom() : 11;
     if (zoom <= 11) return 1.5;
     if (zoom <= 13) return 2.5;
     if (zoom <= 15) return 4;
@@ -198,14 +205,14 @@ function estiloLineaReferencia() {
         color: "#9ca3af", // Gris tenue referencial
         weight: obtenerGrosorLineaMetro(),
         opacity: 0.55,
-        interactive: false // No interfiere con clics de polígonos
+        interactive: false 
     };
 }
 
 function cargarDatosYMapaInicial() {
     Promise.all([  
       fetch('cerramientos.geojson').then(res => res.json()),  
-      fetch('lineas.geojson').then(res => res.json()).catch(() => null), // Carga segura de los trazos de L2 y L4
+      fetch('lineas.geojson').then(res => res.json()).catch(() => null), 
       new Promise(resolve => {  
         Papa.parse(urlCSV, {  
           download: true,  
@@ -217,7 +224,6 @@ function cargarDatosYMapaInicial() {
       geojsonDataGlobal = geojsonData;
       datosGlobalesCSV = csvData;
 
-      // Renderizar trazos de Línea 2 y Línea 4 si el archivo existe
       if (lineasGeojson) {
           L.geoJSON(lineasGeojson, {
               style: estiloLineaReferencia,
@@ -225,7 +231,6 @@ function cargarDatosYMapaInicial() {
           }).addTo(grupoLineasMetro);
       }
 
-      // Actualizar grosor al hacer zoom en pantalla
       map.on('zoomend', () => {
           grupoLineasMetro.eachLayer(layer => {
               if (layer.setStyle) {
@@ -473,6 +478,7 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
 
 function construirTablaHTML(elementos) {
     let tbody = document.getElementById('tabla-tbody');
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     if (elementos.length === 0) {
@@ -518,7 +524,7 @@ function construirTablaHTML(elementos) {
             tr.classList.add('fila-seleccionada');
 
             let marker = marcadoresMapIndex[idNorm];
-            if (marker) {
+            if (marker && map) {
                 map.setView(marker.getLatLng(), 15, { animate: true });
                 marker.openPopup();
             }
@@ -570,26 +576,27 @@ function generarHTMLPopup(idEstructura, datos) {
 
 window.filtrarEstado = function(tipo) {
  document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
- event.target.classList.add('active');
+ if (event && event.target) event.target.classList.add('active');
  if (geojsonDataGlobal && datosGlobalesCSV) actualizarDashboardYMapa(datosGlobalesCSV, geojsonDataGlobal, tipo);
 }
 
 window.toggleFiltros = function() {  
  const contenido = document.getElementById('filtrosContenido');  
  const icon = document.getElementById('filtro-icon');  
- contenido.classList.toggle('show');  
- icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';  
+ if (contenido) contenido.classList.toggle('show');  
+ if (icon) icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';  
 }  
 
 window.toggleLeyenda = function() {
  const contenido = document.getElementById('leyendaContenido');
  const icon = document.getElementById('leyenda-icon');
- contenido.classList.toggle('show');
- icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';
+ if (contenido) contenido.classList.toggle('show');
+ if (icon) icon.innerText = contenido.classList.contains('show') ? '▲' : '▼';
 }
 
 window.toggleConsultorIA = function() {
- document.getElementById('desplegableIA').classList.toggle('show');
+ const desplegable = document.getElementById('desplegableIA');
+ if (desplegable) desplegable.classList.toggle('show');
 }
 
 window.manejarEnterIA = function(event) {
@@ -600,10 +607,12 @@ window.manejarEnterIA = function(event) {
 
 window.ejecutarConsultaIA = function() {
  let inputElem = document.getElementById('inputConsultaIA');
+ if (!inputElem) return;
  let consulta = inputElem.value.trim();
  if(!consulta) return;
 
  let chatContainer = document.getElementById('iaChatContainer');
+ if (!chatContainer) return;
  
  let userBubble = document.createElement('div');
  userBubble.className = 'ia-chat-bubble user';
@@ -625,7 +634,7 @@ window.ejecutarConsultaIA = function() {
                         `• Asiento: ${datosID.Asiento_Obra || 'N/A'}`;
    
    let marker = marcadoresMapIndex[idNorm];
-   if (marker) {
+   if (marker && map) {
        map.setView(marker.getLatLng(), 15, { animate: true });
        marker.openPopup();
        resaltarFilaEnTabla(idNorm);
@@ -696,6 +705,7 @@ window.copiarReporteTexto = function() {
 
     navigator.clipboard.writeText(textoReporte).then(() => {
         let btn = document.getElementById('btnReporte');
+        if (!btn) return;
         let textoOriginal = btn.innerHTML;
         btn.innerHTML = '✅ Copiado';
         btn.classList.add('copiado');
