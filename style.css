@@ -51,7 +51,7 @@ body, html {
  display: none;
 }
 
-/* --- Estructura Gerencial de los 3 Cuerpos del Panel Derecho (Web) --- */
+/* --- Estructura Gerencial de los Cuerpos del Panel Derecho (Web) --- */
 .panel-seccion-bloque {
  display: flex; flex-direction: column; flex-shrink: 0;
 }
@@ -107,6 +107,9 @@ body, html {
 .filtro-btn.btn-culminada { background-color: #eaf2eb; color: #315738; border-color: #94a3b8; grid-column: span 2; }
 .filtro-btn.btn-temporal { background-color: #ffffff; color: #475569; border-color: #cbd5e1; }
 .filtro-btn.btn-proximas { background-color: #fef3c7; color: #92400e; border-color: #f59e0b; }
+/* Estilos nuevos para Transitabilidad */
+.filtro-btn.btn-transito-si { background-color: #dcfce7; color: #166534; border-color: #86efac; grid-column: span 2; }
+.filtro-btn.btn-transito-no { background-color: #fee2e2; color: #991b1b; border-color: #fca5a5; grid-column: span 2; }
 .filtro-btn.active { box-shadow: 0 0 0 2px #0f172a; font-weight: 700; }
 
 /* --- Tabla Panel Derecho --- */
@@ -135,7 +138,7 @@ tr.fila-resto { background-color: #F2F7F7 !important; }
 tr.fila-hover { background-color: #cbd5e1 !important; cursor: pointer; transition: background 0.15s; }
 tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !important; }
 
-/* --- Leyenda (Esquina Inferior Derecha del Mapa) --- */
+/* --- Leyenda --- */
 #panel-leyenda {
  position: absolute; bottom: 15px; right: 15px; z-index: 1000;
  background-color: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px;
@@ -150,7 +153,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 .color-liberado { background-color: #e0f2fe; border: 1.5px solid #38bdf8; }
 .color-culminada { background-color: #eaf2eb; border: 1.5px solid #315738; }
 
-/* --- Botones de Acciones y Marca de Agua (Esquina Inferior Izquierda del Mapa) --- */
+/* --- Botones de Acciones y Marca de Agua --- */
 #panel-acciones-izquierda {
  position: absolute; bottom: 15px; left: 15px; z-index: 1000;
  display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
@@ -168,7 +171,7 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
 .btn-consultor { background-color: #2563eb; }
 .btn-accion.copiado { background-color: #16a34a !important; color: #ffffff !important; }
 
-/* --- Consultor IA Estilo Chat Integrado y Colapsable --- */
+/* --- Consultor IA Estilo Chat --- */
 .ia-desplegable-arriba {
  display: none; position: absolute; bottom: 48px; left: 0; width: 320px;
  background: #ffffff; border-radius: 12px; box-shadow: 0 12px 35px rgba(0,0,0,0.22); padding: 0; z-index: 2100;
@@ -195,342 +198,124 @@ tr.fila-seleccionada { background-color: #fde047 !important; font-weight: 700 !i
  z-index: 3000 !important;
 }
 
-/* ==========================================================
-   ESTILOS NUEVOS: VENTANAS MODALES DE FIREBASE IAM & DISCLAIMER
-   ========================================================== */
+/* --- Modales Firebase IAM & Disclaimer --- */
 .modal-overlay-login {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(15, 23, 42, 0.92);
-    backdrop-filter: blur(8px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999999;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px);
+    display: flex; justify-content: center; align-items: center; z-index: 9999999;
 }
-
 .login-card {
-    background: #ffffff;
-    color: #1e293b;
-    width: 90%;
-    max-width: 400px;
-    padding: 35px 30px;
-    border-radius: 14px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-sizing: border-box;
+    background: #ffffff; color: #1e293b; width: 90%; max-width: 400px;
+    padding: 35px 30px; border-radius: 14px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
 }
-
-.login-header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.login-header h2 {
-    margin: 0 0 8px 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.login-header p {
-    margin: 0;
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 600;
-}
-
-.login-form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
+.login-header { text-align: center; margin-bottom: 25px; }
+.login-header h2 { margin: 0 0 8px 0; font-size: 22px; font-weight: 700; color: #0f172a; }
+.login-header p { margin: 0; font-size: 13px; color: #64748b; font-weight: 600; }
+.login-form { width: 100%; display: flex; flex-direction: column; gap: 15px; }
 .login-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 13px;
-    box-sizing: border-box;
-    outline: none;
-    color: #1e293b;
-    background: #f8fafc;
+    width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 8px;
+    font-size: 13px; box-sizing: border-box; outline: none; color: #1e293b; background: #f8fafc;
 }
-
 .btn-login-sistema {
-    background: #0f172a;
-    color: #ffffff;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    text-transform: uppercase;
+    background: #0f172a; color: #ffffff; border: none; padding: 12px; border-radius: 8px;
+    font-weight: 700; font-size: 13px; cursor: pointer; text-transform: uppercase;
 }
-
-.login-divider {
-    width: 100%;
-    text-align: center;
-    border-bottom: 1px solid #e2e8f0;
-    line-height: 0.1em;
-    margin: 20px 0;
-}
-
-.login-divider span {
-    background: #ffffff;
-    padding: 0 10px;
-    color: #94a3b8;
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
+.login-divider { width: 100%; text-align: center; border-bottom: 1px solid #e2e8f0; line-height: 0.1em; margin: 20px 0; }
+.login-divider span { background: #ffffff; padding: 0 10px; color: #94a3b8; font-size: 11px; text-transform: uppercase; font-weight: 600; }
 .btn-google-auth {
-    width: 100%;
-    background: #ffffff;
-    color: #334155;
-    border: 1px solid #cbd5e1;
-    padding: 11px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    width: 100%; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 11px;
+    border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
 }
 
 .modal-overlay-disclaimer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(15, 23, 42, 0.88);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999998;
-    padding: 15px;
-    box-sizing: border-box;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(15, 23, 42, 0.88); backdrop-filter: blur(5px);
+    display: flex; justify-content: center; align-items: center; z-index: 999998; padding: 15px; box-sizing: border-box;
 }
-
 .modal-box {
-    background: #1e293b;
-    border: 1px solid #334155;
-    width: 100%;
-    max-width: 620px;
-    border-radius: 10px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    background: #1e293b; border: 1px solid #334155; width: 100%; max-width: 620px;
+    border-radius: 10px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; overflow: hidden;
 }
-
-.modal-header-disc {
-    background: #0f172a;
-    padding: 16px 20px;
-    border-bottom: 1px solid #334155;
-    text-align: center;
-}
-
-.modal-header-disc h3 {
-    margin: 0;
-    font-size: 13px;
-    font-weight: 700;
-    color: #f8fafc;
-    text-transform: uppercase;
-}
-
-.modal-body-disc {
-    padding: 22px;
-    font-size: 11.5px;
-    line-height: 1.6;
-    color: #cbd5e1;
-    max-height: 55vh;
-    overflow-y: auto;
-    text-align: justify;
-}
-
-.modal-footer-disc {
-    background: #0f172a;
-    padding: 14px 20px;
-    border-top: 1px solid #334155;
-    display: flex;
-    justify-content: flex-end;
-}
-
+.modal-header-disc { background: #0f172a; padding: 16px 20px; border-bottom: 1px solid #334155; text-align: center; }
+.modal-header-disc h3 { margin: 0; font-size: 13px; font-weight: 700; color: #f8fafc; text-transform: uppercase; }
+.modal-body-disc { padding: 22px; font-size: 11.5px; line-height: 1.6; color: #cbd5e1; max-height: 55vh; overflow-y: auto; text-align: justify; }
+.modal-footer-disc { background: #0f172a; padding: 14px 20px; border-top: 1px solid #334155; display: flex; justify-content: flex-end; }
 #btn-aceptar-disclaimer {
-    background: #2563eb;
-    color: #ffffff;
-    border: none;
-    padding: 9px 18px;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 11px;
-    cursor: pointer;
-    text-transform: uppercase;
+    background: #2563eb; color: #ffffff; border: none; padding: 9px 18px; border-radius: 6px;
+    font-weight: 700; font-size: 11px; cursor: pointer; text-transform: uppercase;
 }
 
-/* ==========================================================
-   ADAPTABILIDAD MÓVIL (CELULAR) - FILTROS COLAPSIBLES DEBAJO DEL TÍTULO
-   ========================================================== */
+/* --- Adaptabilidad Móvil (Celular) --- */
 @media (max-width: 900px) {
  body, html { overflow: auto !important; height: auto !important; }
  
  #app-container {
-   display: flex;
-   flex-direction: column;
-   height: auto !important;
-   width: 100vw;
-   overflow: visible !important;
+   display: flex; flex-direction: column; height: auto !important; width: 100vw; overflow: visible !important;
  }
 
- /* Orden 1: Título Principal */
  #titulo-principal {
-   position: static !important;
-   transform: none !important;
-   order: 1;
-   width: 100%;
-   border-radius: 0;
-   text-align: center;
-   font-size: 11px;
-   padding: 6px 8px;
-   border-left: none;
-   border-bottom: 3px solid #2563EB;
-   box-sizing: border-box;
-   margin-bottom: 4px;
+   position: static !important; transform: none !important; order: 1; width: 100%;
+   border-radius: 0; text-align: center; font-size: 11px; padding: 6px 8px;
+   border-left: none; border-bottom: 3px solid #2563EB; box-sizing: border-box; margin-bottom: 4px;
  }
 
- /* Orden 2: Panel de Filtros Colapsable debajo del Título */
  #panel-filtros {
-   display: block !important;
-   position: static !important;
-   order: 2;
-   width: 100%;
-   box-sizing: border-box;
-   border-radius: 0;
-   padding: 6px 10px;
-   background: #ffffff;
-   border-top: 1px solid #cbd5e1;
-   border-bottom: 1px solid #cbd5e1;
-   box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-   margin-bottom: 6px;
+   display: block !important; position: static !important; order: 2; width: 100%;
+   box-sizing: border-box; border-radius: 0; padding: 6px 10px; background: #ffffff;
+   border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 6px;
  }
  .filtro-header-mobile { display: flex !important; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; padding: 2px 0; justify-content: space-between; align-items: center; }
  .filtro-titulo-web { display: none !important; }
  .filtros-contenido { display: none; margin-top: 6px; }
  .filtros-contenido.show { display: block !important; }
  .filtros-botones {
-   display: grid !important;
-   grid-template-columns: repeat(3, 1fr) !important;
-   gap: 4px !important;
-   padding-bottom: 4px !important;
+   display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 4px !important; padding-bottom: 4px !important;
  }
  
  .filtro-btn {
-   font-size: 8px !important;
-   padding: 5px 3px !important;
-   text-align: center !important;
-   width: 100% !important;
-   box-sizing: border-box !important;
-   white-space: normal !important;
-   height: auto !important;
-   min-height: 30px;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   line-height: 1.2;
-   border-radius: 4px !important;
-   grid-column: span 1 !important;
+   font-size: 8px !important; padding: 5px 3px !important; text-align: center !important; width: 100% !important;
+   box-sizing: border-box !important; white-space: normal !important; height: auto !important; min-height: 30px;
+   display: flex; align-items: center; justify-content: center; line-height: 1.2; border-radius: 4px !important; grid-column: span 1 !important;
  }
+ /* Ajuste móvil para botones de tránsito si ocupan celdas */
+ .filtro-btn.btn-transito-si, .filtro-btn.btn-transito-no { grid-column: span 3 !important; }
 
  .filtros-botones-web-grid { display: none !important; }
  .panel-separador-estetico { display: none !important; }
  .bloque-titulo-gerencial { display: none !important; }
 
- /* Orden 3: Sección del Mapa */
  #seccion-mapa {
-   order: 3;
-   height: 52vh !important;
-   width: 100%;
-   position: relative;
-   flex: unset !important;
-   margin-bottom: 4px;
+   order: 3; height: 52vh !important; width: 100%; position: relative; flex: unset !important; margin-bottom: 4px;
  }
- #map {
-   height: 100% !important;
-   width: 100% !important;
-   position: absolute !important;
- }
+ #map { height: 100% !important; width: 100% !important; position: absolute !important; }
 
- /* Orden 4: Panel Derecho (KPIs y Tabla) */
  #seccion-panel-derecho {
-   order: 4;
-   height: auto !important;
-   min-height: 45vh;
-   width: 100%;
-   border-left: none;
-   border-top: 2px solid #cbd5e1;
-   padding: 6px;
-   display: flex;
-   flex-direction: column;
-   overflow: visible !important;
-   box-sizing: border-box;
-   background-color: #ffffff;
-   box-shadow: none;
-   flex: unset !important;
+   order: 4; height: auto !important; min-height: 45vh; width: 100%; border-left: none;
+   border-top: 2px solid #cbd5e1; padding: 6px; display: flex; flex-direction: column;
+   overflow: visible !important; box-sizing: border-box; background-color: #ffffff; box-shadow: none; flex: unset !important;
  }
 
  #panel-kpis {
-   order: 1;
-   display: grid;
-   grid-template-columns: repeat(4, 1fr);
-   gap: 4px;
-   padding: 4px 6px;
-   background: #fff;
-   margin: 0 0 6px 0;
+   order: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px 6px; background: #fff; margin: 0 0 6px 0;
  }
  .kpi-card { padding: 4px 2px; }
  .kpi-title { font-size: 6px; }
  .kpi-value { font-size: 11px; }
 
  .panel-seccion-bloque.table-flex-grow {
-   order: 2;
-   flex: unset !important;
-   height: auto !important;
+   order: 2; flex: unset !important; height: auto !important;
  }
- #contenedor-tabla {
-   height: 360px;
-   overflow: hidden;
-   display: flex;
-   flex-direction: column;
-   margin-top: 0;
-   border-radius: 6px;
- }
+ #contenedor-tabla { height: 360px; overflow: hidden; display: flex; flex-direction: column; margin-top: 0; border-radius: 6px; }
  .tabla-header-titulo { font-size: 9px; padding: 6px 8px; }
  #tabla-estructuras { font-size: 9px; }
  #tabla-estructuras th, #tabla-estructuras td { padding: 4px 5px; white-space: nowrap; }
 
- #panel-acciones-izquierda {
-   position: absolute; bottom: 8px; left: 8px; z-index: 1000; gap: 3px;
- }
+ #panel-acciones-izquierda { position: absolute; bottom: 8px; left: 8px; z-index: 1000; gap: 3px; }
  #marca-agua { font-size: 8px; padding: 2px 6px; }
  .btn-accion { padding: 5px 8px; font-size: 9px; }
 
- #panel-leyenda {
-   position: absolute; bottom: 8px; right: 8px; z-index: 1000; font-size: 8px; padding: 4px 6px;
- }
+ #panel-leyenda { position: absolute; bottom: 8px; right: 8px; z-index: 1000; font-size: 8px; padding: 4px 6px; }
  .leyenda-item { gap: 4px; margin-bottom: 1px; }
  .leyenda-color { width: 8px; height: 8px; }
 }
