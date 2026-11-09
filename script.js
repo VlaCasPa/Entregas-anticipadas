@@ -35,7 +35,7 @@ let marcadoresMapIndex = {};
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSz_DsP2CT07FaYNRe4MIX7cO25I01gUb9e_aboGNrIHyBzHiVCX-Ea800l6R76rQ/pub?gid=814807134&single=true&output=csv";  
 
-// Control de flujo inicial de Autenticación IAM (Blindado contra cargas prematuras)
+// Control de flujo inicial de Autenticación IAM
 document.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -170,9 +170,8 @@ window.aceptarDisclaimer = async function() {
     }
 };
 
-// Inicialización segura controlada solo tras la autorización
 function inicializarEstructuraMapaSiEsNecesario() {
-    if (map) return; // Evita inicializar doble si ya estaba activo
+    if (map) return; 
 
     map = L.map('map').setView([-12.055, -77.050], 11);  
 
@@ -191,7 +190,6 @@ function inicializarEstructuraMapaSiEsNecesario() {
     cargarDatosYMapaInicial();
 }
 
-// Función para calcular el grosor dinámico de las líneas de metro según el zoom
 function obtenerGrosorLineaMetro() {
     let zoom = map ? map.getZoom() : 11;
     if (zoom <= 11) return 1.5;
@@ -202,7 +200,7 @@ function obtenerGrosorLineaMetro() {
 
 function estiloLineaReferencia() {
     return {
-        color: "#9ca3af", // Gris tenue referencial
+        color: "#9ca3af",
         weight: obtenerGrosorLineaMetro(),
         opacity: 0.55,
         interactive: false 
@@ -308,10 +306,23 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (!estructurasUnicasMap.has(idNorm)) {
        let keys = Object.keys(item);
        let valColD = item[keys[3]] ? item[keys[3]].trim().toLowerCase() : ""; 
+       // Lectura robusta de la Columna L "Transito" (índice 11 o búsqueda por nombre normalizado)
+       let valTransito = "";
+       keys.forEach(k => {
+           if (k.toLowerCase().includes("transito") || k.toLowerCase().includes("tránsito")) {
+               valTransito = item[k] ? item[k].trim().toLowerCase() : "";
+           }
+       });
+       if (!valTransito && keys.length > 11) {
+           valTransito = item[keys[11]] ? item[keys[11]].trim().toLowerCase() : "";
+       }
 
        let esCulminada = (valColD.includes("culminada") || valColD.includes("culminado"));
        let esSi = (valColD === "si");
        let esNo = (valColD === "no");
+
+       let esTransitoSi = (valTransito === "si");
+       let esTransitoNo = (valTransito === "no");
 
        let estadoCalculado = 'inicial';
        if (esCulminada) {
@@ -343,6 +354,8 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
          esSi: esSi,
          esCulminada: esCulminada,
          esNo: esNo,
+         esTransitoSi: esTransitoSi,
+         esTransitoNo: esTransitoNo,
          cumple30Dias: cumple30Dias,
          cumpleProxima: cumpleProxima,
          prioridad: prioridad,
@@ -401,6 +414,8 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
      if (filtroEstado === 'culminada') coincide = (tipoGeo === 'culminada');
      if (filtroEstado === '30dias') coincide = datosItem && datosItem.cumple30Dias;
      if (filtroEstado === 'proximas') coincide = datosItem && datosItem.cumpleProxima;
+     if (filtroEstado === 'transito_si') coincide = datosItem && estructurasUnicasMap.get(idGeo)?.esTransitoSi;
+     if (filtroEstado === 'transito_no') coincide = datosItem && estructurasUnicasMap.get(idGeo)?.esTransitoNo;
 
      if (coincide) {
        idsPoligonosFiltrados.add(idGeo);
@@ -428,6 +443,8 @@ function actualizarDashboardYMapa(csvData, geojsonData, filtroEstado) {
    if (filtroEstado === 'culminada') cumpleFiltro = (item.estadoCalculado === 'culminada');
    if (filtroEstado === '30dias') cumpleFiltro = item.cumple30Dias;
    if (filtroEstado === 'proximas') cumpleFiltro = item.cumpleProxima;
+   if (filtroEstado === 'transito_si') cumpleFiltro = item.esTransitoSi;
+   if (filtroEstado === 'transito_no') cumpleFiltro = item.esTransitoNo;
 
    if (cumpleFiltro) {
      contadorIDsFiltrados++;
@@ -551,6 +568,8 @@ function actualizarTextoFiltroUI(filtro, cantidad) {
  if (filtro === 'culminada') textoEstado = "OBRA CULMINADA";
  if (filtro === '30dias') textoEstado = "< 30 DÍAS";
  if (filtro === 'proximas') textoEstado = "PRÓXIMAS LIBERACIONES";
+ if (filtro === 'transito_si') textoEstado = "TRÁNSITO LIBRE (SI)";
+ if (filtro === 'transito_no') textoEstado = "TRÁNSITO RESTRINGIDO (NO)";
 
  let labelMobile = document.getElementById('label-filtro-mobile');
  let labelWeb = document.getElementById('label-filtro-web');
